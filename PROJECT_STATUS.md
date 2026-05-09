@@ -34,6 +34,8 @@ npm run build
 npm run dev
 ```
 
+If PowerShell blocks `npm.ps1`, use `npm.cmd install`, `npm.cmd run typecheck`, `npm.cmd run build`, and `npm.cmd run dev`.
+
 Fill `.env.local` before starting the app:
 
 ```env

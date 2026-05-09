@@ -26,6 +26,8 @@ copy .env.example .env.local
 npm run dev
 ```
 
+If PowerShell blocks `npm.ps1`, run the same commands through `npm.cmd`, for example `npm.cmd install` and `npm.cmd run dev`.
+
 Then open `http://localhost:3000`.
 
 Edit `.env.local` before running the app:

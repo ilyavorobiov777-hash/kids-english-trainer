@@ -23,6 +23,12 @@ cd D:\Projects\kids-english-trainer
 npm install
 ```
 
+If PowerShell says `npm.ps1 cannot be loaded because running scripts is disabled`, use:
+
+```powershell
+npm.cmd install
+```
+
 6. Create `.env.local` from the example:
 
 ```powershell
@@ -44,6 +50,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm run dev
 ```
 
+PowerShell fallback:
+
+```powershell
+npm.cmd run dev
+```
+
 9. Open:
 
 ```text
@@ -55,4 +67,11 @@ http://localhost:3000
 ```powershell
 npm run typecheck
 npm run build
+```
+
+PowerShell fallback:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
 ```
