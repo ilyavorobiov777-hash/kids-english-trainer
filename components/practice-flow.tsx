@@ -39,8 +39,14 @@ export function PracticeFlow() {
     async function load() {
       if (!family || !childId) return;
       const [cardsRes, attemptsRes, scheduleRes, grammarRes] = await Promise.all([
-        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(120),
-        supabase.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).order("created_at", { ascending: false }).limit(500),
+        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
+        supabase
+          .from("practice_attempts")
+          .select("*")
+          .eq("family_id", family.familyId)
+          .eq("child_id", childId)
+          .order("created_at", { ascending: false })
+          .limit(800),
         supabase.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
         supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId)
       ]);
@@ -60,7 +66,7 @@ export function PracticeFlow() {
       setSession(newSession as PracticeSession);
       setStartedAt(Date.now());
     }
-    load();
+    void load();
   }, [family, childId, supabase]);
 
   const current = exercises[index];
@@ -72,15 +78,18 @@ export function PracticeFlow() {
     const duration = Math.max(1, Math.round((Date.now() - new Date(session.started_at).getTime()) / 1000));
     const incorrect = stats.total - stats.correct;
     const accuracy = stats.total ? (stats.correct / stats.total) * 100 : 0;
-    await supabase.from("practice_sessions").update({
-      finished_at: new Date().toISOString(),
-      duration_seconds: duration,
-      total_attempts: stats.total,
-      correct_attempts: stats.correct,
-      incorrect_attempts: incorrect,
-      accuracy,
-      stars_earned: stars
-    }).eq("id", session.id);
+    await supabase
+      .from("practice_sessions")
+      .update({
+        finished_at: new Date().toISOString(),
+        duration_seconds: duration,
+        total_attempts: stats.total,
+        correct_attempts: stats.correct,
+        incorrect_attempts: incorrect,
+        accuracy,
+        stars_earned: stars
+      })
+      .eq("id", session.id);
     setCompleted(true);
   }, [completed, session, stars, stats.correct, stats.total, supabase]);
 
@@ -135,24 +144,30 @@ export function PracticeFlow() {
     });
 
     const duration = Math.max(1, Math.round((Date.now() - new Date(session.started_at).getTime()) / 1000));
-    await supabase.from("practice_sessions").update({
-      duration_seconds: duration,
-      total_attempts: nextStats.total,
-      correct_attempts: nextStats.correct,
-      incorrect_attempts: nextStats.total - nextStats.correct,
-      accuracy: nextStats.total ? (nextStats.correct / nextStats.total) * 100 : 0,
-      stars_earned: Math.min(3, Math.floor(nextStats.correct / 3))
-    }).eq("id", session.id);
+    await supabase
+      .from("practice_sessions")
+      .update({
+        duration_seconds: duration,
+        total_attempts: nextStats.total,
+        correct_attempts: nextStats.correct,
+        incorrect_attempts: nextStats.total - nextStats.correct,
+        accuracy: nextStats.total ? (nextStats.correct / nextStats.total) * 100 : 0,
+        stars_earned: Math.min(3, Math.floor(nextStats.correct / 3))
+      })
+      .eq("id", session.id);
 
     if (current.card?.id) {
       const existing = schedules.find((item) => item.card_id === current.card?.id);
       const review = nextReviewState(existing, isCorrect, rating);
-      await supabase.from("review_schedule").upsert({
-        family_id: family.familyId,
-        child_id: childId,
-        card_id: current.card.id,
-        ...review
-      }, { onConflict: "child_id,card_id" });
+      await supabase.from("review_schedule").upsert(
+        {
+          family_id: family.familyId,
+          child_id: childId,
+          card_id: current.card.id,
+          ...review
+        },
+        { onConflict: "child_id,card_id" }
+      );
     }
 
     window.setTimeout(() => {
@@ -163,13 +178,12 @@ export function PracticeFlow() {
       setUsedWordIndexes([]);
       setIndex((value) => value + 1);
       setStartedAt(Date.now());
-    }, isCorrect ? 850 : 1500);
+    }, isCorrect ? 850 : 1600);
   }
 
   function addWord(word: string, wordIndex: number) {
     if (usedWordIndexes.includes(wordIndex) || feedback) return;
-    const nextWords = [...selectedWords, word];
-    setSelectedWords(nextWords);
+    setSelectedWords([...selectedWords, word]);
     setUsedWordIndexes([...usedWordIndexes, wordIndex]);
   }
 
@@ -178,30 +192,48 @@ export function PracticeFlow() {
     setUsedWordIndexes([]);
   }
 
+  const isChoiceExerciseBroken =
+    current && current.type !== "build_sentence" && (!current.options.length || current.options.length < 2);
+  const sentenceReady = current?.type === "build_sentence" && selectedWords.length === (current.words?.length ?? 0);
+
   return (
     <AuthRequired loading={loading} error={error}>
-      {!family ? <NeedLogin /> : !childId ? (
+      {!family ? (
+        <NeedLogin />
+      ) : !childId ? (
         <Panel>
           <p className="mb-4 font-medium">Сначала выбери детский профиль.</p>
-          <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/child/select">Выбрать профиль</Link>
+          <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/child/select">
+            Выбрать профиль
+          </Link>
         </Panel>
       ) : (
         <>
-          <PageHeader title={title} subtitle={childName ? `${childName}, короткое занятие на сегодня.` : "Короткое занятие на сегодня."} />
+          <PageHeader
+            title={title}
+            subtitle={childName ? `${childName}, короткое занятие на сегодня.` : "Короткое занятие на сегодня."}
+          />
           {!exercises.length ? (
-            <Panel>Активных карточек пока нет. Родитель может добавить карточки, импортировать CSV или загрузить seed-данные.</Panel>
+            <Panel>
+              Активных карточек пока нет. Родитель может добавить карточки, импортировать CSV или загрузить Starter 350.
+            </Panel>
           ) : finished ? (
             <Panel className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-bold">Готово!</h2>
-              <p className="mt-3 text-xl">Правильно: {stats.correct} из {stats.total}</p>
+              <p className="mt-3 text-xl">Заданий выполнено: {stats.total}</p>
+              <p className="mt-2 text-xl">Правильных ответов: {stats.correct}</p>
               <p className="mt-2 text-2xl font-bold text-berry">Звезды: {"★".repeat(stars)}{"☆".repeat(Math.max(0, 3 - stars))}</p>
-              <p className="mt-4 rounded-lg bg-skysoft p-4">Завтра повторим карточки, где были ошибки, и добавим несколько новых.</p>
-              <Link className="mt-5 inline-block rounded-lg bg-berry px-6 py-4 font-bold text-white" href="/child/dashboard">В детский кабинет</Link>
+              <p className="mt-4 rounded-lg bg-skysoft p-4">
+                Завтра повторим карточки, где были ошибки, и добавим несколько новых.
+              </p>
+              <Link className="mt-5 inline-block rounded-lg bg-berry px-6 py-4 font-bold text-white" href="/child/dashboard">
+                В детский кабинет
+              </Link>
             </Panel>
           ) : current ? (
             <Panel className="mx-auto max-w-2xl">
               <div className="mb-5 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-500">Задание {index + 1} из {exercises.length}</p>
+                <p className="text-sm font-semibold text-slate-500">Задание {index + 1} / {exercises.length}</p>
                 <p className="text-sm font-semibold text-slate-500">Верно: {stats.correct}</p>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-slate-100">
@@ -211,7 +243,9 @@ export function PracticeFlow() {
               <div className="mt-5 rounded-lg bg-skysoft p-6 text-center">
                 {current.promptRu ? <p className="mb-2 text-sm font-semibold text-slate-500">{current.promptRu}</p> : null}
                 <p className="text-3xl font-bold leading-tight">{current.prompt}</p>
-                {current.card?.example_en && current.type === "choose_translation" ? <p className="mt-3 text-lg text-slate-700">{current.card.example_en}</p> : null}
+                {current.card?.example_en && current.type === "choose_translation" ? (
+                  <p className="mt-3 text-lg text-slate-700">{current.card.example_en}</p>
+                ) : null}
               </div>
 
               {current.listenText ? (
@@ -220,13 +254,27 @@ export function PracticeFlow() {
                   <Button type="button" className="bg-slate-700" onClick={() => listen(0.6)}>Listen slowly</Button>
                   <label className="grid gap-1 text-sm text-slate-600">
                     Rate {rate.toFixed(1)}
-                    <input min="0.5" max="1.2" step="0.1" value={rate} onChange={(event) => setRate(Number(event.target.value))} type="range" />
+                    <input
+                      min="0.5"
+                      max="1.2"
+                      step="0.1"
+                      value={rate}
+                      onChange={(event) => setRate(Number(event.target.value))}
+                      type="range"
+                    />
                   </label>
                 </div>
               ) : null}
               {speechMessage ? <p className="mt-3 rounded-lg bg-peach p-3 text-sm">{speechMessage}</p> : null}
 
-              {current.type === "build_sentence" ? (
+              {isChoiceExerciseBroken ? (
+                <div className="mt-5 rounded-lg bg-peach p-4">
+                  <p className="font-semibold">Это задание пропущено: не хватает вариантов ответа.</p>
+                  <Button className="mt-3" type="button" onClick={() => setIndex((value) => value + 1)}>
+                    Следующее задание
+                  </Button>
+                </div>
+              ) : current.type === "build_sentence" ? (
                 <div className="mt-5 grid gap-4">
                   <div className="min-h-16 rounded-lg border-2 border-dashed border-slate-200 bg-white p-4 text-xl font-bold">
                     {selectedWords.length ? selectedWords.join(" ") : "Нажимай слова по порядку"}
@@ -245,7 +293,9 @@ export function PracticeFlow() {
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <Button type="button" onClick={() => saveAnswer(selectedWords.join(" "))} disabled={!selectedWords.length}>Проверить</Button>
+                    <Button type="button" onClick={() => saveAnswer(selectedWords.join(" "))} disabled={!sentenceReady}>
+                      Проверить
+                    </Button>
                     <Button type="button" className="bg-slate-600" onClick={resetSentence}>Reset</Button>
                   </div>
                 </div>
@@ -267,8 +317,8 @@ export function PracticeFlow() {
               {feedback ? (
                 <div className="mt-5 rounded-lg bg-mint p-4 text-center">
                   <p className="text-2xl font-bold">{feedback}</p>
-                  {lastCorrect === false && current.explanationRu ? <p className="mt-2 text-sm">{current.explanationRu}</p> : null}
-                  <p className="mt-2 text-sm text-slate-600">Правильный ответ: {current.correctAnswer}</p>
+                  {current.explanationRu ? <p className="mt-2 text-sm">{current.explanationRu}</p> : null}
+                  {lastCorrect === false ? <p className="mt-2 text-sm text-slate-600">Правильный ответ: {current.correctAnswer}</p> : null}
                 </div>
               ) : null}
             </Panel>
