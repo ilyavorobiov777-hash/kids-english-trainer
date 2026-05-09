@@ -1,0 +1,9 @@
+{
+  "appName": "Kids English Trainer",
+  "parentArea": "Parent",
+  "childArea": "Child",
+  "login": "Login",
+  "dashboard": "Dashboard",
+  "cards": "Cards",
+  "practice": "Practice"
+}
