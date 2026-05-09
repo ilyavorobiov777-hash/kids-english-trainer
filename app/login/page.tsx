@@ -5,7 +5,7 @@ import { createBrowserSupabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-const AUTH_TIMEOUT_MS = 20000;
+const AUTH_TIMEOUT_MS = 60000;
 
 function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -43,7 +43,7 @@ export default function LoginPage() {
               password,
               options: { data: { display_name: displayName || email, family_name: familyName || "Моя семья" } }
             }),
-        "Не удалось дождаться ответа от Supabase. Проверьте интернет и попробуйте еще раз."
+        "Не удалось дождаться ответа от Supabase за 60 секунд. Проверьте, что открыт именно production-сайт, и попробуйте еще раз."
       );
 
       if (response.error) {

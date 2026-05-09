@@ -3,7 +3,7 @@
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 
-const FAMILY_LOAD_TIMEOUT_MS = 20000;
+const FAMILY_LOAD_TIMEOUT_MS = 60000;
 
 export type FamilyContext = {
   userId: string;
@@ -35,7 +35,7 @@ export function useFamily() {
       setError(null);
 
       try {
-        const { data: auth } = await withTimeout(supabase.auth.getUser(), "Не удалось загрузить сессию. Проверьте интернет и обновите страницу.");
+        const { data: auth } = await withTimeout(supabase.auth.getUser(), "Не удалось загрузить сессию за 60 секунд. Проверьте интернет и обновите страницу.");
 
         if (!auth.user) {
           if (mounted) {
@@ -47,7 +47,7 @@ export function useFamily() {
 
         const { data, error: profileError } = await withTimeout(
           supabase.from("profiles").select("family_id, display_name").eq("auth_user_id", auth.user.id).single(),
-          "Не удалось загрузить семейный профиль. Проверьте интернет и обновите страницу."
+          "Не удалось загрузить семейный профиль за 60 секунд. Проверьте интернет и обновите страницу."
         );
 
         if (mounted) {
