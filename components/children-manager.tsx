@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function ChildrenManager() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [children, setChildren] = useState<Child[]>([]);
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
@@ -20,9 +20,9 @@ export function ChildrenManager() {
 
   const load = useCallback(async () => {
     if (!family) return;
-    const { data } = await supabase.from("children").select("*").eq("family_id", family.familyId).order("created_at");
+    const { data } = await api.from("children").select("*").eq("family_id", family.familyId).order("created_at");
     setChildren((data ?? []) as Child[]);
-  }, [family, supabase]);
+  }, [family, api]);
 
   useEffect(() => {
     void load();
@@ -34,7 +34,7 @@ export function ChildrenManager() {
   async function createChild(event: React.FormEvent) {
     event.preventDefault();
     if (!family || !name.trim()) return;
-    await supabase.from("children").insert({
+    await api.from("children").insert({
       family_id: family.familyId,
       name: name.trim(),
       birth_year: birthYear ? Number(birthYear) : null,
@@ -55,7 +55,7 @@ export function ChildrenManager() {
   async function archiveChild(child: Child) {
     if (!family) return;
     setBusyChildId(child.id);
-    const { error: archiveError } = await supabase
+    const { error: archiveError } = await api
       .from("children")
       .update({
         status: "archived",
@@ -72,7 +72,7 @@ export function ChildrenManager() {
   async function restoreChild(child: Child) {
     if (!family) return;
     setBusyChildId(child.id);
-    const { error: restoreError } = await supabase
+    const { error: restoreError } = await api
       .from("children")
       .update({
         status: "active",
@@ -92,10 +92,10 @@ export function ChildrenManager() {
 
     const scoped = { family_id: family.familyId, child_id: resetChild.id };
     const [attemptsRes, sessionsRes, reviewRes, rewardsRes] = await Promise.all([
-      supabase.from("practice_attempts").delete().match(scoped),
-      supabase.from("practice_sessions").delete().match(scoped),
-      supabase.from("review_schedule").delete().match(scoped),
-      supabase.from("rewards").delete().match(scoped)
+      api.from("practice_attempts").delete().match(scoped),
+      api.from("practice_sessions").delete().match(scoped),
+      api.from("review_schedule").delete().match(scoped),
+      api.from("rewards").delete().match(scoped)
     ]);
 
     const resetError = attemptsRes.error || sessionsRes.error || reviewRes.error || rewardsRes.error;

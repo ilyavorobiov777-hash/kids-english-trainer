@@ -2,8 +2,8 @@
 
 import { Button, Field, Panel } from "@/components/ui";
 import type { CardStatus, CardType, Course, Lesson, Source, Topic, Unit } from "@/lib/database.types";
+import type { ApiClient } from "@/lib/api-client";
 import { normalizeTags } from "@/lib/supabase/helpers";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { useMemo, useState } from "react";
 
 type CsvRow = {
@@ -93,8 +93,12 @@ function normalizeRow(raw: Record<string, string>): CsvRow {
   };
 }
 
+function makeTitleMap<T extends { id: string; title: string }>(items: unknown): Map<string, T> {
+  return new Map(((Array.isArray(items) ? items : []) as T[]).map((item) => [String(item.title).toLowerCase(), item]));
+}
+
 async function getOrCreate<T extends { id: string; title: string }>(
-  supabase: SupabaseClient,
+  api: ApiClient,
   table: "courses" | "sources" | "topics" | "units" | "lessons",
   cache: Map<string, T>,
   title: string,
@@ -105,14 +109,14 @@ async function getOrCreate<T extends { id: string; title: string }>(
   const existing = cache.get(key);
   if (existing) return existing.id;
 
-  const { data, error } = await supabase.from(table).insert(payload).select("id,title").single();
+  const { data, error } = await api.from(table).insert(payload).select("id,title").single();
   if (error) throw error;
   const item = data as T;
   cache.set(key, item);
   return item.id;
 }
 
-export function CsvImporter({ supabase, familyId, userId }: { supabase: SupabaseClient; familyId: string; userId: string }) {
+export function CsvImporter({ api, familyId, userId }: { api: ApiClient; familyId: string; userId: string }) {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -143,44 +147,44 @@ export function CsvImporter({ supabase, familyId, userId }: { supabase: Supabase
     try {
       const validRows = rows.filter((row) => !row.errors.length);
       const [coursesRes, sourcesRes, topicsRes, unitsRes, lessonsRes] = await Promise.all([
-        supabase.from("courses").select("id,title").eq("family_id", familyId),
-        supabase.from("sources").select("id,title").eq("family_id", familyId),
-        supabase.from("topics").select("id,title").eq("family_id", familyId),
-        supabase.from("units").select("id,title").eq("family_id", familyId),
-        supabase.from("lessons").select("id,title").eq("family_id", familyId)
+        api.from("courses").select("id,title").eq("family_id", familyId),
+        api.from("sources").select("id,title").eq("family_id", familyId),
+        api.from("topics").select("id,title").eq("family_id", familyId),
+        api.from("units").select("id,title").eq("family_id", familyId),
+        api.from("lessons").select("id,title").eq("family_id", familyId)
       ]);
 
-      const courses = new Map((coursesRes.data ?? []).map((item) => [String(item.title).toLowerCase(), item as Course]));
-      const sources = new Map((sourcesRes.data ?? []).map((item) => [String(item.title).toLowerCase(), item as Source]));
-      const topics = new Map((topicsRes.data ?? []).map((item) => [String(item.title).toLowerCase(), item as Topic]));
-      const units = new Map((unitsRes.data ?? []).map((item) => [String(item.title).toLowerCase(), item as Unit]));
-      const lessons = new Map((lessonsRes.data ?? []).map((item) => [String(item.title).toLowerCase(), item as Lesson]));
+      const courses = makeTitleMap<Course>(coursesRes.data);
+      const sources = makeTitleMap<Source>(sourcesRes.data);
+      const topics = makeTitleMap<Topic>(topicsRes.data);
+      const units = makeTitleMap<Unit>(unitsRes.data);
+      const lessons = makeTitleMap<Lesson>(lessonsRes.data);
 
       let imported = 0;
       for (const row of validRows) {
-        const courseId = await getOrCreate(supabase, "courses", courses, row.course, {
+        const courseId = await getOrCreate(api, "courses", courses, row.course, {
           family_id: familyId,
           title: row.course,
           description: "Создано при CSV-импорте"
         });
-        const sourceId = await getOrCreate(supabase, "sources", sources, row.source, {
+        const sourceId = await getOrCreate(api, "sources", sources, row.source, {
           family_id: familyId,
           course_id: courseId,
           title: row.source,
           kind: "csv"
         });
-        const topicId = await getOrCreate(supabase, "topics", topics, row.topic, {
+        const topicId = await getOrCreate(api, "topics", topics, row.topic, {
           family_id: familyId,
           course_id: courseId,
           title: row.topic
         });
-        const unitId = await getOrCreate(supabase, "units", units, row.unit, {
+        const unitId = await getOrCreate(api, "units", units, row.unit, {
           family_id: familyId,
           course_id: courseId,
           title: row.unit,
           position: 1
         });
-        const lessonId = await getOrCreate(supabase, "lessons", lessons, row.lesson, {
+        const lessonId = await getOrCreate(api, "lessons", lessons, row.lesson, {
           family_id: familyId,
           course_id: courseId,
           unit_id: unitId,
@@ -188,7 +192,7 @@ export function CsvImporter({ supabase, familyId, userId }: { supabase: Supabase
           position: 1
         });
 
-        const { error } = await supabase.from("cards").insert({
+        const { error } = await api.from("cards").insert({
           family_id: familyId,
           created_by: userId,
           english: row.english,

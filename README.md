@@ -443,11 +443,20 @@ https://kids-english-trainer.vercel.app
 
 Before testing auth on production, complete [SUPABASE_REDIRECT_TODO.md](SUPABASE_REDIRECT_TODO.md).
 
+Production now uses a Vercel API proxy/BFF:
+
+- browser calls only `https://kids-english-trainer.vercel.app/api/...`;
+- Vercel server routes call Supabase server-side;
+- mobile devices do not need direct access to `*.supabase.co`;
+- Supabase RLS still applies through the user access token stored in httpOnly cookies.
+
 Detailed guides:
 
 - [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 - [SUPABASE_PRODUCTION_CHECKLIST.md](SUPABASE_PRODUCTION_CHECKLIST.md)
 - [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md)
+- [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.md)
+- [SECURITY_PROXY_NOTES.md](SECURITY_PROXY_NOTES.md)
 - [PWA_INSTALL_GUIDE.md](PWA_INSTALL_GUIDE.md)
 - [SUPABASE_REDIRECT_TODO.md](SUPABASE_REDIRECT_TODO.md)
 
@@ -470,8 +479,9 @@ ilyavorobiov777-hash/kids-english-trainer
 
 3. Add Vercel environment variables:
 
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_APP_URL`
 
 4. Deploy from Vercel.
 5. Copy the Vercel production URL.

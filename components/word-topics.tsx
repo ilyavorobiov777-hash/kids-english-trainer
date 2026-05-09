@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 export function WordTopics() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [childId, setChildId] = useState<string | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
@@ -22,10 +22,10 @@ export function WordTopics() {
     async function load() {
       if (!family) return;
       const [topicsRes, cardsRes, attemptsRes] = await Promise.all([
-        supabase.from("topics").select("*").eq("family_id", family.familyId).order("title"),
-        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").in("type", ["word", "phrase"]),
+        api.from("topics").select("*").eq("family_id", family.familyId).order("title"),
+        api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").in("type", ["word", "phrase"]),
         childId
-          ? supabase.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).limit(1200)
+          ? api.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).limit(1200)
           : Promise.resolve({ data: [] })
       ]);
       setTopics((topicsRes.data ?? []) as Topic[]);
@@ -33,7 +33,7 @@ export function WordTopics() {
       setAttempts((attemptsRes.data ?? []) as PracticeAttempt[]);
     }
     void load();
-  }, [childId, family, supabase]);
+  }, [childId, family, api]);
 
   const studiedCardIds = useMemo(() => new Set(attempts.map((attempt) => attempt.card_id).filter(Boolean)), [attempts]);
 

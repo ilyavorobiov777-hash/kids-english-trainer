@@ -7,23 +7,23 @@ import type { Course } from "@/lib/database.types";
 import { useCallback, useEffect, useState } from "react";
 
 export default function ParentCoursesPage() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [courses, setCourses] = useState<Course[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const load = useCallback(async () => {
     if (!family) return;
-    const { data } = await supabase.from("courses").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false });
+    const { data } = await api.from("courses").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false });
     setCourses((data ?? []) as Course[]);
-  }, [family, supabase]);
+  }, [family, api]);
 
   useEffect(() => { void load(); }, [load]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!family) return;
-    await supabase.from("courses").insert({ family_id: family.familyId, title, description });
+    await api.from("courses").insert({ family_id: family.familyId, title, description });
     setTitle("");
     setDescription("");
     await load();

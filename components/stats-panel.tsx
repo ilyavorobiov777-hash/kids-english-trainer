@@ -59,7 +59,7 @@ function grammarLabel(grammar: GrammarPattern | undefined) {
 }
 
 export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [attempts, setAttempts] = useState<PracticeAttempt[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
@@ -71,22 +71,22 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
     async function load() {
       if (!family) return;
       const [sessionsRes, attemptsRes, cardsRes, textsRes, grammarRes, scheduleRes] = await Promise.all([
-        supabase
+        api
           .from("practice_sessions")
           .select("*")
           .eq("family_id", family.familyId)
           .order("started_at", { ascending: false })
           .limit(100),
-        supabase
+        api
           .from("practice_attempts")
           .select("*")
           .eq("family_id", family.familyId)
           .order("created_at", { ascending: false })
           .limit(1500),
-        supabase.from("cards").select("*").eq("family_id", family.familyId),
-        supabase.from("learning_texts").select("*").eq("family_id", family.familyId),
-        supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId),
-        supabase
+        api.from("cards").select("*").eq("family_id", family.familyId),
+        api.from("learning_texts").select("*").eq("family_id", family.familyId),
+        api.from("grammar_patterns").select("*").eq("family_id", family.familyId),
+        api
           .from("review_schedule")
           .select("*")
           .eq("family_id", family.familyId)
@@ -101,7 +101,7 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       setReviewSchedule((scheduleRes.data ?? []) as ReviewSchedule[]);
     }
     void load();
-  }, [family, supabase]);
+  }, [family, api]);
 
   const stats = useMemo(() => {
     const completedSessions = sessions.filter(isCompletedSession);

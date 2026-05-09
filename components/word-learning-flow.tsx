@@ -177,7 +177,7 @@ function selectCards(params: {
 }
 
 export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: string }) {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [childId, setChildId] = useState<string | null>(null);
   const [childName, setChildName] = useState<string | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
@@ -202,10 +202,10 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     async function load() {
       if (!family || !childId) return;
       const [cardsRes, attemptsRes, schedulesRes, topicRes] = await Promise.all([
-        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
-        supabase.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).order("created_at", { ascending: false }).limit(1000),
-        supabase.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
-        topicId ? supabase.from("topics").select("*").eq("family_id", family.familyId).eq("id", topicId).maybeSingle() : Promise.resolve({ data: null })
+        api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
+        api.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).order("created_at", { ascending: false }).limit(1000),
+        api.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
+        topicId ? api.from("topics").select("*").eq("family_id", family.familyId).eq("id", topicId).maybeSingle() : Promise.resolve({ data: null })
       ]);
 
       const loadedCards = (cardsRes.data ?? []) as Card[];
@@ -221,7 +221,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       setTopic((topicRes.data ?? null) as Topic | null);
 
       if (pickedCards.length) {
-        const { data: newSession } = await supabase
+        const { data: newSession } = await api
           .from("practice_sessions")
           .insert({ family_id: family.familyId, child_id: childId })
           .select()
@@ -230,7 +230,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       }
     }
     void load();
-  }, [childId, family, mode, supabase, topicId]);
+  }, [childId, family, mode, api, topicId]);
 
   const current = tasks[index];
   const finished = tasks.length > 0 && index >= tasks.length;
@@ -239,7 +239,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
 
   const finishSession = useCallback(async () => {
     if (!session) return;
-    await supabase
+    await api
       .from("practice_sessions")
       .update({
         finished_at: new Date().toISOString(),
@@ -251,7 +251,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
         stars_earned: stars
       })
       .eq("id", session.id);
-  }, [session, stars, stats.correct, stats.total, supabase]);
+  }, [session, stars, stats.correct, stats.total, api]);
 
   useEffect(() => {
     if (finished) void finishSession();
@@ -278,7 +278,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       ]);
     }
 
-    await supabase.from("practice_attempts").insert({
+    await api.from("practice_attempts").insert({
       family_id: family.familyId,
       child_id: childId,
       session_id: session.id,
@@ -293,7 +293,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     });
 
     const existing = schedules.find((item) => item.card_id === current.card.id);
-    await supabase.from("review_schedule").upsert(
+    await api.from("review_schedule").upsert(
       {
         family_id: family.familyId,
         child_id: childId,
@@ -318,7 +318,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
 
   async function repeatWords() {
     if (!family || !childId) return;
-    const { data: newSession } = await supabase
+    const { data: newSession } = await api
       .from("practice_sessions")
       .insert({ family_id: family.familyId, child_id: childId })
       .select()

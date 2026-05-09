@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
-const requiredEnv = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+const requiredEnv = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "NEXT_PUBLIC_APP_URL"];
 const placeholderPatterns = [/your-/i, /placeholder/i, /example/i, /changeme/i, /supabase-anon-key/i];
 const warnings = [];
 
@@ -136,6 +136,30 @@ const serviceRoleSearch = spawnSync("git", ["grep", "-n", "-E", "service_role|SU
 });
 if (serviceRoleSearch.status === 0 && serviceRoleSearch.stdout.trim()) {
   fail(`Service role reference found in frontend code:\n${serviceRoleSearch.stdout.trim()}`);
+}
+
+const clientDirectSupabaseSearches = [
+  ["app", "app/api"],
+  ["components", null],
+  ["hooks", null]
+];
+
+for (const [target, excluded] of clientDirectSupabaseSearches) {
+  const grepArgs = ["grep", "-n", "-E", "NEXT_PUBLIC_SUPABASE|@supabase/supabase-js|\\.supabase\\.co|createClient\\(|supabase\\.auth|supabase\\.from|auth/v1|rest/v1", "--", target];
+  const result = spawnSync("git", grepArgs, {
+    cwd: root,
+    encoding: "utf8",
+    shell: false
+  });
+  if (result.status === 0 && result.stdout.trim()) {
+    const lines = result.stdout
+      .trim()
+      .split(/\r?\n/)
+      .filter((line) => !excluded || !line.startsWith(`${excluded}/`));
+    if (lines.length) {
+      fail(`Direct browser Supabase usage found in client-side code:\n${lines.join("\n")}`);
+    }
+  }
 }
 
 console.log("deploy-check: env, git safety, PWA assets, seed files, and production-sensitive route files look good.");

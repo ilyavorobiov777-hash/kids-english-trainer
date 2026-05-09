@@ -76,7 +76,7 @@ function parseQuestions(value: string): LearningTextQuestion[] {
 }
 
 export function TextsManager() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [texts, setTexts] = useState<LearningText[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [form, setForm] = useState<TextForm>(emptyForm);
@@ -86,12 +86,12 @@ export function TextsManager() {
   const load = useCallback(async () => {
     if (!family) return;
     const [textsRes, topicsRes] = await Promise.all([
-      supabase.from("learning_texts").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false }),
-      supabase.from("topics").select("*").eq("family_id", family.familyId).order("title")
+      api.from("learning_texts").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false }),
+      api.from("topics").select("*").eq("family_id", family.familyId).order("title")
     ]);
     setTexts((textsRes.data ?? []) as LearningText[]);
     setTopics((topicsRes.data ?? []) as Topic[]);
-  }, [family, supabase]);
+  }, [family, api]);
 
   useEffect(() => {
     void load();
@@ -127,8 +127,8 @@ export function TextsManager() {
       };
 
       const result = form.id
-        ? await supabase.from("learning_texts").update(payload).eq("family_id", family.familyId).eq("id", form.id)
-        : await supabase.from("learning_texts").insert(payload);
+        ? await api.from("learning_texts").update(payload).eq("family_id", family.familyId).eq("id", form.id)
+        : await api.from("learning_texts").insert(payload);
 
       if (result.error) throw result.error;
       setForm(emptyForm);
@@ -143,7 +143,7 @@ export function TextsManager() {
 
   async function archiveText(text: LearningText) {
     if (!family) return;
-    const { error: archiveError } = await supabase
+    const { error: archiveError } = await api
       .from("learning_texts")
       .update({ status: text.status === "archived" ? "active" : "archived" })
       .eq("family_id", family.familyId)

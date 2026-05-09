@@ -29,7 +29,7 @@ const emptyForm = {
 };
 
 export function CardsManager() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [cards, setCards] = useState<Card[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -45,12 +45,12 @@ export function CardsManager() {
   const load = useCallback(async () => {
     if (!family) return;
     const [cardsRes, topicsRes, coursesRes, sourcesRes, unitsRes, lessonsRes] = await Promise.all([
-      supabase.from("cards").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false }),
-      supabase.from("topics").select("*").eq("family_id", family.familyId).order("title"),
-      supabase.from("courses").select("*").eq("family_id", family.familyId).order("title"),
-      supabase.from("sources").select("*").eq("family_id", family.familyId).order("title"),
-      supabase.from("units").select("*").eq("family_id", family.familyId).order("position"),
-      supabase.from("lessons").select("*").eq("family_id", family.familyId).order("position")
+      api.from("cards").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false }),
+      api.from("topics").select("*").eq("family_id", family.familyId).order("title"),
+      api.from("courses").select("*").eq("family_id", family.familyId).order("title"),
+      api.from("sources").select("*").eq("family_id", family.familyId).order("title"),
+      api.from("units").select("*").eq("family_id", family.familyId).order("position"),
+      api.from("lessons").select("*").eq("family_id", family.familyId).order("position")
     ]);
     setCards((cardsRes.data ?? []) as Card[]);
     setTopics((topicsRes.data ?? []) as Topic[]);
@@ -58,7 +58,7 @@ export function CardsManager() {
     setSources((sourcesRes.data ?? []) as Source[]);
     setUnits((unitsRes.data ?? []) as Unit[]);
     setLessons((lessonsRes.data ?? []) as Lesson[]);
-  }, [family, supabase]);
+  }, [family, api]);
 
   useEffect(() => {
     void load();
@@ -115,8 +115,8 @@ export function CardsManager() {
     };
 
     const result = editingId
-      ? await supabase.from("cards").update(payload).eq("id", editingId)
-      : await supabase.from("cards").insert(payload);
+      ? await api.from("cards").update(payload).eq("id", editingId)
+      : await api.from("cards").insert(payload);
 
     if (result.error) {
       setMessage(result.error.message);
@@ -129,7 +129,7 @@ export function CardsManager() {
   }
 
   async function archive(id: string) {
-    await supabase.from("cards").update({ status: "archived" }).eq("id", id);
+    await api.from("cards").update({ status: "archived" }).eq("id", id);
     await load();
   }
 

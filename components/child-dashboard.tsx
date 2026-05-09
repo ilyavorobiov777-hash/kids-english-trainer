@@ -18,7 +18,7 @@ const actions = [
 ];
 
 export function ChildDashboard() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [childName, setChildName] = useState<string | null>(null);
   const [attempts, setAttempts] = useState<PracticeAttempt[]>([]);
 
@@ -27,11 +27,11 @@ export function ChildDashboard() {
     setChildName(window.localStorage.getItem("selected_child_name"));
     async function load() {
       if (!family || !childId) return;
-      const { data } = await supabase.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).limit(100);
+      const { data } = await api.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).limit(100);
       setAttempts((data ?? []) as PracticeAttempt[]);
     }
     void load();
-  }, [family, supabase]);
+  }, [family, api]);
 
   const correct = attempts.filter((attempt) => attempt.is_correct).length;
 

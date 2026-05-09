@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserSupabase } from "@/lib/supabase/client";
+import { createApiClient, getCurrentFamily } from "@/lib/api-client";
 import { useEffect, useMemo, useState } from "react";
 
 const FAMILY_LOAD_TIMEOUT_MS = 60000;
@@ -23,44 +23,29 @@ function withTimeout<T>(promise: PromiseLike<T>, message: string): Promise<T> {
 }
 
 export function useFamily() {
-  const supabase = useMemo(() => createBrowserSupabase(), []);
+  const api = useMemo(() => createApiClient(), []);
   const [family, setFamily] = useState<FamilyContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
+
     async function load() {
       setLoading(true);
       setError(null);
 
       try {
-        const { data: auth } = await withTimeout(supabase.auth.getUser(), "Не удалось загрузить сессию за 60 секунд. Проверьте интернет и обновите страницу.");
-
-        if (!auth.user) {
-          if (mounted) {
-            setFamily(null);
-            setLoading(false);
-          }
-          return;
-        }
-
-        const { data, error: profileError } = await withTimeout(
-          supabase.from("profiles").select("family_id, display_name").eq("auth_user_id", auth.user.id).single(),
-          "Не удалось загрузить семейный профиль за 60 секунд. Проверьте интернет и обновите страницу."
-        );
-
-        if (mounted) {
-          if (profileError) setError(profileError.message);
-          if (data) setFamily({ userId: auth.user.id, familyId: data.family_id, displayName: data.display_name });
-          setLoading(false);
-        }
-      } catch (error) {
-        if (mounted) {
-          setFamily(null);
-          setError(error instanceof Error ? error.message : "Не удалось загрузить семейные данные.");
-          setLoading(false);
-        }
+        const result = await withTimeout(getCurrentFamily(), "Не удалось загрузить сессию за 60 секунд. Проверьте интернет и обновите страницу.");
+        if (!mounted) return;
+        setFamily(result.family);
+        setError(result.error);
+      } catch (loadError) {
+        if (!mounted) return;
+        setFamily(null);
+        setError(loadError instanceof Error ? loadError.message : "Не удалось загрузить семейные данные.");
+      } finally {
+        if (mounted) setLoading(false);
       }
     }
 
@@ -68,7 +53,7 @@ export function useFamily() {
     return () => {
       mounted = false;
     };
-  }, [supabase]);
+  }, []);
 
-  return { supabase, family, loading, error };
+  return { api, family, loading, error };
 }

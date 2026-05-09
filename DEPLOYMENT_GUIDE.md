@@ -24,6 +24,8 @@ Note: CLI deploy works. During `vercel link`, Vercel could not automatically con
 
 Supabase Auth redirect update status: not completed automatically. Supabase CLI can see the linked project `etuvgikfrlndeayczbrm`, but there is no direct safe CLI command for Auth URL Configuration. `SUPABASE_ACCESS_TOKEN` is not present locally, so the Management API was not used. See `SUPABASE_REDIRECT_TODO.md` for exact manual steps and the optional local-token retry path.
 
+The production app now uses a Vercel API proxy. Browser code should call only `/api/...` on the app domain; Vercel route handlers call Supabase server-side.
+
 ## 1. Before Deploy
 
 Run locally from `D:\Projects\kids-english-trainer`:
@@ -61,8 +63,9 @@ If Vercel CLI is not authorized locally, do not force CLI deploy. Use the Vercel
 In Vercel project settings, add:
 
 ```text
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_URL
+SUPABASE_ANON_KEY
+NEXT_PUBLIC_APP_URL
 ```
 
 Where to get them:
@@ -71,8 +74,9 @@ Where to get them:
 2. Open the `kids-english-trainer` project.
 3. Go to `Project Settings` -> `API`.
 4. Copy:
-   - `Project URL` -> `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key -> `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `Project URL` -> `SUPABASE_URL`
+   - `anon public` key -> `SUPABASE_ANON_KEY`
+   - production app URL -> `NEXT_PUBLIC_APP_URL`
 
 Do not add:
 
@@ -83,6 +87,8 @@ Do not add:
 - private tokens not meant for browser use
 
 The frontend must use only the public Supabase URL and anon key.
+
+Legacy `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` may still exist from the older browser-direct version, but client code no longer uses them. Remove them after proxy smoke testing is complete.
 
 ## 4. Run First Deploy
 

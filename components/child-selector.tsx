@@ -9,18 +9,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export function ChildSelector() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [children, setChildren] = useState<Child[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     async function load() {
       if (!family) return;
-      const { data } = await supabase.from("children").select("*").eq("family_id", family.familyId).order("created_at");
+      const { data } = await api.from("children").select("*").eq("family_id", family.familyId).order("created_at");
       setChildren((data ?? []) as Child[]);
     }
     void load();
-  }, [family, supabase]);
+  }, [family, api]);
 
   const activeChildren = useMemo(() => children.filter((child) => child.status !== "archived"), [children]);
 

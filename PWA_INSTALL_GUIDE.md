@@ -41,6 +41,7 @@ Use Yandex Browser, Chrome, or Edge:
 
 - Lesson history is saved through Supabase.
 - Cards, texts, attempts and statistics need internet for full sync.
+- Production sync goes through the Vercel API proxy, so mobile browsers should not need direct access to the Supabase host.
 - Full offline learning mode is not implemented yet.
 - The PWA shell/static files may open from browser cache after first load, but login and progress sync require network.
 - Browser SpeechSynthesis can sound different on Windows, Android and iPhone.

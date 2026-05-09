@@ -1,8 +1,7 @@
 "use client";
 
 import { Button, PageHeader, Panel } from "@/components/ui";
-import { createBrowserSupabase, getSupabaseBrowserConfig } from "@/lib/supabase/client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type Check = {
   name: string;
@@ -26,17 +25,13 @@ async function timed<T>(name: string, action: () => Promise<T>, describe: (value
 }
 
 export default function DiagnosticsPage() {
-  const supabase = useMemo(() => createBrowserSupabase(), []);
   const [checks, setChecks] = useState<Check[]>([]);
   const [running, setRunning] = useState(false);
 
   async function runChecks() {
     setRunning(true);
-    const { url, anonKey } = getSupabaseBrowserConfig();
-    const supabaseHost = new URL(url).host;
     const nextChecks: Check[] = [
       { name: "App URL", status: "info", details: window.location.href },
-      { name: "Supabase host", status: "info", details: supabaseHost },
       { name: "Browser online", status: navigator.onLine ? "ok" : "fail", details: navigator.onLine ? "online" : "offline" },
       { name: "Secure context", status: window.isSecureContext ? "ok" : "fail", details: window.isSecureContext ? "https/secure" : "not secure" },
       { name: "User agent", status: "info", details: navigator.userAgent }
@@ -62,32 +57,17 @@ export default function DiagnosticsPage() {
 
     nextChecks.push(
       await timed(
-        "Supabase Auth health",
-        () => fetch(`${url}/auth/v1/health`, { cache: "no-store" }),
-        (response) => `HTTP ${response.status}`
+        "Vercel API Auth health",
+        () => fetch("/api/auth/health", { cache: "no-store" }).then(async (response) => ({ response, body: await response.json() })),
+        ({ response, body }) => `HTTP ${response.status}: ${body.status ?? "no status"}${body.ms ? `, server ${body.ms} ms` : ""}`
       )
     );
 
     nextChecks.push(
       await timed(
-        "Supabase REST reachability",
-        () =>
-          fetch(`${url}/rest/v1/`, {
-            cache: "no-store",
-            headers: {
-              apikey: anonKey,
-              Authorization: `Bearer ${anonKey}`
-            }
-          }),
-        (response) => `HTTP ${response.status}`
-      )
-    );
-
-    nextChecks.push(
-      await timed(
-        "Supabase SDK getSession",
-        () => supabase.auth.getSession(),
-        (response) => (response.error ? `error: ${response.error.message}` : response.data.session ? "session found" : "no active session")
+        "Vercel API current session",
+        () => fetch("/api/auth/me", { cache: "no-store", credentials: "include" }),
+        (response) => (response.status === 401 ? "HTTP 401: no active session" : `HTTP ${response.status}`)
       )
     );
 
@@ -97,6 +77,7 @@ export default function DiagnosticsPage() {
 
   async function clearLocalData() {
     window.localStorage.clear();
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => undefined);
     if ("serviceWorker" in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map((registration) => registration.unregister()));
@@ -112,7 +93,7 @@ export default function DiagnosticsPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Диагностика входа"
-        subtitle="Эта страница не показывает ключи и пароли. Она проверяет, видит ли устройство production-сайт и Supabase."
+        subtitle="Эта страница не показывает ключи и пароли. Браузер проверяет только Vercel API, а Vercel уже проверяет Supabase server-side."
       />
       <Panel>
         <div className="flex flex-wrap gap-3">

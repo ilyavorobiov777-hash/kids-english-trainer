@@ -13,7 +13,7 @@ function wordCount(text: string) {
 }
 
 export function ChildTextsList() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [texts, setTexts] = useState<LearningText[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
 
@@ -21,20 +21,20 @@ export function ChildTextsList() {
     async function load() {
       if (!family) return;
       const [textsRes, topicsRes] = await Promise.all([
-        supabase
+        api
           .from("learning_texts")
           .select("*")
           .eq("family_id", family.familyId)
           .eq("status", "active")
           .order("difficulty", { ascending: true })
           .order("title_en", { ascending: true }),
-        supabase.from("topics").select("*").eq("family_id", family.familyId)
+        api.from("topics").select("*").eq("family_id", family.familyId)
       ]);
       setTexts((textsRes.data ?? []) as LearningText[]);
       setTopics((topicsRes.data ?? []) as Topic[]);
     }
     void load();
-  }, [family, supabase]);
+  }, [family, api]);
 
   const topicById = useMemo(() => new Map(topics.map((topic) => [topic.id, topic.title])), [topics]);
 

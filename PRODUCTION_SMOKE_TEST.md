@@ -18,6 +18,7 @@ https://kids-english-trainer.vercel.app
 - [x] `/manifest.webmanifest` returns HTTP 200.
 - [x] `/` returns HTTP 307 redirect, which is acceptable for the app root.
 - [x] Supabase CLI can see linked project `etuvgikfrlndeayczbrm`.
+- [x] Vercel API proxy routes are part of the production build.
 
 ## Auth Redirect Status
 
@@ -37,6 +38,8 @@ https://*.vercel.app/**
 Automatic update was not performed because `SUPABASE_ACCESS_TOKEN` is not present locally and Supabase CLI does not provide a direct safe command for this setting.
 
 Manual checks still required after updating Supabase Auth redirect URLs in `SUPABASE_REDIRECT_TODO.md`.
+
+For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.md). Mobile devices should no longer need direct access to `*.supabase.co`.
 
 ## Checklist
 

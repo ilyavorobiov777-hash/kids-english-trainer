@@ -1,16 +1,15 @@
 "use client";
 
 import { Button, Field, Input, PageHeader, Panel } from "@/components/ui";
-import { createBrowserSupabase, getSupabaseBrowserConfig } from "@/lib/supabase/client";
+import { postAuth } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 const AUTH_TIMEOUT_MS = 60000;
-const SDK_LOGIN_TIMEOUT_MS = 15000;
 
-function withTimeout<T>(promise: PromiseLike<T>, message: string, timeoutMs = AUTH_TIMEOUT_MS): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, message: string): Promise<T> {
   return new Promise((resolve, reject) => {
-    const timeout = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    const timeout = window.setTimeout(() => reject(new Error(message)), AUTH_TIMEOUT_MS);
 
     Promise.resolve(promise)
       .then(resolve)
@@ -19,17 +18,7 @@ function withTimeout<T>(promise: PromiseLike<T>, message: string, timeoutMs = AU
   });
 }
 
-async function parseAuthError(response: Response) {
-  try {
-    const body = (await response.json()) as { error_description?: string; msg?: string; message?: string; error?: string };
-    return body.error_description ?? body.msg ?? body.message ?? body.error ?? `Auth API returned ${response.status}`;
-  } catch {
-    return `Auth API returned ${response.status}`;
-  }
-}
-
 export default function LoginPage() {
-  const supabase = useMemo(() => createBrowserSupabase(), []);
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -39,52 +28,6 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function directPasswordLogin() {
-    const { url, anonKey } = getSupabaseBrowserConfig();
-    const response = await fetch(`${url}/auth/v1/token?grant_type=password`, {
-      method: "POST",
-      headers: {
-        apikey: anonKey,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    if (!response.ok) {
-      throw new Error(await parseAuthError(response));
-    }
-
-    const data = (await response.json()) as { access_token?: string; refresh_token?: string };
-
-    if (!data.access_token || !data.refresh_token) {
-      throw new Error("Auth API did not return a session.");
-    }
-
-    const sessionResponse = await supabase.auth.setSession({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token
-    });
-
-    if (sessionResponse.error) {
-      throw sessionResponse.error;
-    }
-
-    return sessionResponse;
-  }
-
-  async function loginWithFallback() {
-    try {
-      return await withTimeout(
-        supabase.auth.signInWithPassword({ email, password }),
-        "Supabase SDK не ответил за 15 секунд.",
-        SDK_LOGIN_TIMEOUT_MS
-      );
-    } catch {
-      setMessage("Основной вход не ответил. Пробуем запасной способ...");
-      return await withTimeout(directPasswordLogin(), "Запасной вход не получил ответ от Supabase за 60 секунд.");
-    }
-  }
-
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
@@ -92,20 +35,18 @@ export default function LoginPage() {
 
     try {
       const response = await withTimeout(
-        mode === "login" ? loginWithFallback() : supabase.auth.signUp({
-              email,
-              password,
-              options: { data: { display_name: displayName || email, family_name: familyName || "Моя семья" } }
-            }),
-        "Не удалось дождаться ответа от Supabase за 60 секунд. Проверьте, что открыт именно production-сайт, и попробуйте еще раз."
+        mode === "login"
+          ? postAuth("/api/auth/login", { email, password })
+          : postAuth("/api/auth/signup", { email, password, displayName, familyName }),
+        "Сервер временно не может подключиться к базе. Попробуйте позже."
       );
 
       if (response.error) {
-        setMessage(response.error.message);
+        setMessage(response.error);
         return;
       }
 
-      if (mode === "signup" && !response.data.session) {
+      if (mode === "signup" && response.needsEmailConfirmation) {
         setMessage("Проверьте email для подтверждения аккаунта, если оно включено в Supabase.");
         return;
       }
@@ -123,7 +64,7 @@ export default function LoginPage() {
     setLoading(true);
     setMessage(null);
     try {
-      await withTimeout(supabase.auth.signOut({ scope: "local" }), "Не удалось очистить локальную сессию.");
+      await withTimeout(fetch("/api/auth/logout", { method: "POST", credentials: "include" }), "Не удалось очистить локальную сессию.");
       setMessage("Локальная сессия очищена. Попробуйте войти еще раз.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Не удалось очистить локальную сессию.");

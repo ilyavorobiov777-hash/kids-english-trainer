@@ -15,17 +15,17 @@ type GrammarPattern = {
 };
 
 export default function GrammarPage() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [items, setItems] = useState<GrammarPattern[]>([]);
 
   useEffect(() => {
     async function load() {
       if (!family) return;
-      const { data } = await supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId).order("title");
+      const { data } = await api.from("grammar_patterns").select("*").eq("family_id", family.familyId).order("title");
       setItems((data ?? []) as GrammarPattern[]);
     }
     void load();
-  }, [family, supabase]);
+  }, [family, api]);
 
   return (
     <AuthRequired loading={loading} error={error}>

@@ -56,7 +56,7 @@ function makeVocabTasks(words: LearningTextVocabularyWord[], cards: Card[]) {
 }
 
 export function TextReader({ textId }: { textId: string }) {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [childId, setChildId] = useState<string | null>(null);
   const [text, setText] = useState<LearningText | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
@@ -82,20 +82,20 @@ export function TextReader({ textId }: { textId: string }) {
   useEffect(() => {
     async function load() {
       if (!family) return;
-      const { data } = await supabase.from("learning_texts").select("*").eq("family_id", family.familyId).eq("id", textId).maybeSingle();
+      const { data } = await api.from("learning_texts").select("*").eq("family_id", family.familyId).eq("id", textId).maybeSingle();
       const loadedText = data as LearningText | null;
       setText(loadedText);
       if (!loadedText) return;
 
       const [topicRes, cardsRes] = await Promise.all([
-        loadedText.topic_id ? supabase.from("topics").select("*").eq("family_id", family.familyId).eq("id", loadedText.topic_id).maybeSingle() : Promise.resolve({ data: null }),
-        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(600)
+        loadedText.topic_id ? api.from("topics").select("*").eq("family_id", family.familyId).eq("id", loadedText.topic_id).maybeSingle() : Promise.resolve({ data: null }),
+        api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(600)
       ]);
       setTopic((topicRes.data ?? null) as Topic | null);
       setCards((cardsRes.data ?? []) as Card[]);
     }
     void load();
-  }, [family, supabase, textId]);
+  }, [family, api, textId]);
 
   const questions = text?.comprehension_questions ?? [];
   const currentQuestion = questions[questionIndex];
@@ -104,7 +104,7 @@ export function TextReader({ textId }: { textId: string }) {
 
   const ensureSession = useCallback(async () => {
     if (session || !family || !childId) return session;
-    const { data } = await supabase
+    const { data } = await api
       .from("practice_sessions")
       .insert({ family_id: family.familyId, child_id: childId })
       .select()
@@ -112,12 +112,12 @@ export function TextReader({ textId }: { textId: string }) {
     const nextSession = data as PracticeSession;
     setSession(nextSession);
     return nextSession;
-  }, [childId, family, session, supabase]);
+  }, [childId, family, session, api]);
 
   const updateSession = useCallback(
     async (nextTotal: number, nextCorrect: number, finished = false, targetSession = session) => {
       if (!targetSession) return;
-      await supabase
+      await api
         .from("practice_sessions")
         .update({
           finished_at: finished ? new Date().toISOString() : null,
@@ -130,7 +130,7 @@ export function TextReader({ textId }: { textId: string }) {
         })
         .eq("id", targetSession.id);
     },
-    [session, supabase]
+    [session, api]
   );
 
   async function saveQuestionAnswer(answer: string) {
@@ -154,7 +154,7 @@ export function TextReader({ textId }: { textId: string }) {
       ]);
     }
 
-    await supabase.from("practice_attempts").insert({
+    await api.from("practice_attempts").insert({
       family_id: family.familyId,
       child_id: childId,
       session_id: activeSession.id,
@@ -203,7 +203,7 @@ export function TextReader({ textId }: { textId: string }) {
       ]);
     }
 
-    await supabase.from("practice_attempts").insert({
+    await api.from("practice_attempts").insert({
       family_id: family.familyId,
       child_id: childId,
       session_id: activeSession.id,
@@ -221,7 +221,7 @@ export function TextReader({ textId }: { textId: string }) {
     });
 
     if (task.card) {
-      await supabase.from("review_schedule").upsert(
+      await api.from("review_schedule").upsert(
         {
           family_id: family.familyId,
           child_id: childId,

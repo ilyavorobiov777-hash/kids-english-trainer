@@ -6,10 +6,13 @@ Use this before and after Vercel deployment.
 
 - [ ] Supabase project URL is checked in `Project Settings` -> `API`.
 - [ ] `anon public` key is checked in `Project Settings` -> `API`.
-- [ ] Vercel has `NEXT_PUBLIC_SUPABASE_URL`.
-- [ ] Vercel has `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- [ ] Vercel has `SUPABASE_URL`.
+- [ ] Vercel has `SUPABASE_ANON_KEY`.
+- [ ] Vercel has `NEXT_PUBLIC_APP_URL`.
 - [ ] Supabase `service_role` key is not used in frontend code.
 - [ ] Supabase `service_role` key is not added to Vercel frontend env.
+- [ ] Browser Network tab does not show direct requests to `*.supabase.co`.
+- [ ] Browser requests app data through `/api/...`.
 
 ## Database And RLS
 

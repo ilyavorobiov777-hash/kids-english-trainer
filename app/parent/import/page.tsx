@@ -30,7 +30,7 @@ const starterCourseTitle = "Starter 350 Pre-A1";
 const starterTextsCourseTitle = "Starter Texts Pre-A1";
 
 export default function ParentImportPage() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const [message, setMessage] = useState<string | null>(null);
   const [starterLoading, setStarterLoading] = useState(false);
   const [starterStatus, setStarterStatus] = useState<StarterStatus>({
@@ -45,8 +45,8 @@ export default function ParentImportPage() {
     setStarterStatus((current) => ({ ...current, loading: true }));
 
     const [starterCourseRes, textsCourseRes] = await Promise.all([
-      supabase.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterCourseTitle).maybeSingle(),
-      supabase.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterTextsCourseTitle).maybeSingle()
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterCourseTitle).maybeSingle(),
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterTextsCourseTitle).maybeSingle()
     ]);
 
     const starterCourse = starterCourseRes.data;
@@ -54,13 +54,13 @@ export default function ParentImportPage() {
 
     const [{ count: cardsCount }, { count: grammarCount }, { count: textsCount }] = await Promise.all([
       starterCourse
-        ? supabase.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
+        ? api.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
         : Promise.resolve({ count: 0 }),
       starterCourse
-        ? supabase.from("grammar_patterns").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
+        ? api.from("grammar_patterns").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
         : Promise.resolve({ count: 0 }),
       textsCourse
-        ? supabase.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", textsCourse.id)
+        ? api.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", textsCourse.id)
         : Promise.resolve({ count: 0 })
     ]);
 
@@ -70,14 +70,14 @@ export default function ParentImportPage() {
       texts: textsCount ?? 0,
       loading: false
     });
-  }, [family, supabase]);
+  }, [family, api]);
 
   useEffect(() => {
     void loadStarterStatus();
   }, [loadStarterStatus]);
 
   async function seedDemo() {
-    const { error: rpcError } = await supabase.rpc("seed_demo_content");
+    const { error: rpcError } = await api.rpc("seed_demo_content");
     setMessage(rpcError ? rpcError.message : "Демо-набор добавлен: 30 слов, 10 фраз, 5 грамматических паттернов.");
     await loadStarterStatus();
   }
@@ -86,7 +86,7 @@ export default function ParentImportPage() {
     setStarterLoading(true);
     setMessage("Добавляю Starter 350. Обычно это занимает несколько секунд...");
 
-    const { data, error: rpcError } = await supabase.rpc("seed_starter_learning_content");
+    const { data, error: rpcError } = await api.rpc("seed_starter_learning_content");
 
     if (rpcError) {
       setStarterLoading(false);
@@ -112,7 +112,7 @@ export default function ParentImportPage() {
     setStarterLoading(true);
     setMessage("Добавляю Starter Texts. Повторный запуск безопасен: дубли не создаются...");
 
-    const { data, error: rpcError } = await supabase.rpc("seed_starter_texts");
+    const { data, error: rpcError } = await api.rpc("seed_starter_texts");
 
     if (rpcError) {
       setStarterLoading(false);
@@ -137,10 +137,10 @@ export default function ParentImportPage() {
         <>
           <PageHeader
             title="Импорт"
-            subtitle="Загрузите CSV, проверьте preview, исправьте ошибки и сохраните карточки в Supabase. Здесь же можно добавить стартовые наборы."
+            subtitle="Загрузите CSV, проверьте preview, исправьте ошибки и сохраните карточки в api. Здесь же можно добавить стартовые наборы."
           />
           <div className="grid gap-5">
-            <CsvImporter supabase={supabase} familyId={family.familyId} userId={family.userId} />
+            <CsvImporter api={api} familyId={family.familyId} userId={family.userId} />
             <Panel>
               <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
                 <div>

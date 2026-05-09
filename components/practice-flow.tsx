@@ -22,7 +22,7 @@ const positiveFeedback = ["Отлично!", "Здорово!", "Так держ
 const retryFeedback = ["Почти! Давай еще раз", "Хорошая попытка", "Не страшно, повторим"];
 
 export function PracticeFlow() {
-  const { supabase, family, loading, error } = useFamily();
+  const { api, family, loading, error } = useFamily();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [childId, setChildId] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function PracticeFlow() {
   const beginSession = useCallback(
     async (nextExercises: PracticeExercise[], nextChildId: string, keepMistakes = false) => {
       if (!family) return;
-      const { data: newSession } = await supabase
+      const { data: newSession } = await api
         .from("practice_sessions")
         .insert({ family_id: family.familyId, child_id: nextChildId })
         .select()
@@ -76,24 +76,24 @@ export function PracticeFlow() {
       if (!keepMistakes) setMistakes([]);
       setStartedAt(Date.now());
     },
-    [family, supabase]
+    [family, api]
   );
 
   useEffect(() => {
     async function load() {
       if (!family || !childId) return;
       const [childRes, cardsRes, attemptsRes, scheduleRes, grammarRes] = await Promise.all([
-        supabase.from("children").select("*").eq("family_id", family.familyId).eq("id", childId).maybeSingle(),
-        supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
-        supabase
+        api.from("children").select("*").eq("family_id", family.familyId).eq("id", childId).maybeSingle(),
+        api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
+        api
           .from("practice_attempts")
           .select("*")
           .eq("family_id", family.familyId)
           .eq("child_id", childId)
           .order("created_at", { ascending: false })
           .limit(800),
-        supabase.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
-        supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId)
+        api.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
+        api.from("grammar_patterns").select("*").eq("family_id", family.familyId)
       ]);
 
       const child = childRes.data as Child | null;
@@ -110,7 +110,7 @@ export function PracticeFlow() {
       await beginSession(buildDailyPractice({ cards, attempts, schedules: reviewSchedules, grammarPatterns }), childId);
     }
     void load();
-  }, [beginSession, childId, family, supabase]);
+  }, [beginSession, childId, family, api]);
 
   const current = exercises[index];
   const finished = exercises.length > 0 && index >= exercises.length;
@@ -121,7 +121,7 @@ export function PracticeFlow() {
     const duration = Math.max(1, Math.round((Date.now() - new Date(session.started_at).getTime()) / 1000));
     const incorrect = stats.total - stats.correct;
     const accuracy = stats.total ? (stats.correct / stats.total) * 100 : 0;
-    await supabase
+    await api
       .from("practice_sessions")
       .update({
         finished_at: new Date().toISOString(),
@@ -134,7 +134,7 @@ export function PracticeFlow() {
       })
       .eq("id", session.id);
     setCompleted(true);
-  }, [completed, session, stars, stats.correct, stats.total, supabase]);
+  }, [completed, session, stars, stats.correct, stats.total, api]);
 
   useEffect(() => {
     if (finished) void finishSession();
@@ -184,7 +184,7 @@ export function PracticeFlow() {
       ]);
     }
 
-    await supabase.from("practice_attempts").insert({
+    await api.from("practice_attempts").insert({
       family_id: family.familyId,
       child_id: childId,
       session_id: session.id,
@@ -199,7 +199,7 @@ export function PracticeFlow() {
     });
 
     const duration = Math.max(1, Math.round((Date.now() - new Date(session.started_at).getTime()) / 1000));
-    await supabase
+    await api
       .from("practice_sessions")
       .update({
         duration_seconds: duration,
@@ -214,7 +214,7 @@ export function PracticeFlow() {
     if (current.card?.id) {
       const existing = schedules.find((item) => item.card_id === current.card?.id);
       const review = nextReviewState(existing, isCorrect, rating);
-      await supabase.from("review_schedule").upsert(
+      await api.from("review_schedule").upsert(
         {
           family_id: family.familyId,
           child_id: childId,
