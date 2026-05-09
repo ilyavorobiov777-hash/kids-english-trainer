@@ -49,10 +49,12 @@ npm run build
 npm run start
 npm run lint
 npm run typecheck
+npm run deploy:check
 npm run db:push
 ```
 
 `typecheck` runs `tsc --noEmit`.
+`deploy:check` verifies required public env variables and PWA assets, then runs a production build.
 Supabase CLI is installed as a project dev dependency, so you can also run it with `npx supabase --version`.
 
 ## Supabase Setup
@@ -353,14 +355,54 @@ git remote -v
 git status
 ```
 
-## Deploy To Vercel
+## Deployment
 
-1. Create a Vercel project from the GitHub repository.
-2. Add env variables:
+Production deploy is prepared for Vercel. Detailed guides:
+
+- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+- [SUPABASE_PRODUCTION_CHECKLIST.md](SUPABASE_PRODUCTION_CHECKLIST.md)
+- [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md)
+- [PWA_INSTALL_GUIDE.md](PWA_INSTALL_GUIDE.md)
+
+Short path:
+
+1. Run checks locally:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+npm.cmd run content:report
+npm.cmd run deploy:check
+```
+
+2. Create a Vercel project from GitHub repository:
+
+```text
+ilyavorobiov777-hash/kids-english-trainer
+```
+
+3. Add Vercel environment variables:
+
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. Make sure Supabase migrations are applied.
-4. Deploy.
+
+4. Deploy from Vercel.
+5. Copy the Vercel production URL.
+6. Add the Vercel production URL to Supabase `Authentication -> URL Configuration`:
+
+```text
+https://your-vercel-domain/**
+```
+
+7. Keep local auth redirect for development:
+
+```text
+http://localhost:3000/**
+```
+
+8. Run the production smoke test from [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md).
+
+Do not add a Supabase `service_role` key to Vercel frontend environment variables.
 
 ## Next Stage
 

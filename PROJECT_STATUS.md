@@ -41,7 +41,8 @@ Results:
 
 - `npm run typecheck` passed.
 - `npm run build` passed.
-- Build produced only existing React hook dependency warnings in several components.
+- React hook dependency warnings from the previous pass were cleaned up where safe.
+- `npm run deploy:check` is available for production readiness checks.
 - Supabase CLI is installed as a project dev dependency and verified with `npx supabase --version` -> `2.98.2`.
 
 ## Commands To Run Locally
@@ -110,8 +111,9 @@ The suggested automatic remediation is `npm audit fix --force`, which would upgr
 
 ## Next Stage
 
-1. Apply both Supabase migrations in the hosted project.
-2. Run the seed SQL if needed.
-3. Smoke-test CSV import and mixed child practice against real Supabase.
-4. Add E2E tests for import, practice attempts, and parent stats.
-5. Add a real child PIN/session model.
+1. Create a Vercel project from the GitHub repository.
+2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel.
+3. Deploy and add the Vercel URL to Supabase Auth redirect URLs.
+4. Run `PRODUCTION_SMOKE_TEST.md` on Windows, Android tablet, and iPhone.
+5. Add E2E tests for import, practice attempts, and parent stats.
+6. Add a real child PIN/session model.

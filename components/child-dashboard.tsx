@@ -20,8 +20,8 @@ export function ChildDashboard() {
       const { data } = await supabase.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).limit(100);
       setAttempts((data ?? []) as PracticeAttempt[]);
     }
-    load();
-  }, [family?.familyId]);
+    void load();
+  }, [family, supabase]);
 
   const correct = attempts.filter((attempt) => attempt.is_correct).length;
 

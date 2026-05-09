@@ -6,7 +6,7 @@ import { useFamily } from "@/hooks/use-family";
 import type { Card, CardStatus, CardType, Course, Lesson, Source, Topic, Unit } from "@/lib/database.types";
 import { normalizeTags } from "@/lib/supabase/helpers";
 import { Edit3, Volume2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { speakEnglish } from "@/lib/speech";
 
 const cardTypes: CardType[] = ["word", "phrase", "sentence", "grammar_pattern", "dialogue", "mini_story"];
@@ -42,7 +42,7 @@ export function CardsManager() {
   const [topicFilter, setTopicFilter] = useState("all");
   const [message, setMessage] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!family) return;
     const [cardsRes, topicsRes, coursesRes, sourcesRes, unitsRes, lessonsRes] = await Promise.all([
       supabase.from("cards").select("*").eq("family_id", family.familyId).order("created_at", { ascending: false }),
@@ -58,11 +58,11 @@ export function CardsManager() {
     setSources((sourcesRes.data ?? []) as Source[]);
     setUnits((unitsRes.data ?? []) as Unit[]);
     setLessons((lessonsRes.data ?? []) as Lesson[]);
-  }
+  }, [family, supabase]);
 
   useEffect(() => {
-    load();
-  }, [family?.familyId]);
+    void load();
+  }, [load]);
 
   const filteredCards = useMemo(
     () =>

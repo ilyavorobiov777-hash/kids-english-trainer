@@ -18,8 +18,8 @@ export function ChildSelector() {
       const { data } = await supabase.from("children").select("*").eq("family_id", family.familyId).order("created_at");
       setChildren((data ?? []) as Child[]);
     }
-    load();
-  }, [family?.familyId]);
+    void load();
+  }, [family, supabase]);
 
   function selectChild(child: Child) {
     window.localStorage.setItem("selected_child_id", child.id);

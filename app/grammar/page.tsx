@@ -24,8 +24,8 @@ export default function GrammarPage() {
       const { data } = await supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId).order("title");
       setItems((data ?? []) as GrammarPattern[]);
     }
-    load();
-  }, [family?.familyId]);
+    void load();
+  }, [family, supabase]);
 
   return (
     <AuthRequired loading={loading} error={error}>

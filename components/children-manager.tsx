@@ -4,7 +4,7 @@ import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { Button, Field, Input, PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import type { Child } from "@/lib/database.types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function ChildrenManager() {
   const { supabase, family, loading, error } = useFamily();
@@ -12,15 +12,15 @@ export function ChildrenManager() {
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!family) return;
     const { data } = await supabase.from("children").select("*").eq("family_id", family.familyId).order("created_at");
     setChildren((data ?? []) as Child[]);
-  }
+  }, [family, supabase]);
 
   useEffect(() => {
-    load();
-  }, [family?.familyId]);
+    void load();
+  }, [load]);
 
   async function createChild(event: React.FormEvent) {
     event.preventDefault();
