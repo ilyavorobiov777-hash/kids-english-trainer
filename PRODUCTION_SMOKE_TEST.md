@@ -5,8 +5,20 @@ Run this after Vercel deployment and after important production changes.
 Production URL:
 
 ```text
-https://your-vercel-production-url
+https://kids-english-trainer.vercel.app
 ```
+
+## Automated Smoke Already Checked
+
+- [x] Production deploy completed with Vercel CLI.
+- [x] `/login` returns HTTP 200.
+- [x] `/parent/import` returns HTTP 200 before login and renders the app shell.
+- [x] `/child/texts` returns HTTP 200 before login and renders the app shell.
+- [x] `/grammar` returns HTTP 200.
+- [x] `/manifest.webmanifest` returns HTTP 200.
+- [x] `/` returns HTTP 307 redirect, which is acceptable for the app root.
+
+Manual checks still required after updating Supabase Auth redirect URLs in `SUPABASE_REDIRECT_TODO.md`.
 
 ## Checklist
 

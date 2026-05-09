@@ -2,6 +2,26 @@
 
 This guide deploys `kids-english-trainer` to Vercel so the app works from an Android tablet, iPhone, and Windows laptop even when the local computer is turned off.
 
+## Current Production Status
+
+Production deploy was completed with Vercel CLI.
+
+Production URL:
+
+```text
+https://kids-english-trainer.vercel.app
+```
+
+Remaining manual actions:
+
+1. Open `SUPABASE_REDIRECT_TODO.md`.
+2. Add the production URL to Supabase Auth `Site URL`.
+3. Add the production redirect URL to Supabase Auth Redirect URLs.
+4. Test parent signup/login on production.
+5. In Vercel dashboard, connect the GitHub repository to the existing Vercel project if you want automatic deploys from `main`.
+
+Note: CLI deploy works. During `vercel link`, Vercel could not automatically connect the GitHub repository to the project, so Preview branch env variables were not configured.
+
 ## 1. Before Deploy
 
 Run locally from `D:\Projects\kids-english-trainer`:

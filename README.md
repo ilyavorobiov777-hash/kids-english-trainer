@@ -435,12 +435,21 @@ git status
 
 Production deploy is prepared for Vercel so the app can work from a tablet, iPhone, or Windows laptop while the local computer is off.
 
+Current production URL:
+
+```text
+https://kids-english-trainer.vercel.app
+```
+
+Before testing auth on production, complete [SUPABASE_REDIRECT_TODO.md](SUPABASE_REDIRECT_TODO.md).
+
 Detailed guides:
 
 - [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 - [SUPABASE_PRODUCTION_CHECKLIST.md](SUPABASE_PRODUCTION_CHECKLIST.md)
 - [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md)
 - [PWA_INSTALL_GUIDE.md](PWA_INSTALL_GUIDE.md)
+- [SUPABASE_REDIRECT_TODO.md](SUPABASE_REDIRECT_TODO.md)
 
 Short path:
 
