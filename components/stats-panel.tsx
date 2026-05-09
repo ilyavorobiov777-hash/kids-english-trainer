@@ -20,12 +20,15 @@ function dateKey(value: string | Date) {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-function calculateStreak(sessions: PracticeSession[]) {
-  const practicedDates = new Set(sessions.map((session) => dateKey(session.started_at)));
+function isCompletedSession(session: PracticeSession) {
+  return Boolean(session.finished_at) && session.total_attempts > 0;
+}
+
+function calculateStreak(completedSessions: PracticeSession[]) {
+  const practicedDates = new Set(completedSessions.map((session) => dateKey(session.finished_at ?? session.started_at)));
   if (!practicedDates.size) return 0;
 
-  const today = new Date();
-  let cursor = new Date(today);
+  const cursor = new Date();
   let streak = 0;
 
   if (!practicedDates.has(dateKey(cursor))) {
@@ -38,6 +41,21 @@ function calculateStreak(sessions: PracticeSession[]) {
   }
 
   return streak;
+}
+
+function formatStreak(streak: number) {
+  if (streak <= 0) return "Пока нет серии";
+  const word = streak === 1 ? "день" : streak >= 2 && streak <= 4 ? "дня" : "дней";
+  return `${streak} ${word} подряд`;
+}
+
+function cardLabel(card: Card | undefined) {
+  if (!card) return "Карточка не найдена";
+  return `${card.english} - ${card.russian}`;
+}
+
+function grammarLabel(grammar: GrammarPattern | undefined) {
+  return grammar?.title_ru || grammar?.title || "Грамматика не найдена";
 }
 
 export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
@@ -83,6 +101,8 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
   }, [family, supabase]);
 
   const stats = useMemo(() => {
+    const completedSessions = sessions.filter(isCompletedSession);
+    const lastCompletedSession = completedSessions[0];
     const correct = attempts.filter((item) => item.is_correct).length;
     const incorrect = attempts.length - correct;
     const byType = attempts.reduce<Record<string, PracticeAttempt[]>>((acc, attempt) => {
@@ -90,17 +110,19 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       acc[attempt.exercise_type].push(attempt);
       return acc;
     }, {});
-    const byCard = attempts.reduce<Record<string, { total: number; wrong: number }>>((acc, attempt) => {
+    const byCard = attempts.reduce<Record<string, { total: number; wrong: number; attempts: PracticeAttempt[] }>>((acc, attempt) => {
       if (!attempt.card_id) return acc;
-      acc[attempt.card_id] ??= { total: 0, wrong: 0 };
+      acc[attempt.card_id] ??= { total: 0, wrong: 0, attempts: [] };
       acc[attempt.card_id].total += 1;
+      acc[attempt.card_id].attempts.push(attempt);
       if (!attempt.is_correct) acc[attempt.card_id].wrong += 1;
       return acc;
     }, {});
-    const byGrammar = attempts.reduce<Record<string, { total: number; wrong: number }>>((acc, attempt) => {
+    const byGrammar = attempts.reduce<Record<string, { total: number; wrong: number; attempts: PracticeAttempt[] }>>((acc, attempt) => {
       if (!attempt.grammar_pattern_id) return acc;
-      acc[attempt.grammar_pattern_id] ??= { total: 0, wrong: 0 };
+      acc[attempt.grammar_pattern_id] ??= { total: 0, wrong: 0, attempts: [] };
       acc[attempt.grammar_pattern_id].total += 1;
+      acc[attempt.grammar_pattern_id].attempts.push(attempt);
       if (!attempt.is_correct) acc[attempt.grammar_pattern_id].wrong += 1;
       return acc;
     }, {});
@@ -110,20 +132,36 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       .sort((a, b) => b.rate - a.rate)
       .slice(0, 5);
     const weakestGrammar = Object.entries(byGrammar)
-      .map(([grammarId, value]) => ({
-        grammar: grammarPatterns.find((item) => item.id === grammarId),
-        ...value,
-        rate: value.wrong / value.total
-      }))
+      .map(([grammarId, value]) => {
+        const incorrectAttempts = value.attempts.filter((attempt) => !attempt.is_correct);
+        const lastMistake = incorrectAttempts[0];
+        return {
+          grammar: grammarPatterns.find((item) => item.id === grammarId),
+          ...value,
+          lastMistake,
+          rate: value.wrong / value.total
+        };
+      })
       .filter((item) => item.grammar && item.wrong > 0)
       .sort((a, b) => b.rate - a.rate)
       .slice(0, 5);
-    return { correct, incorrect, accuracy: accuracy(attempts), byType, weakestCards, weakestGrammar };
-  }, [attempts, cards, grammarPatterns]);
+    const recentMistakes = attempts.filter((attempt) => !attempt.is_correct).slice(0, 10);
 
-  const lastSession = sessions[0];
+    return {
+      completedSessions,
+      lastCompletedSession,
+      correct,
+      incorrect,
+      accuracy: accuracy(attempts),
+      byType,
+      weakestCards,
+      weakestGrammar,
+      recentMistakes
+    };
+  }, [attempts, cards, grammarPatterns, sessions]);
+
   const dueToday = reviewSchedule.filter((item) => new Date(item.due_at).getTime() <= Date.now());
-  const streak = calculateStreak(sessions);
+  const streak = calculateStreak(stats.completedSessions);
 
   return (
     <AuthRequired loading={loading} error={error}>
@@ -133,32 +171,54 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
         <>
           <PageHeader
             title={detailed ? "Прогресс" : "Дашборд родителя"}
-            subtitle="Статистика считается из реальных practice_attempts, practice_sessions и review_schedule."
+            subtitle="Статистика считается из реальных ответов ребенка. Пустые и незавершенные сессии не считаются завершенными занятиями."
           />
           <div className="grid gap-4 md:grid-cols-5">
-            <Panel><p className="text-sm text-slate-500">Занятий</p><p className="text-3xl font-bold">{sessions.length}</p></Panel>
-            <Panel><p className="text-sm text-slate-500">Попыток</p><p className="text-3xl font-bold">{attempts.length}</p></Panel>
-            <Panel><p className="text-sm text-slate-500">Верно</p><p className="text-3xl font-bold">{stats.correct}</p></Panel>
-            <Panel><p className="text-sm text-slate-500">Accuracy</p><p className="text-3xl font-bold">{formatPercent(stats.accuracy)}</p></Panel>
-            <Panel><p className="text-sm text-slate-500">Streak</p><p className="text-3xl font-bold">{streak}</p></Panel>
+            <Panel>
+              <p className="text-sm text-slate-500">Завершенных занятий</p>
+              <p className="text-3xl font-bold">{stats.completedSessions.length}</p>
+              <p className="mt-1 text-xs text-slate-500">Только занятия с финалом и заданиями</p>
+            </Panel>
+            <Panel>
+              <p className="text-sm text-slate-500">Всего попыток</p>
+              <p className="text-3xl font-bold">{attempts.length}</p>
+              <p className="mt-1 text-xs text-slate-500">Все ответы ребенка за все занятия</p>
+            </Panel>
+            <Panel>
+              <p className="text-sm text-slate-500">Заданий в последнем</p>
+              <p className="text-3xl font-bold">{stats.lastCompletedSession?.total_attempts ?? 0}</p>
+              <p className="mt-1 text-xs text-slate-500">Только последнее завершенное занятие</p>
+            </Panel>
+            <Panel>
+              <p className="text-sm text-slate-500">Общая точность</p>
+              <p className="text-3xl font-bold">{formatPercent(stats.accuracy)}</p>
+              <p className="mt-1 text-xs text-slate-500">По всем сохраненным ответам</p>
+            </Panel>
+            <Panel>
+              <p className="text-sm text-slate-500">Серия занятий</p>
+              <p className="text-2xl font-bold">{formatStreak(streak)}</p>
+              <p className="mt-1 text-xs text-slate-500">Дни подряд с завершенным занятием</p>
+            </Panel>
           </div>
+
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
             <Panel>
-              <h2 className="mb-3 text-lg font-bold">Последнее занятие</h2>
-              {lastSession ? (
+              <h2 className="mb-3 text-lg font-bold">Последнее завершенное занятие</h2>
+              {stats.lastCompletedSession ? (
                 <div className="grid gap-2 text-sm">
-                  <p>Начато: {new Date(lastSession.started_at).toLocaleString("ru-RU")}</p>
-                  <p>Попыток: {lastSession.total_attempts}</p>
-                  <p>Ошибок: {lastSession.incorrect_attempts}</p>
-                  <p>Accuracy: {formatPercent(lastSession.accuracy)}</p>
-                  <p>Звезд: {lastSession.stars_earned}</p>
+                  <p>Дата и время: {new Date(stats.lastCompletedSession.finished_at ?? stats.lastCompletedSession.started_at).toLocaleString("ru-RU")}</p>
+                  <p>Заданий: {stats.lastCompletedSession.total_attempts}</p>
+                  <p>Верно: {stats.lastCompletedSession.correct_attempts}</p>
+                  <p>Ошибок: {stats.lastCompletedSession.incorrect_attempts}</p>
+                  <p>Accuracy: {formatPercent(stats.lastCompletedSession.accuracy)}</p>
+                  <p>Звезд: {stats.lastCompletedSession.stars_earned}</p>
                 </div>
               ) : (
-                <p className="text-slate-500">Занятий пока нет. Начните с детской тренировки.</p>
+                <p className="text-slate-500">Завершенных занятий пока нет. Пройдите тренировку в детском режиме.</p>
               )}
             </Panel>
             <Panel>
-              <h2 className="mb-3 text-lg font-bold">Accuracy по типам</h2>
+              <h2 className="mb-3 text-lg font-bold">Accuracy по типам упражнений</h2>
               {Object.keys(stats.byType).length ? (
                 <div className="grid gap-2">
                   {Object.entries(stats.byType).map(([type, typeAttempts]) => (
@@ -173,6 +233,7 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
               )}
             </Panel>
           </div>
+
           <div className="mt-5 grid gap-5 lg:grid-cols-3">
             <Panel>
               <h2 className="mb-3 text-lg font-bold">Слабые карточки</h2>
@@ -192,12 +253,26 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
             <Panel>
               <h2 className="mb-3 text-lg font-bold">Слабая грамматика</h2>
               {stats.weakestGrammar.length ? (
-                stats.weakestGrammar.map((item) => (
-                  <div key={item.grammar?.id} className="rounded-lg bg-slate-50 p-3">
-                    <b>{item.grammar?.title_ru || item.grammar?.title}</b>
-                    <p className="text-sm text-slate-500">Ошибок: {item.wrong} из {item.total}</p>
-                  </div>
-                ))
+                <div className="grid gap-3">
+                  {stats.weakestGrammar.map((item) => (
+                    <div key={item.grammar?.id} className="rounded-lg bg-slate-50 p-3">
+                      <b>{grammarLabel(item.grammar)}</b>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Точность: {formatPercent(100 - item.rate * 100)} ({item.total - item.wrong}/{item.total})
+                      </p>
+                      {item.lastMistake ? (
+                        <div className="mt-2 rounded-lg bg-white p-3 text-sm">
+                          <p className="font-semibold">Последняя ошибка</p>
+                          <p>Упражнение: {item.lastMistake.exercise_type}</p>
+                          <p>Ответ ребенка: {item.lastMistake.answer || "нет ответа"}</p>
+                          <p>Правильно: {item.lastMistake.correct_answer || "нет данных"}</p>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-slate-500">Есть ошибка. Посмотрите последние попытки.</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p className="text-slate-500">Ошибок по грамматике пока нет.</p>
               )}
@@ -207,33 +282,78 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
               {dueToday.length ? (
                 dueToday.slice(0, 6).map((item) => {
                   const card = cards.find((candidate) => candidate.id === item.card_id);
-                  return <p key={item.id} className="border-b border-slate-100 py-2">{card ? `${card.english} - ${card.russian}` : item.card_id}</p>;
+                  return <p key={item.id} className="border-b border-slate-100 py-2">{card ? cardLabel(card) : item.card_id}</p>;
                 })
               ) : (
                 <p className="text-slate-500">На сегодня повторений нет.</p>
               )}
             </Panel>
           </div>
+
           {detailed ? (
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
-              <Panel>
-                <h2 className="mb-3 text-lg font-bold">Фокусные тренажеры</h2>
-                <div className="grid gap-2 text-sm">
-                  <p>Articles accuracy: {formatPercent(accuracy(stats.byType.articles ?? []))}</p>
-                  <p>Question forms accuracy: {formatPercent(accuracy(stats.byType.question_form ?? []))}</p>
-                  <p>Short answers accuracy: {formatPercent(accuracy(stats.byType.short_answer ?? []))}</p>
-                  <p>Last practice date: {lastSession ? new Date(lastSession.started_at).toLocaleDateString("ru-RU") : "нет данных"}</p>
-                </div>
+            <>
+              <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                <Panel>
+                  <h2 className="mb-3 text-lg font-bold">Фокусные тренажеры</h2>
+                  <div className="grid gap-2 text-sm">
+                    <p>Articles accuracy: {formatPercent(accuracy(stats.byType.articles ?? []))}</p>
+                    <p>Question forms accuracy: {formatPercent(accuracy(stats.byType.question_form ?? []))}</p>
+                    <p>Short answers accuracy: {formatPercent(accuracy(stats.byType.short_answer ?? []))}</p>
+                    <p>
+                      Last completed practice:{" "}
+                      {stats.lastCompletedSession
+                        ? new Date(stats.lastCompletedSession.finished_at ?? stats.lastCompletedSession.started_at).toLocaleDateString("ru-RU")
+                        : "нет данных"}
+                    </p>
+                  </div>
+                </Panel>
+                <Panel>
+                  <h2 className="mb-3 text-lg font-bold">Быстрые действия</h2>
+                  <div className="flex flex-wrap gap-2">
+                    <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/parent/cards">Добавить карточки</Link>
+                    <Link className="rounded-lg bg-mint px-4 py-3 font-semibold" href="/parent/import">Импорт CSV</Link>
+                    <Link className="rounded-lg bg-berry px-4 py-3 font-semibold text-white" href="/child/practice">Открыть тренировку</Link>
+                  </div>
+                </Panel>
+              </div>
+              <Panel className="mt-5">
+                <h2 className="mb-3 text-lg font-bold">Последние ошибки</h2>
+                {stats.recentMistakes.length ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[760px] text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-500">
+                          <th className="py-2 pr-3">Дата</th>
+                          <th className="py-2 pr-3">Тип</th>
+                          <th className="py-2 pr-3">Материал</th>
+                          <th className="py-2 pr-3">Вопрос / English</th>
+                          <th className="py-2 pr-3">Ответ ребенка</th>
+                          <th className="py-2 pr-3">Правильно</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stats.recentMistakes.map((attempt) => {
+                          const card = cards.find((item) => item.id === attempt.card_id);
+                          const grammar = grammarPatterns.find((item) => item.id === attempt.grammar_pattern_id);
+                          return (
+                            <tr className="border-b border-slate-100" key={attempt.id}>
+                              <td className="py-3 pr-3">{new Date(attempt.created_at).toLocaleString("ru-RU")}</td>
+                              <td className="py-3 pr-3">{attempt.exercise_type}</td>
+                              <td className="py-3 pr-3">{card ? "Карточка" : grammar ? "Грамматика" : "Упражнение"}</td>
+                              <td className="py-3 pr-3">{card ? card.english : grammarLabel(grammar)}</td>
+                              <td className="py-3 pr-3">{attempt.answer || "нет ответа"}</td>
+                              <td className="py-3 pr-3">{attempt.correct_answer || "нет данных"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-slate-500">Ошибок пока нет.</p>
+                )}
               </Panel>
-              <Panel>
-                <h2 className="mb-3 text-lg font-bold">Быстрые действия</h2>
-                <div className="flex flex-wrap gap-2">
-                  <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/parent/cards">Добавить карточки</Link>
-                  <Link className="rounded-lg bg-mint px-4 py-3 font-semibold" href="/parent/import">Импорт CSV</Link>
-                  <Link className="rounded-lg bg-berry px-4 py-3 font-semibold text-white" href="/child/practice">Открыть тренировку</Link>
-                </div>
-              </Panel>
-            </div>
+            </>
           ) : null}
         </>
       )}

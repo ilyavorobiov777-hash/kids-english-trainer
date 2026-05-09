@@ -154,3 +154,34 @@ Critical errors:
 - Practice session starts but attempts are not saved.
 - Review schedule is not updated after card attempts.
 - Child practice shows empty or impossible exercises.
+
+## 10. Statistics During Development
+
+During development, parent statistics can include older Codex/API test sessions and attempts. This is normal if the same parent/child profile was used for several smoke tests.
+
+The dashboard now counts completed sessions only when:
+
+- `finished_at` is not empty;
+- `total_attempts > 0`.
+
+Empty sessions and unfinished sessions do not count as completed lessons and do not affect the lesson streak.
+
+`Всего попыток` means all saved answers for the family. `Заданий в последнем занятии` means only the latest completed session.
+
+## 11. How To Check With A Clean Child
+
+Use this when you want a clean statistics check without old test attempts:
+
+1. Open `/parent/children`.
+2. Create a new child profile, for example `QA Child`.
+3. Open `/parent/import`.
+4. Make sure Starter 350 is available. Re-running it is safe and should not create duplicates.
+5. Open `/child/select`.
+6. Select the new child.
+7. Open `/child/practice`.
+8. Complete exactly one full session.
+9. Open `/parent/dashboard`.
+10. Check that `Завершенных занятий` increased by 1 for this new child's attempts in the family data.
+11. Check that `Последнее завершенное занятие` shows the same number of tasks as the completed practice summary.
+12. Open `/parent/progress`.
+13. Check `Последние ошибки` if you intentionally made mistakes.
