@@ -26,7 +26,7 @@ copy .env.example .env.local
 npm run dev
 ```
 
-If `npm` is not recognized after installing Node.js, close PowerShell and open a new window. This project expects `C:\Program Files\nodejs` in PATH. If PowerShell blocks `npm.ps1`, run the same commands through `npm.cmd`, for example `npm.cmd install` and `npm.cmd run dev`.
+If `npm` is not recognized after installing Node.js, close PowerShell and open a new window. This project expects `C:\Program Files\nodejs` in PATH. If PowerShell blocks `npm.ps1`, either run `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once, or run the same commands through `npm.cmd`, for example `npm.cmd install` and `npm.cmd run dev`.
 
 Then open `http://localhost:3000`.
 

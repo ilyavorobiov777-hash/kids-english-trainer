@@ -29,6 +29,12 @@ If PowerShell says `npm.ps1 cannot be loaded because running scripts is disabled
 npm.cmd install
 ```
 
+Or allow local signed scripts for the current Windows user:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
 If `npm` is not recognized, close PowerShell and open a new window after installing Node.js. The expected PATH entry is:
 
 ```text
