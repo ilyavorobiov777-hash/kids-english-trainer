@@ -63,7 +63,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 - `npm`, `pnpm`, and `yarn` are not available in PATH.
 - A separate bundled Node executable exists and can print a version, but it does not provide npm. This is not a suitable substitute for normal project setup.
 - Because npm is unavailable, dependency installation, TypeScript, lint, build, and dev server checks could not be executed in this environment.
-- `.git` is not present in `D:\Projects\kids-english-trainer`. No git init or remote changes were made automatically.
+- `.git` has been initialized in `D:\Projects\kids-english-trainer`.
+- Local branch: `main`.
+- Remote: `origin` -> `https://github.com/ilyavorobiov777-hash/kids-english-trainer.git`.
+- Initial local commit exists: `514d78e Initial MVP foundation`.
+- Push was not completed because local GitHub credentials are not available to command-line Git. HTTPS push waits for Git Credential Manager authentication; SSH key `id_ed25519` is present locally but GitHub rejects it with `Permission denied (publickey)`.
 
 ## Supabase Readiness
 
@@ -90,7 +94,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 4. Run `npm run build`.
 5. Apply Supabase migration and seed SQL.
 6. Complete the smoke test checklist.
-7. Initialize/push Git only after confirming the local folder is the desired repository root.
+7. Authenticate command-line GitHub access, then run `git push -u origin main`.
 
 ## Not Included In This Stabilization Step
 
