@@ -113,6 +113,58 @@ select public.seed_demo_content();
 
 Seed content includes 30 words, 10 phrases, and 5 grammar patterns, including `have got`, `can`, `like`, `would like`, and `articles a / an / the`.
 
+## Starter 350 Content Pack
+
+The larger starter base is generated from:
+
+```text
+scripts/learning-content-data.mjs
+```
+
+Generate the SQL seed and report:
+
+```powershell
+npm run content:report
+```
+
+This writes:
+
+```text
+supabase/seed_350_learning_content.sql
+CONTENT_SEED_REPORT.md
+```
+
+Apply the function to Supabase:
+
+```powershell
+npx supabase db query --linked -f supabase/seed_350_learning_content.sql
+```
+
+Then sign in as a parent and either click **Add Starter 350** on `/parent/import`, or run:
+
+```sql
+select public.seed_starter_learning_content();
+```
+
+The pack currently contains 467 cards plus 20 grammar pattern rows:
+
+- 300 words and classroom/routine lexical units
+- 74 phrases
+- 45 simple sentences
+- 20 grammar pattern cards
+- 20 mini dialogue cards
+- 8 mini stories
+
+Topics include greetings, family, school, classroom objects, classroom language, colours, numbers, toys, animals, food and drinks, body, clothes, house and rooms, weather, days of the week, actions, hobbies, feelings, places, simple questions, school routine, time and daily routine, and polite requests.
+
+The seed is idempotent. It uses a stable course/source pair (`Starter 350 Pre-A1` / `Starter 350 generated seed`) and checks existing cards by `family_id + course_id + source_id + english + type`. Re-running it updates grammar templates and does not duplicate cards.
+
+Check counts:
+
+```powershell
+npm run content:report
+```
+
 ## Main User Flow
 
 1. Open `/login`.
