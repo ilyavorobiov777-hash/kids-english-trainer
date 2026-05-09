@@ -433,7 +433,9 @@ git status
 
 ## Deployment
 
-Production deploy is prepared for Vercel. Detailed guides:
+Production deploy is prepared for Vercel so the app can work from a tablet, iPhone, or Windows laptop while the local computer is off.
+
+Detailed guides:
 
 - [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
 - [SUPABASE_PRODUCTION_CHECKLIST.md](SUPABASE_PRODUCTION_CHECKLIST.md)
@@ -477,8 +479,9 @@ http://localhost:3000/**
 ```
 
 8. Run the production smoke test from [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md).
+9. Install the PWA on Android/iPhone/Windows using [PWA_INSTALL_GUIDE.md](PWA_INSTALL_GUIDE.md).
 
-Do not add a Supabase `service_role` key to Vercel frontend environment variables.
+Do not add a Supabase `service_role` key to Vercel frontend environment variables. Do not upload `.env.local` to Vercel. Create your own parent user in production; do not publish test email/password pairs.
 
 ## Next Stage
 

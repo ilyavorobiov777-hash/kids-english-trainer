@@ -1,26 +1,19 @@
 # PWA Install Guide
 
-The app works from a tablet or phone only after it is deployed to a public HTTPS URL, for example on Vercel.
+The app can be installed on phones, tablets and Windows after it is deployed to a public HTTPS URL, for example Vercel.
 
-Local `localhost` works only on the computer where `npm run dev` is running. If that computer is off, a phone or tablet cannot open the local app.
+Local `localhost` works only while the Windows computer is turned on and the dev server is running. After Vercel deploy, the tablet/iPhone/Windows laptop can open the app from the production URL even when the local computer is off.
 
 ## Android Tablet
 
 Use Chrome or Yandex Browser:
 
 1. Open the Vercel production URL.
-2. Wait until the page loads.
+2. Wait until the app loads.
 3. Open the browser menu.
 4. Tap `Install app` or `Add to Home screen`.
-5. Confirm the install.
+5. Confirm install.
 6. Open `Kids English Trainer` from the home screen.
-
-If the install option does not appear:
-
-- refresh the page;
-- check that the URL starts with `https://`;
-- check that you are not using `localhost`;
-- open the site in Chrome if another browser hides PWA install.
 
 ## iPhone / iPad
 
@@ -29,37 +22,37 @@ Use Safari:
 1. Open the Vercel production URL in Safari.
 2. Tap the Share button.
 3. Tap `Add to Home Screen`.
-4. Confirm the name.
-5. Open the app icon from the home screen.
+4. Confirm the app name.
+5. Open the app from the home screen.
 
-Notes:
+iPhone installs PWAs through Safari. Chrome on iPhone cannot install the app in the same way.
 
-- iPhone uses Safari for PWA install.
-- SpeechSynthesis usually needs the child to tap `Listen`; autoplay speech is not expected.
+## Windows
 
-## Windows Laptop
-
-Use Chrome, Edge, or Yandex Browser:
+Use Yandex Browser, Chrome, or Edge:
 
 1. Open the Vercel production URL.
 2. Look for the install icon in the address bar.
 3. If there is no icon, open the browser menu.
-4. Choose `Install app` or `Apps` -> `Install this site as an app`.
-5. Pin the app to taskbar or Start menu if useful.
+4. Choose `Install app`, `Apps`, or `Install this site as an app`.
+5. Pin the app to Start or taskbar if useful.
 
-## What Works Offline
+## Data And Offline Notes
 
-The PWA shell and cached static files may open after first load, depending on browser cache and service worker state.
+- Lesson history is saved through Supabase.
+- Cards, texts, attempts and statistics need internet for full sync.
+- Full offline learning mode is not implemented yet.
+- The PWA shell/static files may open from browser cache after first load, but login and progress sync require network.
+- Browser SpeechSynthesis can sound different on Windows, Android and iPhone.
+- Mobile browsers may require the child to tap `Listen` before speech starts.
 
-Learning history, login, cards, and statistics depend on Supabase and require internet. For real practice syncing, keep the device online.
+## If Install Option Does Not Appear
 
-## What Requires Vercel
+Check:
 
-Use the Vercel production URL for:
-
-- tablet access while the computer is off;
-- iPhone access outside the local network;
-- PWA install over HTTPS;
-- production Supabase Auth redirects.
-
-Use `localhost` only for development on the Windows computer.
+- URL starts with `https://`;
+- `/manifest.webmanifest` loads;
+- `public/sw.js` exists in the deployed app;
+- icons exist in `public/icons`;
+- browser supports PWA install;
+- you are not opening another computer's `localhost`.
