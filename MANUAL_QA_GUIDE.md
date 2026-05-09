@@ -73,10 +73,14 @@ Critical errors:
 
 ## 6. Pass Child Practice
 
-1. Open `/child/select`.
-2. Select the child profile.
-3. Open `/child/practice`.
-4. Complete the short session.
+1. Open `/parent/dashboard`.
+2. Click `Перейти к занятию ребенка`, or use the top menu item `Детский режим`.
+3. Confirm `/child/select` opens without typing a direct URL.
+4. You can also open `/parent/children` and click `Начать занятие` near a child profile.
+5. Open `/child/select`.
+6. Select the child profile.
+7. Open `/child/practice`.
+8. Complete the short session.
 
 Check these exercise types when they appear:
 
@@ -100,6 +104,9 @@ Expected:
 - wrong answer shows the correct answer;
 - articles show a short Russian explanation;
 - final summary shows completed tasks, correct answers, and stars.
+- if mistakes were made, final summary shows exercise type, prompt, child answer, correct answer, and Russian explanation;
+- `Повторить ошибки` starts a short retry session from current-session mistakes;
+- `Повторить это задание` repeats one missed task.
 
 Critical errors:
 
@@ -185,3 +192,33 @@ Use this when you want a clean statistics check without old test attempts:
 11. Check that `Последнее завершенное занятие` shows the same number of tasks as the completed practice summary.
 12. Open `/parent/progress`.
 13. Check `Последние ошибки` if you intentionally made mistakes.
+
+## 12. Child Profile Management
+
+Archive a child:
+
+1. Open `/parent/children`.
+2. Click `Архивировать` near a child.
+3. Open `/child/select`.
+4. Confirm the archived child is not shown.
+5. Confirm the child appears in `Архивные профили` on `/parent/children`.
+
+Restore a child:
+
+1. Open `/parent/children`.
+2. Find `Архивные профили`.
+3. Click `Восстановить`.
+4. Open `/child/select`.
+5. Confirm the child is available again.
+
+Reset child statistics:
+
+1. Open `/parent/children`.
+2. Click `Обнулить статистику` near one child.
+3. Read the confirmation text.
+4. Type `RESET`.
+5. Confirm reset.
+6. Open `/parent/dashboard` and `/parent/progress`.
+7. Confirm progress data for that child no longer affects attempts, sessions, streak, weak cards, or recent mistakes.
+
+Reset must not delete cards, courses, Starter 350, or another child's data.

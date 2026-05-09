@@ -173,17 +173,18 @@ npm run content:report
 2. Sign up as a parent with email/password.
 3. Open `/parent/children` and create a child profile.
 4. Open `/parent/import` and add seed data, import CSV, or add cards manually on `/parent/cards`.
-5. Open `/child/select` and choose the child profile.
-6. Open `/child/practice`.
-7. Use `Listen` or `Listen slowly`.
-8. Complete the mixed daily practice.
-9. Open `/parent/dashboard` or `/parent/progress` to see saved stats.
+5. Click `Детский режим` in the top menu or `Перейти к занятию ребенка` on the parent dashboard.
+6. Choose the child profile on `/child/select`.
+7. Open `/child/practice`.
+8. Use `Listen` or `Listen slowly`.
+9. Complete the mixed daily practice.
+10. Open `/parent/dashboard` or `/parent/progress` to see saved stats.
 
 ## Pages
 
 - `/login` - parent login and signup
 - `/parent/dashboard` - parent stats
-- `/parent/children` - child profile creation
+- `/parent/children` - child profile creation, archive/restore, reset child statistics, start practice
 - `/parent/courses` - basic course creation
 - `/parent/cards` - card list, add, edit, archive, filters
 - `/parent/import` - CSV preview import and seed data import
@@ -243,6 +244,19 @@ The child practice flow can build a short mixed session from cards, review sched
 - one mini-dialogue when data is available
 
 If the family has little content, the builder uses what exists and still opens without crashing.
+
+After a session, the child sees a summary with completed tasks, correct answers, mistakes, stars, and a detailed mistake review. Mistakes include the exercise type, prompt, child answer, correct answer, and a short Russian explanation. The child can repeat all mistakes or repeat a single missed task.
+
+## Child Management
+
+Parents can manage child profiles on `/parent/children`:
+
+- `Начать занятие` selects the child and opens `/child/practice`.
+- `Архивировать` hides the child from `/child/select` without deleting learning history.
+- `Восстановить` returns an archived child to active selection.
+- `Обнулить статистику` deletes only that child's progress data: `practice_attempts`, `practice_sessions`, `review_schedule`, and `rewards`.
+
+Reset does not delete cards, courses, Starter 350, or other children. It requires typing `RESET`.
 
 ## Question Forms Trainer
 

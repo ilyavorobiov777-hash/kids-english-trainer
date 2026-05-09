@@ -69,6 +69,11 @@ Date: 2026-05-09
 
 - Full parent login in the browser with the real Supabase session.
 - Clicking `Добавить Starter 350` twice and confirming the second run shows `added 0`.
+- Parent dashboard button `Перейти к занятию ребенка` opens `/child/select`.
+- `/parent/children` button `Начать занятие` selects a child and opens practice.
+- Child archive hides the child from `/child/select`; restore shows the child again.
+- `Обнулить статистику` removes only the selected child's progress data after `RESET`.
 - Visual layout on iPhone width, Android tablet width, and Windows laptop width.
 - Browser SpeechSynthesis voice availability in Chrome, Yandex Browser, Safari, and Edge.
 - A full child practice run by clicking through all exercise types.
+- End-of-session mistake review shows explanations and repeat buttons.

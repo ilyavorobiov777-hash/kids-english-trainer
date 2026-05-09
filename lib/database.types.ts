@@ -49,6 +49,9 @@ export type Child = {
   name: string;
   avatar_color: string;
   birth_year: number | null;
+  status?: "active" | "archived";
+  archived_at?: string | null;
+  archived_by?: string | null;
   created_at: string;
   updated_at: string;
 };

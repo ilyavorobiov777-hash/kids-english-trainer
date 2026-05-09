@@ -3,17 +3,28 @@
 import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { Button, PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
-import type { Card, GrammarPattern, PracticeAttempt, PracticeSession, ReviewSchedule } from "@/lib/database.types";
+import type { Card, Child, GrammarPattern, PracticeAttempt, PracticeSession, ReviewSchedule } from "@/lib/database.types";
+import { explainAnswer } from "@/lib/practice/explanations";
 import { buildDailyPractice, isCorrectAnswer, nextReviewState, type PracticeExercise } from "@/lib/practice/exercises";
 import { speakEnglish } from "@/lib/speech";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+type MistakeReview = {
+  exercise: PracticeExercise;
+  answer: string;
+  correctAnswer: string;
+  explanationRu: string;
+};
 
 const positiveFeedback = ["Отлично!", "Здорово!", "Так держать!"];
 const retryFeedback = ["Почти! Давай еще раз", "Хорошая попытка", "Не страшно, повторим"];
 
 export function PracticeFlow() {
   const { supabase, family, loading, error } = useFamily();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [childId, setChildId] = useState<string | null>(null);
   const [childName, setChildName] = useState<string | null>(null);
   const [session, setSession] = useState<PracticeSession | null>(null);
@@ -29,16 +40,50 @@ export function PracticeFlow() {
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [usedWordIndexes, setUsedWordIndexes] = useState<number[]>([]);
   const [completed, setCompleted] = useState(false);
+  const [mistakes, setMistakes] = useState<MistakeReview[]>([]);
 
   useEffect(() => {
-    setChildId(window.localStorage.getItem("selected_child_id"));
-    setChildName(window.localStorage.getItem("selected_child_name"));
-  }, []);
+    const queryChildId = searchParams.get("childId");
+    const selectedChildId = queryChildId || window.localStorage.getItem("selected_child_id");
+    const selectedChildName = window.localStorage.getItem("selected_child_name");
+
+    if (selectedChildId) {
+      setChildId(selectedChildId);
+      if (queryChildId) window.localStorage.setItem("selected_child_id", queryChildId);
+    }
+    if (selectedChildName) setChildName(selectedChildName);
+  }, [searchParams]);
+
+  const beginSession = useCallback(
+    async (nextExercises: PracticeExercise[], nextChildId: string, keepMistakes = false) => {
+      if (!family) return;
+      const { data: newSession } = await supabase
+        .from("practice_sessions")
+        .insert({ family_id: family.familyId, child_id: nextChildId })
+        .select()
+        .single();
+
+      setSession(newSession as PracticeSession);
+      setExercises(nextExercises);
+      setIndex(0);
+      setStats({ total: 0, correct: 0 });
+      setFeedback(null);
+      setLastCorrect(null);
+      setSpeechMessage(null);
+      setSelectedWords([]);
+      setUsedWordIndexes([]);
+      setCompleted(false);
+      if (!keepMistakes) setMistakes([]);
+      setStartedAt(Date.now());
+    },
+    [family, supabase]
+  );
 
   useEffect(() => {
     async function load() {
       if (!family || !childId) return;
-      const [cardsRes, attemptsRes, scheduleRes, grammarRes] = await Promise.all([
+      const [childRes, cardsRes, attemptsRes, scheduleRes, grammarRes] = await Promise.all([
+        supabase.from("children").select("*").eq("family_id", family.familyId).eq("id", childId).maybeSingle(),
         supabase.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
         supabase
           .from("practice_attempts")
@@ -51,23 +96,21 @@ export function PracticeFlow() {
         supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId)
       ]);
 
+      const child = childRes.data as Child | null;
+      if (child?.name) {
+        setChildName(child.name);
+        window.localStorage.setItem("selected_child_name", child.name);
+      }
+
       const cards = (cardsRes.data ?? []) as Card[];
       const attempts = (attemptsRes.data ?? []) as PracticeAttempt[];
       const reviewSchedules = (scheduleRes.data ?? []) as ReviewSchedule[];
       const grammarPatterns = (grammarRes.data ?? []) as GrammarPattern[];
       setSchedules(reviewSchedules);
-      setExercises(buildDailyPractice({ cards, attempts, schedules: reviewSchedules, grammarPatterns }));
-
-      const { data: newSession } = await supabase
-        .from("practice_sessions")
-        .insert({ family_id: family.familyId, child_id: childId })
-        .select()
-        .single();
-      setSession(newSession as PracticeSession);
-      setStartedAt(Date.now());
+      await beginSession(buildDailyPractice({ cards, attempts, schedules: reviewSchedules, grammarPatterns }), childId);
     }
     void load();
-  }, [family, childId, supabase]);
+  }, [beginSession, childId, family, supabase]);
 
   const current = exercises[index];
   const finished = exercises.length > 0 && index >= exercises.length;
@@ -113,9 +156,9 @@ export function PracticeFlow() {
     return names[current.type] ?? "Тренировка";
   }, [current]);
 
-  function listen(customRate = rate) {
-    if (!current?.listenText) return;
-    const result = speakEnglish(current.listenText, customRate);
+  function listen(customRate = rate, text = current?.listenText) {
+    if (!text) return;
+    const result = speakEnglish(text, customRate);
     setSpeechMessage(result.message ?? null);
   }
 
@@ -128,6 +171,18 @@ export function PracticeFlow() {
     setStats(nextStats);
     setLastCorrect(isCorrect);
     setFeedback(isCorrect ? positiveFeedback[nextStats.correct % positiveFeedback.length] : retryFeedback[nextStats.total % retryFeedback.length]);
+
+    if (!isCorrect) {
+      setMistakes((currentMistakes) => [
+        ...currentMistakes,
+        {
+          exercise: current,
+          answer,
+          correctAnswer: current.correctAnswer,
+          explanationRu: explainAnswer(current)
+        }
+      ]);
+    }
 
     await supabase.from("practice_attempts").insert({
       family_id: family.familyId,
@@ -192,6 +247,20 @@ export function PracticeFlow() {
     setUsedWordIndexes([]);
   }
 
+  async function repeatMistakes() {
+    if (!childId || !mistakes.length) return;
+    const retryExercises = mistakes.map((mistake, mistakeIndex) => ({
+      ...mistake.exercise,
+      id: `repeat:${mistakeIndex}:${mistake.exercise.id}`
+    }));
+    await beginSession(retryExercises, childId);
+  }
+
+  async function repeatSingleMistake(mistake: MistakeReview, mistakeIndex: number) {
+    if (!childId) return;
+    await beginSession([{ ...mistake.exercise, id: `repeat-one:${mistakeIndex}:${mistake.exercise.id}` }], childId);
+  }
+
   const isChoiceExerciseBroken =
     current && current.type !== "build_sentence" && (!current.options.length || current.options.length < 2);
   const sentenceReady = current?.type === "build_sentence" && selectedWords.length === (current.words?.length ?? 0);
@@ -202,7 +271,7 @@ export function PracticeFlow() {
         <NeedLogin />
       ) : !childId ? (
         <Panel>
-          <p className="mb-4 font-medium">Сначала выбери детский профиль.</p>
+          <p className="mb-4 font-medium">Сначала выберите детский профиль.</p>
           <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/child/select">
             Выбрать профиль
           </Link>
@@ -218,17 +287,65 @@ export function PracticeFlow() {
               Активных карточек пока нет. Родитель может добавить карточки, импортировать CSV или загрузить Starter 350.
             </Panel>
           ) : finished ? (
-            <Panel className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold">Готово!</h2>
-              <p className="mt-3 text-xl">Заданий выполнено: {stats.total}</p>
-              <p className="mt-2 text-xl">Правильных ответов: {stats.correct}</p>
-              <p className="mt-2 text-2xl font-bold text-berry">Звезды: {"★".repeat(stars)}{"☆".repeat(Math.max(0, 3 - stars))}</p>
-              <p className="mt-4 rounded-lg bg-skysoft p-4">
-                Завтра повторим карточки, где были ошибки, и добавим несколько новых.
-              </p>
-              <Link className="mt-5 inline-block rounded-lg bg-berry px-6 py-4 font-bold text-white" href="/child/dashboard">
-                В детский кабинет
-              </Link>
+            <Panel className="mx-auto max-w-3xl">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold">Готово!</h2>
+                <p className="mt-3 text-xl">Заданий выполнено: {stats.total}</p>
+                <p className="mt-2 text-xl">Правильных ответов: {stats.correct}</p>
+                <p className="mt-2 text-xl">Ошибок: {stats.total - stats.correct}</p>
+                <p className="mt-2 text-2xl font-bold text-berry">Звезды: {"★".repeat(stars)}{"☆".repeat(Math.max(0, 3 - stars))}</p>
+              </div>
+
+              <div className="mt-6 rounded-lg bg-skysoft p-4">
+                {mistakes.length ? (
+                  <>
+                    <h3 className="text-xl font-bold">Разбор ошибок</h3>
+                    <div className="mt-4 grid gap-3">
+                      {mistakes.map((mistake, mistakeIndex) => (
+                        <div className="rounded-lg bg-white p-4" key={`${mistake.exercise.id}-${mistakeIndex}`}>
+                          <p className="text-xs font-semibold uppercase text-slate-500">{mistake.exercise.type}</p>
+                          <p className="mt-2 text-lg font-bold">{mistake.exercise.prompt}</p>
+                          {mistake.exercise.card ? <p className="mt-1 text-sm text-slate-600">Карточка: {mistake.exercise.card.english}</p> : null}
+                          {mistake.exercise.grammarPattern ? (
+                            <p className="mt-1 text-sm text-slate-600">
+                              Грамматика: {mistake.exercise.grammarPattern.title_ru || mistake.exercise.grammarPattern.title}
+                            </p>
+                          ) : null}
+                          <div className="mt-3 grid gap-2 text-sm">
+                            <p><b>Ответ ребенка:</b> {mistake.answer}</p>
+                            <p><b>Правильно:</b> {mistake.correctAnswer}</p>
+                            <p><b>Почему:</b> {mistake.explanationRu}</p>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {mistake.exercise.listenText ? (
+                              <Button className="bg-slate-700" type="button" onClick={() => listen(0.8, mistake.exercise.listenText)}>
+                                Послушать правильный ответ
+                              </Button>
+                            ) : null}
+                            <Button type="button" onClick={() => repeatSingleMistake(mistake, mistakeIndex)}>
+                              Повторить это задание
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button className="mt-4 bg-berry" type="button" onClick={repeatMistakes}>
+                      Повторить ошибки
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-center text-lg font-bold">Ошибок нет. Отличная работа!</p>
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <Link className="rounded-lg bg-ink px-6 py-4 font-bold text-white" href="/child/dashboard">
+                  В детский кабинет
+                </Link>
+                <button className="rounded-lg bg-mint px-6 py-4 font-bold" type="button" onClick={() => router.push("/child/select")}>
+                  Выбрать другого ребенка
+                </button>
+              </div>
             </Panel>
           ) : current ? (
             <Panel className="mx-auto max-w-2xl">
@@ -317,7 +434,7 @@ export function PracticeFlow() {
               {feedback ? (
                 <div className="mt-5 rounded-lg bg-mint p-4 text-center">
                   <p className="text-2xl font-bold">{feedback}</p>
-                  {current.explanationRu ? <p className="mt-2 text-sm">{current.explanationRu}</p> : null}
+                  <p className="mt-2 text-sm">{explainAnswer(current)}</p>
                   {lastCorrect === false ? <p className="mt-2 text-sm text-slate-600">Правильный ответ: {current.correctAnswer}</p> : null}
                 </div>
               ) : null}

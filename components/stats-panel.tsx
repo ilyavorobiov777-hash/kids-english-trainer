@@ -173,6 +173,29 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
             title={detailed ? "Прогресс" : "Дашборд родителя"}
             subtitle="Статистика считается из реальных ответов ребенка. Пустые и незавершенные сессии не считаются завершенными занятиями."
           />
+          {!detailed ? (
+            <Panel className="mb-5 bg-skysoft">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold">Занятие ребенка</h2>
+                  <p className="text-sm text-slate-600">Выберите детский профиль и запустите короткую тренировку без прямых ссылок.</p>
+                </div>
+                <Link className="rounded-lg bg-berry px-5 py-3 font-bold text-white" href="/child/select">
+                  Перейти к занятию ребенка
+                </Link>
+              </div>
+            </Panel>
+          ) : (
+            <Panel className="mb-5 bg-skysoft">
+              <h2 className="text-lg font-bold">Как читать статистику</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Завершенные занятия считаются только по сессиям с заданиями. Тестовые данные можно обнулить для конкретного ребенка на странице профилей детей.
+              </p>
+              <Link className="mt-3 inline-block rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/parent/children">
+                Открыть профили детей
+              </Link>
+            </Panel>
+          )}
           <div className="grid gap-4 md:grid-cols-5">
             <Panel>
               <p className="text-sm text-slate-500">Завершенных занятий</p>

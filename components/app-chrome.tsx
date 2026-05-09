@@ -8,6 +8,7 @@ import { useI18n } from "@/components/i18n-provider";
 const parentLinks = [
   { href: "/parent/dashboard", label: "Дашборд", icon: Home },
   { href: "/parent/children", label: "Дети", icon: UserRound },
+  { href: "/child/select", label: "Детский режим", icon: Sparkles },
   { href: "/parent/cards", label: "Карточки", icon: BookOpen },
   { href: "/parent/progress", label: "Прогресс", icon: ChartNoAxesColumn }
 ];
@@ -15,7 +16,7 @@ const parentLinks = [
 const childLinks = [
   { href: "/child/select", label: "Профиль", icon: Sparkles },
   { href: "/child/dashboard", label: "Домик", icon: Home },
-  { href: "/child/practice", label: "Играть", icon: GraduationCap }
+  { href: "/child/practice", label: "Занятие", icon: GraduationCap }
 ];
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
