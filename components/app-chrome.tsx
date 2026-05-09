@@ -16,7 +16,8 @@ const parentLinks = [
 const childLinks = [
   { href: "/child/select", label: "Профиль", icon: Sparkles },
   { href: "/child/dashboard", label: "Домик", icon: Home },
-  { href: "/child/practice", label: "Занятие", icon: GraduationCap }
+  { href: "/child/practice", label: "Занятие", icon: GraduationCap },
+  { href: "/child/words", label: "Слова", icon: BookOpen }
 ];
 
 export function AppChrome({ children }: { children: React.ReactNode }) {

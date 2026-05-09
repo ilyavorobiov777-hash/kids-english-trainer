@@ -108,6 +108,42 @@ Expected:
 - `Повторить ошибки` starts a short retry session from current-session mistakes;
 - `Повторить это задание` repeats one missed task.
 
+## 6A. Check How The Child Learns Words
+
+1. Open `/child/dashboard`.
+2. Confirm there are large buttons:
+   - `Занятие дня`
+   - `Учить новые слова`
+   - `Повторить слова`
+   - `Повторить ошибки`
+   - `Слова по темам`
+3. Click `Учить новые слова`.
+4. Confirm the child sees 5-7 words, not the full card list.
+5. For a word, check the cycle:
+   - presentation with English/Russian;
+   - Listen;
+   - Listen slowly;
+   - `Понятно`;
+   - English -> Russian;
+   - Russian -> English;
+   - listening choice;
+   - quick recall.
+6. Finish the mode.
+7. Confirm the summary shows learned words, correct answers, mistakes, and `Повторить эти слова`.
+8. Open `/child/words/review`.
+9. If no due words exist, confirm the empty state suggests learning new words.
+10. Open `/child/words/mistakes`.
+11. If no mistakes exist, confirm it says `Ошибок пока нет. Отличная работа!`.
+12. Open `/child/words/topics`.
+13. Pick a topic and confirm it starts a short topic session.
+
+Critical errors:
+
+- child sees all 467 cards as the learning screen;
+- word-learning attempts are not saved;
+- `review_schedule` is not updated after word exercises;
+- topic mode shows empty/broken exercises when the topic has cards.
+
 Critical errors:
 
 - empty exercise screen;

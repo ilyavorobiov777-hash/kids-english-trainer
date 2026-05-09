@@ -196,6 +196,18 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
               </Link>
             </Panel>
           )}
+          {!detailed ? (
+            <Panel className="mb-5">
+              <h2 className="text-lg font-bold">Как ребенок учит слова</h2>
+              <p className="mt-1 text-sm text-slate-600">Выберите короткий детский режим вместо большого списка карточек.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link className="rounded-lg bg-berry px-4 py-3 font-semibold text-white" href="/child/select">Перейти в детский режим</Link>
+                <Link className="rounded-lg bg-mint px-4 py-3 font-semibold text-ink" href="/child/words/new">Учить новые слова</Link>
+                <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/child/words/review">Повторить слова</Link>
+                <Link className="rounded-lg bg-peach px-4 py-3 font-semibold text-ink" href="/child/words/mistakes">Повторить ошибки</Link>
+              </div>
+            </Panel>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-5">
             <Panel>
               <p className="text-sm text-slate-500">Завершенных занятий</p>

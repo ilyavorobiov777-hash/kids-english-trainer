@@ -247,6 +247,28 @@ If the family has little content, the builder uses what exists and still opens w
 
 After a session, the child sees a summary with completed tasks, correct answers, mistakes, stars, and a detailed mistake review. Mistakes include the exercise type, prompt, child answer, correct answer, and a short Russian explanation. The child can repeat all mistakes or repeat a single missed task.
 
+## How The Child Learns Words
+
+The child should not learn from the parent card list. `/parent/cards` is only for managing content.
+
+Child vocabulary learning is available from `/child/dashboard` and `/child/words`:
+
+- `Занятие дня` opens the mixed daily practice.
+- `Учить новые слова` opens `/child/words/new` and teaches 5-7 new or least-practiced words.
+- `Повторить слова` opens `/child/words/review` and uses due cards from `review_schedule`.
+- `Повторить ошибки` opens `/child/words/mistakes` and trains recent incorrect word attempts.
+- `Слова по темам` opens `/child/words/topics`, where each topic starts a short topic session.
+
+The new words mode uses a short learning cycle:
+
+1. Presentation: English, Russian, Listen, Listen slowly, example sentence.
+2. Recognition: English -> Russian.
+3. Reverse recognition: Russian -> English.
+4. Listening: hear English -> choose Russian.
+5. Quick recall: Russian -> English.
+
+Word-learning attempts are saved to `practice_attempts`, sessions are saved to `practice_sessions`, and card review timing is updated in `review_schedule`.
+
 ## Child Management
 
 Parents can manage child profiles on `/parent/children`:

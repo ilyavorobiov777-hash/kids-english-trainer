@@ -138,6 +138,18 @@ export function CardsManager() {
       {!family ? <NeedLogin /> : (
         <>
           <PageHeader title="Карточки" subtitle="Добавляйте слова, фразы, предложения, грамматические паттерны, диалоги и мини-истории." />
+          <Panel className="mb-5 bg-skysoft">
+            <h2 className="text-lg font-bold">Это управление контентом</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Ребенок не учит слова через этот большой список. Для обучения используйте детский режим:
+              занятие дня, новые слова, повторение, ошибки и темы.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a className="rounded-lg bg-berry px-4 py-3 font-semibold text-white" href="/child/words/new">Учить новые слова</a>
+              <a className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/child/words/review">Повторить слова</a>
+              <a className="rounded-lg bg-peach px-4 py-3 font-semibold text-ink" href="/child/words/mistakes">Повторить ошибки</a>
+            </div>
+          </Panel>
           <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
             <Panel>
               <form className="grid gap-3" onSubmit={submit}>
