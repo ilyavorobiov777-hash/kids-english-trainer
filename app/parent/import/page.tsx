@@ -13,13 +13,21 @@ type StarterSeedResult = {
   total_grammar_patterns?: number;
 };
 
+type StarterTextsSeedResult = {
+  inserted_texts?: number;
+  existing_texts?: number;
+  total_texts?: number;
+};
+
 type StarterStatus = {
   cards: number;
   grammarPatterns: number;
+  texts: number;
   loading: boolean;
 };
 
 const starterCourseTitle = "Starter 350 Pre-A1";
+const starterTextsCourseTitle = "Starter Texts Pre-A1";
 
 export default function ParentImportPage() {
   const { supabase, family, loading, error } = useFamily();
@@ -28,44 +36,38 @@ export default function ParentImportPage() {
   const [starterStatus, setStarterStatus] = useState<StarterStatus>({
     cards: 0,
     grammarPatterns: 0,
+    texts: 0,
     loading: true
   });
 
   const loadStarterStatus = useCallback(async () => {
-    if (!family) {
-      return;
-    }
-
+    if (!family) return;
     setStarterStatus((current) => ({ ...current, loading: true }));
 
-    const { data: course, error: courseError } = await supabase
-      .from("courses")
-      .select("id")
-      .eq("family_id", family.familyId)
-      .eq("title", starterCourseTitle)
-      .maybeSingle();
+    const [starterCourseRes, textsCourseRes] = await Promise.all([
+      supabase.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterCourseTitle).maybeSingle(),
+      supabase.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterTextsCourseTitle).maybeSingle()
+    ]);
 
-    if (courseError || !course) {
-      setStarterStatus({ cards: 0, grammarPatterns: 0, loading: false });
-      return;
-    }
+    const starterCourse = starterCourseRes.data;
+    const textsCourse = textsCourseRes.data;
 
-    const [{ count: cardsCount }, { count: grammarCount }] = await Promise.all([
-      supabase
-        .from("cards")
-        .select("id", { count: "exact", head: true })
-        .eq("family_id", family.familyId)
-        .eq("course_id", course.id),
-      supabase
-        .from("grammar_patterns")
-        .select("id", { count: "exact", head: true })
-        .eq("family_id", family.familyId)
-        .eq("course_id", course.id)
+    const [{ count: cardsCount }, { count: grammarCount }, { count: textsCount }] = await Promise.all([
+      starterCourse
+        ? supabase.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
+        : Promise.resolve({ count: 0 }),
+      starterCourse
+        ? supabase.from("grammar_patterns").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
+        : Promise.resolve({ count: 0 }),
+      textsCourse
+        ? supabase.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", textsCourse.id)
+        : Promise.resolve({ count: 0 })
     ]);
 
     setStarterStatus({
       cards: cardsCount ?? 0,
       grammarPatterns: grammarCount ?? 0,
+      texts: textsCount ?? 0,
       loading: false
     });
   }, [family, supabase]);
@@ -106,6 +108,27 @@ export default function ParentImportPage() {
     setStarterLoading(false);
   }
 
+  async function seedStarterTexts() {
+    setStarterLoading(true);
+    setMessage("Добавляю Starter Texts. Повторный запуск безопасен: дубли не создаются...");
+
+    const { data, error: rpcError } = await supabase.rpc("seed_starter_texts");
+
+    if (rpcError) {
+      setStarterLoading(false);
+      setMessage(`Не удалось добавить Starter Texts: ${rpcError.message}`);
+      return;
+    }
+
+    const result = data as StarterTextsSeedResult | null;
+    const inserted = result?.inserted_texts ?? 0;
+    const existing = result?.existing_texts ?? Math.max((result?.total_texts ?? 0) - inserted, 0);
+    const total = result?.total_texts ?? 0;
+    setMessage(`Starter Texts готов: добавлено текстов ${inserted}, уже было ${existing}, всего текстов ${total}. Этот набор можно запускать повторно безопасно.`);
+    await loadStarterStatus();
+    setStarterLoading(false);
+  }
+
   return (
     <AuthRequired loading={loading} error={error}>
       {!family ? (
@@ -114,7 +137,7 @@ export default function ParentImportPage() {
         <>
           <PageHeader
             title="Импорт"
-            subtitle="Загрузите CSV, проверьте preview, исправьте ошибки и сохраните карточки в Supabase."
+            subtitle="Загрузите CSV, проверьте preview, исправьте ошибки и сохраните карточки в Supabase. Здесь же можно добавить стартовые наборы."
           />
           <div className="grid gap-5">
             <CsvImporter supabase={supabase} familyId={family.familyId} userId={family.userId} />
@@ -123,20 +146,23 @@ export default function ParentImportPage() {
                 <div>
                   <h2 className="text-lg font-bold">Стартовые наборы</h2>
                   <p className="mt-2 text-sm text-ink/70">
-                    Starter 350 добавляет базовые слова, фразы, грамматику, диалоги и истории для коротких занятий.
-                    Набор можно запускать повторно безопасно: дубли не создаются.
+                    Starter 350 добавляет базовые слова, фразы, грамматику, диалоги и истории. Starter Texts добавляет короткие собственные тексты для чтения и аудирования.
+                    Оба набора можно запускать повторно безопасно: дубли не создаются.
                   </p>
                   <p className="mt-3 rounded-lg bg-sky/20 px-3 py-2 text-sm font-semibold">
-                    Сейчас в Starter 350:{" "}
+                    Сейчас:{" "}
                     {starterStatus.loading
                       ? "считаю..."
-                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns`}
+                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns, ${starterStatus.texts} texts`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 md:justify-end">
                   <Button onClick={seedDemo}>Добавить демо-набор</Button>
                   <Button className="bg-berry" disabled={starterLoading} onClick={seedStarterContent}>
                     {starterLoading ? "Добавляю..." : "Добавить Starter 350"}
+                  </Button>
+                  <Button className="bg-mint text-ink" disabled={starterLoading} onClick={seedStarterTexts}>
+                    {starterLoading ? "Добавляю..." : "Добавить Starter Texts"}
                   </Button>
                 </div>
               </div>

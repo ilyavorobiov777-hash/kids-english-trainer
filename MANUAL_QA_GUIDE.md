@@ -258,3 +258,43 @@ Reset child statistics:
 7. Confirm progress data for that child no longer affects attempts, sessions, streak, weak cards, or recent mistakes.
 
 Reset must not delete cards, courses, Starter 350, or another child's data.
+
+## 13. Reading And Listening Texts QA
+
+Add starter texts:
+
+1. Run `npm run content:report`.
+2. Apply `supabase/seed_starter_texts.sql` in Supabase SQL Editor or with Supabase CLI.
+3. Open `/parent/import`.
+4. Click `Добавить Starter Texts`.
+5. Click it again and confirm inserted count is 0 or the UI says the pack already exists without creating duplicates.
+
+Check child reading:
+
+1. Open `/child/select` and choose a child.
+2. Open `/child/dashboard`.
+3. Click `Тексты`.
+4. Confirm `/child/texts` shows text cards with English/Russian titles, topic, difficulty and word count.
+5. Open one text.
+6. Confirm English text is visible and Russian translation is hidden.
+7. Click `Слушать` and `Слушать медленно`.
+8. Click `Показать перевод`, then `Скрыть перевод`.
+9. Click `Ответить на вопросы`.
+10. Answer all questions and confirm summary shows total, correct answers, mistakes and correct answers.
+11. Click `Повторить слова из текста` and answer vocabulary tasks.
+12. Open `/parent/progress` and check text attempts/text accuracy appear.
+
+Check parent text management:
+
+1. Open `/parent/texts`.
+2. Create a short test text with 2-3 questions.
+3. Edit the title or text.
+4. Archive it and confirm it disappears from `/child/texts`.
+5. Restore it and confirm it appears again.
+
+Critical failures:
+
+- Translation is visible before clicking `Показать перевод`.
+- Text questions do not save to `practice_attempts`.
+- A different family can see the text.
+- Archiving a text deletes attempts or cards.

@@ -1,5 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { allCards, exerciseTypesSupported, grammarPatterns } from "./learning-content-data.mjs";
+import { starterTexts } from "./starter-texts-data.mjs";
 
 function sqlString(value) {
   if (value === null || value === undefined) return "null";
@@ -25,6 +26,7 @@ function countBy(items, key) {
 const cardsValues = allCards.map((card, index) => `    (${index + 1}, ${sqlString(card.type)}, ${sqlString(card.topic)}, ${sqlString(card.english)}, ${sqlString(card.russian)}, ${card.difficulty ?? 1}, ${sqlTextArray(card.tags ?? [card.topic])}, ${sqlString(card.example_en ?? null)}, ${sqlString(card.example_ru ?? null)})`).join(",\n");
 
 const grammarValues = grammarPatterns.map((item, index) => `    (${index + 1}, ${sqlString(item.title)}, ${sqlString(item.title_ru)}, ${sqlString(item.pattern_key)}, ${sqlString(item.pattern)}, ${sqlString(item.explanation_ru)}, ${sqlString(item.affirmative_examples[0] ?? null)}, ${sqlString(item.explanation_ru)}, ${sqlJson(item.affirmative_examples)}, ${sqlJson(item.negative_examples)}, ${sqlJson(item.question_examples)}, ${sqlJson(item.short_positive_answers)}, ${sqlJson(item.short_negative_answers)}, ${sqlJson(item.common_mistakes)}, ${sqlJson(item.exercise_templates)})`).join(",\n");
+const textValues = starterTexts.map((item, index) => `    (${index + 1}, ${sqlString(item.title_en)}, ${sqlString(item.title_ru)}, ${sqlString(item.text_en)}, ${sqlString(item.text_ru)}, ${sqlString(item.topic)}, ${sqlString(item.level)}, ${item.difficulty ?? 1}, ${sqlJson([item.topic, item.level])}, ${sqlJson(item.vocabulary_words)}, ${sqlJson(item.grammar_focus)}, ${sqlJson(item.comprehension_questions)})`).join(",\n");
 
 const sql = `create or replace function public.seed_starter_learning_content()
 returns jsonb
@@ -177,8 +179,95 @@ $$;
 
 writeFileSync("supabase/seed_350_learning_content.sql", sql, "utf8");
 
+const textSql = `create or replace function public.seed_starter_texts()
+returns jsonb
+language plpgsql
+security invoker
+as $$
+declare
+  v_family uuid := public.current_family_id();
+  v_course uuid;
+  v_source uuid;
+  v_inserted_texts int := 0;
+  v_total_texts int := 0;
+begin
+  if v_family is null then
+    raise exception 'Sign in as a parent before running select public.seed_starter_texts();';
+  end if;
+
+  insert into public.courses (family_id, title, description)
+  select v_family, 'Starter Texts Pre-A1', 'Idempotent Pre-A1 reading and listening text pack'
+  where not exists (
+    select 1 from public.courses where family_id = v_family and title = 'Starter Texts Pre-A1'
+  );
+  select id into v_course from public.courses where family_id = v_family and title = 'Starter Texts Pre-A1' limit 1;
+
+  insert into public.sources (family_id, course_id, title, kind)
+  select v_family, v_course, 'Starter texts generated seed', 'seed'
+  where not exists (
+    select 1 from public.sources where family_id = v_family and title = 'Starter texts generated seed'
+  );
+  select id into v_source from public.sources where family_id = v_family and title = 'Starter texts generated seed' limit 1;
+
+  with seed_texts(position, title_en, title_ru, text_en, text_ru, topic, level, difficulty, tags, vocabulary_words, grammar_focus, comprehension_questions) as (
+  values
+${textValues}
+  )
+  insert into public.topics (family_id, course_id, title)
+  select distinct v_family, v_course, topic
+  from seed_texts
+  where not exists (
+    select 1 from public.topics t where t.family_id = v_family and t.course_id = v_course and t.title = seed_texts.topic
+  );
+
+  with seed_texts(position, title_en, title_ru, text_en, text_ru, topic, level, difficulty, tags, vocabulary_words, grammar_focus, comprehension_questions) as (
+  values
+${textValues}
+  ),
+  inserted as (
+    insert into public.learning_texts (
+      family_id, course_id, source_id, topic_id, title_en, title_ru, text_en, text_ru,
+      level, difficulty, tags, vocabulary_words, grammar_focus, comprehension_questions, status, created_by
+    )
+    select
+      v_family, v_course, v_source, t.id, s.title_en, s.title_ru, s.text_en, s.text_ru,
+      s.level, s.difficulty, s.tags, s.vocabulary_words, s.grammar_focus, s.comprehension_questions,
+      'active', auth.uid()
+    from seed_texts s
+    join public.topics t on t.family_id = v_family and t.course_id = v_course and t.title = s.topic
+    where not exists (
+      select 1
+      from public.learning_texts existing
+      where existing.family_id = v_family
+        and existing.source_id = v_source
+        and lower(existing.title_en) = lower(s.title_en)
+    )
+    returning id
+  )
+  select count(*) into v_inserted_texts from inserted;
+
+  select count(*) into v_total_texts
+  from public.learning_texts
+  where family_id = v_family and source_id = v_source;
+
+  return jsonb_build_object(
+    'inserted_texts', v_inserted_texts,
+    'existing_texts', greatest(v_total_texts - v_inserted_texts, 0),
+    'total_texts', v_total_texts,
+    'course_title', 'Starter Texts Pre-A1'
+  );
+end;
+$$;
+`;
+
+writeFileSync("supabase/seed_starter_texts.sql", textSql, "utf8");
+
 const byType = countBy(allCards, "type");
 const byTopic = countBy(allCards, "topic");
+const textsByTopic = countBy(starterTexts, "topic");
+const textsByDifficulty = countBy(starterTexts, "difficulty");
+const grammarFocus = countBy(starterTexts.flatMap((text) => text.grammar_focus.map((focus) => ({ focus }))), "focus");
+const totalTextQuestions = starterTexts.reduce((sum, text) => sum + text.comprehension_questions.length, 0);
 const report = `# Content Seed Report
 
 Generated from \`scripts/learning-content-data.mjs\`.
@@ -193,6 +282,8 @@ Generated from \`scripts/learning-content-data.mjs\`.
 - total grammar patterns table rows: ${grammarPatterns.length}
 - total dialogues: ${byType.dialogue ?? 0}
 - total mini stories: ${byType.mini_story ?? 0}
+- total learning texts: ${starterTexts.length}
+- total text comprehension questions: ${totalTextQuestions}
 
 ## Count By Type
 
@@ -210,9 +301,28 @@ ${grammarPatterns.map((item) => `- ${item.title} (${item.pattern_key})`).join("\
 
 ${exerciseTypesSupported.map((type) => `- ${type}`).join("\n")}
 
+## Starter Texts
+
+- total texts: ${starterTexts.length}
+- total comprehension questions: ${totalTextQuestions}
+
+### Texts By Topic
+
+${Object.entries(textsByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([topic, count]) => `- ${topic}: ${count}`).join("\n")}
+
+### Texts By Difficulty
+
+${Object.entries(textsByDifficulty).sort(([a], [b]) => a.localeCompare(b)).map(([difficulty, count]) => `- difficulty ${difficulty}: ${count}`).join("\n")}
+
+### Text Grammar Focus Coverage
+
+${Object.entries(grammarFocus).sort(([a], [b]) => a.localeCompare(b)).map(([focus, count]) => `- ${focus}: ${count}`).join("\n")}
+
 ## Idempotency
 
 \`public.seed_starter_learning_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` before inserting cards. Grammar patterns are updated by \`family_id + course_id + title\` and inserted only when missing.
+
+\`public.seed_starter_texts()\` inserts into a stable course/source pair and checks existing rows by \`family_id + source_id + title_en\` before inserting texts.
 `;
 
 writeFileSync("CONTENT_SEED_REPORT.md", report, "utf8");
@@ -222,6 +332,9 @@ console.log(JSON.stringify({
   byType,
   byTopic,
   grammarPatterns: grammarPatterns.length,
+  starterTexts: starterTexts.length,
+  textQuestions: totalTextQuestions,
   sql: "supabase/seed_350_learning_content.sql",
+  textSql: "supabase/seed_starter_texts.sql",
   report: "CONTENT_SEED_REPORT.md"
 }, null, 2));

@@ -3,7 +3,7 @@
 import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
-import type { Card, GrammarPattern, PracticeAttempt, PracticeSession, ReviewSchedule } from "@/lib/database.types";
+import type { Card, GrammarPattern, LearningText, PracticeAttempt, PracticeSession, ReviewSchedule } from "@/lib/database.types";
 import { formatPercent } from "@/lib/supabase/helpers";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -63,13 +63,14 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [attempts, setAttempts] = useState<PracticeAttempt[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
+  const [learningTexts, setLearningTexts] = useState<LearningText[]>([]);
   const [grammarPatterns, setGrammarPatterns] = useState<GrammarPattern[]>([]);
   const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule[]>([]);
 
   useEffect(() => {
     async function load() {
       if (!family) return;
-      const [sessionsRes, attemptsRes, cardsRes, grammarRes, scheduleRes] = await Promise.all([
+      const [sessionsRes, attemptsRes, cardsRes, textsRes, grammarRes, scheduleRes] = await Promise.all([
         supabase
           .from("practice_sessions")
           .select("*")
@@ -83,6 +84,7 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
           .order("created_at", { ascending: false })
           .limit(1500),
         supabase.from("cards").select("*").eq("family_id", family.familyId),
+        supabase.from("learning_texts").select("*").eq("family_id", family.familyId),
         supabase.from("grammar_patterns").select("*").eq("family_id", family.familyId),
         supabase
           .from("review_schedule")
@@ -94,6 +96,7 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       setSessions((sessionsRes.data ?? []) as PracticeSession[]);
       setAttempts((attemptsRes.data ?? []) as PracticeAttempt[]);
       setCards((cardsRes.data ?? []) as Card[]);
+      setLearningTexts((textsRes.data ?? []) as LearningText[]);
       setGrammarPatterns((grammarRes.data ?? []) as GrammarPattern[]);
       setReviewSchedule((scheduleRes.data ?? []) as ReviewSchedule[]);
     }
@@ -146,6 +149,12 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       .sort((a, b) => b.rate - a.rate)
       .slice(0, 5);
     const recentMistakes = attempts.filter((attempt) => !attempt.is_correct).slice(0, 10);
+    const textAttempts = attempts.filter((attempt) => attempt.text_id);
+    const textCorrect = textAttempts.filter((attempt) => attempt.is_correct).length;
+    const textMistakes = textAttempts.filter((attempt) => !attempt.is_correct).slice(0, 5);
+    const completedTextSessionIds = new Set(textAttempts.map((attempt) => attempt.session_id).filter(Boolean));
+    const lastTextAttempt = textAttempts[0];
+    const lastText = learningTexts.find((item) => item.id === lastTextAttempt?.text_id);
 
     return {
       completedSessions,
@@ -156,9 +165,14 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
       byType,
       weakestCards,
       weakestGrammar,
-      recentMistakes
+      recentMistakes,
+      textAttempts,
+      textCorrect,
+      textMistakes,
+      completedTextSessionIds,
+      lastText
     };
-  }, [attempts, cards, grammarPatterns, sessions]);
+  }, [attempts, cards, grammarPatterns, learningTexts, sessions]);
 
   const dueToday = reviewSchedule.filter((item) => new Date(item.due_at).getTime() <= Date.now());
   const streak = calculateStreak(stats.completedSessions);
@@ -208,6 +222,17 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
               </div>
             </Panel>
           ) : null}
+          {!detailed ? (
+            <Panel className="mb-5">
+              <h2 className="text-lg font-bold">Тексты для чтения и аудирования</h2>
+              <p className="mt-1 text-sm text-slate-600">Короткие тексты помогают ребенку увидеть знакомые слова в маленьких историях, послушать английский и ответить на вопросы.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link className="rounded-lg bg-mint px-4 py-3 font-semibold text-ink" href="/child/texts">Открыть тексты</Link>
+                <Link className="rounded-lg bg-ink px-4 py-3 font-semibold text-white" href="/parent/texts">Управлять текстами</Link>
+              </div>
+            </Panel>
+          ) : null}
+
           <div className="grid gap-4 md:grid-cols-5">
             <Panel>
               <p className="text-sm text-slate-500">Завершенных занятий</p>
@@ -351,6 +376,50 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
                   </div>
                 </Panel>
               </div>
+              <Panel className="mt-5">
+                <h2 className="mb-3 text-lg font-bold">Тексты</h2>
+                {stats.textAttempts.length ? (
+                  <div className="grid gap-3 md:grid-cols-4">
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-sm text-slate-500">Texts completed</p>
+                      <p className="text-2xl font-bold">{stats.completedTextSessionIds.size}</p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-sm text-slate-500">Text attempts</p>
+                      <p className="text-2xl font-bold">{stats.textAttempts.length}</p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-sm text-slate-500">Text accuracy</p>
+                      <p className="text-2xl font-bold">{formatPercent((stats.textCorrect / stats.textAttempts.length) * 100)}</p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-sm text-slate-500">Last text</p>
+                      <p className="text-lg font-bold">{stats.lastText?.title_en ?? "Text"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-500">Тексты пока не проходили.</p>
+                )}
+                {stats.textMistakes.length ? (
+                  <div className="mt-4">
+                    <h3 className="font-bold">Recent text mistakes</h3>
+                    <div className="mt-2 grid gap-2">
+                      {stats.textMistakes.map((attempt) => {
+                        const text = learningTexts.find((item) => item.id === attempt.text_id);
+                        return (
+                          <div className="rounded-lg bg-peach p-3 text-sm" key={attempt.id}>
+                            <p className="font-semibold">{text?.title_en ?? "Text"} · {attempt.exercise_type}</p>
+                            <p>Question: {attempt.question ?? text?.title_en ?? "text question"}</p>
+                            <p>Answer: {attempt.answer}</p>
+                            <p>Correct: {attempt.correct_answer}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+              </Panel>
+
               <Panel className="mt-5">
                 <h2 className="mb-3 text-lg font-bold">Последние ошибки</h2>
                 {stats.recentMistakes.length ? (

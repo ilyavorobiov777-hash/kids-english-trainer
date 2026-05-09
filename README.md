@@ -187,11 +187,14 @@ npm run content:report
 - `/parent/children` - child profile creation, archive/restore, reset child statistics, start practice
 - `/parent/courses` - basic course creation
 - `/parent/cards` - card list, add, edit, archive, filters
+- `/parent/texts` - reading/listening text CRUD
 - `/parent/import` - CSV preview import and seed data import
 - `/parent/progress` - detailed progress, weak cards, weak grammar, due cards
 - `/child/select` - child profile selection without email
 - `/child/dashboard` - simple child home screen
 - `/child/practice` - mixed daily practice
+- `/child/texts` - child reading/listening text list
+- `/child/texts/[textId]` - one text, hidden translation, questions, text vocabulary review
 - `/grammar` - grammar patterns
 
 ## CSV Import
@@ -268,6 +271,43 @@ The new words mode uses a short learning cycle:
 5. Quick recall: Russian -> English.
 
 Word-learning attempts are saved to `practice_attempts`, sessions are saved to `practice_sessions`, and card review timing is updated in `review_schedule`.
+
+## Reading And Listening Texts
+
+The child also has a separate text block for Pre-A1 reading and listening:
+
+- `/child/texts` lists active short texts.
+- `/child/texts/[textId]` opens one text.
+- English text is shown first.
+- Russian translation is hidden until the child clicks `Показать перевод`.
+- `Слушать` and `Слушать медленно` use the browser SpeechSynthesis API.
+- `Ответить на вопросы` saves text comprehension attempts to `practice_attempts` with `text_id`.
+- `Повторить слова из текста` reviews 3-5 key words from `vocabulary_words`; if a matching card exists, the card is linked and review timing can update.
+
+Parent text management is available at `/parent/texts`. The parent can create, edit, archive and restore reading texts with:
+
+- `title_en`
+- `title_ru`
+- `text_en`
+- `text_ru`
+- topic
+- level
+- difficulty
+- `vocabulary_words`
+- `grammar_focus`
+- `comprehension_questions`
+- status
+
+Starter Texts are original short texts written for this project. They are not copied from Academy Stars, Vereshchagina, Barashkova, PDFs, or textbooks. They use simple Starter 350 vocabulary and patterns such as `to be`, `have got`, `can`, `like`, `would like`, `a/an/the`, `there is/there are`, and simple questions.
+
+Generate and apply the starter text seed:
+
+```powershell
+npm run content:report
+npx supabase db query --linked -f supabase/seed_starter_texts.sql
+```
+
+Then open `/parent/import` and click `Добавить Starter Texts`. The seed is idempotent: it uses the stable course/source pair `Starter Texts Pre-A1` / `Starter texts generated seed` and checks existing texts by `family_id + source_id + title_en`.
 
 ## Child Management
 

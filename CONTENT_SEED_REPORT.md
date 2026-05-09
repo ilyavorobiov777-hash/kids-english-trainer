@@ -12,6 +12,8 @@ Generated from `scripts/learning-content-data.mjs`.
 - total grammar patterns table rows: 20
 - total dialogues: 20
 - total mini stories: 8
+- total learning texts: 15
+- total text comprehension questions: 45
 
 ## Count By Type
 
@@ -84,6 +86,56 @@ Generated from `scripts/learning-content-data.mjs`.
 - articles
 - mini_dialogue
 
+## Starter Texts
+
+- total texts: 15
+- total comprehension questions: 45
+
+### Texts By Topic
+
+- animals: 2
+- classroom: 1
+- clothes: 1
+- family: 1
+- food and drinks: 1
+- house: 1
+- park: 1
+- polite requests: 1
+- school: 1
+- school routine: 1
+- time and daily routine: 1
+- toys: 1
+- weather: 1
+- weekend: 1
+
+### Texts By Difficulty
+
+- difficulty 1: 9
+- difficulty 2: 6
+
+### Text Grammar Focus Coverage
+
+- actions: 1
+- adjectives: 1
+- articles a/an/the: 1
+- articles a/the: 3
+- articles the: 2
+- can: 6
+- classroom commands: 2
+- colours: 1
+- have got: 7
+- like: 6
+- polite requests: 1
+- prepositions: 1
+- present simple routine: 3
+- there are: 3
+- there is: 3
+- this is: 3
+- to be: 3
+- would like: 2
+
 ## Idempotency
 
 `public.seed_starter_learning_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` before inserting cards. Grammar patterns are updated by `family_id + course_id + title` and inserted only when missing.
+
+`public.seed_starter_texts()` inserts into a stable course/source pair and checks existing rows by `family_id + source_id + title_en` before inserting texts.

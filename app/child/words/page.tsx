@@ -1,5 +1,5 @@
 import { PageHeader, Panel } from "@/components/ui";
-import { BookOpen, CalendarCheck, RotateCcw, Sparkles, Tags } from "lucide-react";
+import { BookOpen, CalendarCheck, Headphones, RotateCcw, Sparkles, Tags } from "lucide-react";
 import Link from "next/link";
 
 const modes = [
@@ -7,7 +7,8 @@ const modes = [
   { href: "/child/words/new", title: "Учить новые слова", text: "Посмотреть, послушать, выбрать", icon: Sparkles, className: "bg-mint text-ink" },
   { href: "/child/words/review", title: "Повторить слова", text: "Слова, которые пора повторить", icon: RotateCcw, className: "bg-skysoft text-ink" },
   { href: "/child/words/mistakes", title: "Повторить ошибки", text: "Потренировать трудные слова", icon: BookOpen, className: "bg-peach text-ink" },
-  { href: "/child/words/topics", title: "Слова по темам", text: "Food, Animals, School и другие", icon: Tags, className: "bg-white text-ink" }
+  { href: "/child/words/topics", title: "Слова по темам", text: "Food, Animals, School и другие", icon: Tags, className: "bg-white text-ink" },
+  { href: "/child/texts", title: "Читать и слушать тексты", text: "Маленькие истории с вопросами", icon: Headphones, className: "bg-white text-ink" }
 ];
 
 export default function ChildWordsPage() {
@@ -24,7 +25,7 @@ export default function ChildWordsPage() {
         ))}
       </div>
       <Panel className="mt-5">
-        <p className="text-slate-600">Карточки редактирует родитель. Ребенок учит слова через эти маленькие режимы.</p>
+        <p className="text-slate-600">Карточки редактирует родитель. Ребенок учит слова через маленькие режимы, а тексты помогают увидеть эти слова в коротких историях.</p>
       </Panel>
     </>
   );

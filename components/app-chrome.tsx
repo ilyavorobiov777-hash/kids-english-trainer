@@ -1,15 +1,16 @@
 "use client";
 
+import { useI18n } from "@/components/i18n-provider";
+import { BookOpen, ChartNoAxesColumn, GraduationCap, Headphones, Home, Languages, LogIn, Sparkles, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ChartNoAxesColumn, GraduationCap, Home, Languages, LogIn, Sparkles, UserRound } from "lucide-react";
-import { useI18n } from "@/components/i18n-provider";
 
 const parentLinks = [
   { href: "/parent/dashboard", label: "Дашборд", icon: Home },
   { href: "/parent/children", label: "Дети", icon: UserRound },
   { href: "/child/select", label: "Детский режим", icon: Sparkles },
   { href: "/parent/cards", label: "Карточки", icon: BookOpen },
+  { href: "/parent/texts", label: "Тексты", icon: Headphones },
   { href: "/parent/progress", label: "Прогресс", icon: ChartNoAxesColumn }
 ];
 
@@ -17,7 +18,8 @@ const childLinks = [
   { href: "/child/select", label: "Профиль", icon: Sparkles },
   { href: "/child/dashboard", label: "Домик", icon: Home },
   { href: "/child/practice", label: "Занятие", icon: GraduationCap },
-  { href: "/child/words", label: "Слова", icon: BookOpen }
+  { href: "/child/words", label: "Слова", icon: BookOpen },
+  { href: "/child/texts", label: "Тексты", icon: Headphones }
 ];
 
 export function AppChrome({ children }: { children: React.ReactNode }) {

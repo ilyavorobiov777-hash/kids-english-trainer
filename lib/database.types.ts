@@ -17,7 +17,12 @@ export type ExerciseType =
   | "question_form"
   | "short_answer"
   | "articles"
-  | "mini_dialogue";
+  | "mini_dialogue"
+  | "choose_answer"
+  | "true_false"
+  | "match_word_translation"
+  | "build_sentence_from_text"
+  | "vocabulary_review_from_text";
 
 export type Card = {
   id: string;
@@ -134,7 +139,10 @@ export type PracticeAttempt = {
   session_id: string | null;
   card_id: string | null;
   grammar_pattern_id: string | null;
+  text_id: string | null;
   exercise_type: ExerciseType;
+  question: string | null;
+  exercise_payload: Record<string, unknown>;
   answer: string;
   correct_answer: string;
   is_correct: boolean;
@@ -171,6 +179,43 @@ export type ReviewSchedule = {
   difficulty: number;
   review_count: number;
   lapse_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LearningTextVocabularyWord = {
+  english: string;
+  russian: string;
+};
+
+export type LearningTextQuestion = {
+  id?: string;
+  type: "choose_answer" | "true_false" | "match_word_translation" | "build_sentence_from_text" | "vocabulary_review_from_text";
+  question: string;
+  prompt?: string;
+  correctAnswer: string;
+  options: string[];
+  explanationRu?: string;
+};
+
+export type LearningText = {
+  id: string;
+  family_id: string;
+  course_id: string | null;
+  source_id: string | null;
+  topic_id: string | null;
+  title_en: string;
+  title_ru: string;
+  text_en: string;
+  text_ru: string;
+  level: string;
+  difficulty: number;
+  tags: string[];
+  vocabulary_words: LearningTextVocabularyWord[];
+  grammar_focus: string[];
+  comprehension_questions: LearningTextQuestion[];
+  status: "draft" | "active" | "archived";
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 };
