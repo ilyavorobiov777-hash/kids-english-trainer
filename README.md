@@ -184,6 +184,7 @@ The child practice flow can build a short mixed session from cards, review sched
 - a few new active cards
 - phrase/sentence cards when available
 - one question form exercise
+- one short answer exercise
 - one articles exercise
 - one mini-dialogue when data is available
 
@@ -209,6 +210,23 @@ The `articles` exercise uses sentence gaps and saves attempts with `exercise_typ
 - `Open ___ door.` -> `the`
 
 After an incorrect answer, the child sees a short Russian explanation.
+
+## Short Answer Trainer
+
+The `short_answer` exercise stores `exercise_type = short_answer` in `practice_attempts`. MVP examples include:
+
+- `Have you got a dog?` -> `Yes, I have.` / `No, I haven't.`
+- `Can you swim?` -> `Yes, I can.` / `No, I can't.`
+- `Do you like apples?` -> `Yes, I do.` / `No, I don't.`
+- `Would you like an apple?` -> `Yes, please.` / `No, thank you.`
+
+## Mini Dialogue Trainer
+
+The `mini_dialogue` exercise shows the first line, allows listening to it with SpeechSynthesis, and asks the child to choose the best reply. MVP examples include:
+
+- `Would you like some juice?` -> `Yes, please.`
+- `Have you got a pencil?` -> `No, I haven't.`
+- `Do you like bananas?` -> `Yes, I do.`
 
 ## Card Types
 

@@ -155,6 +155,7 @@ export function StatsPanel({ detailed = false }: { detailed?: boolean }) {
                 <div className="grid gap-2 text-sm">
                   <p>Articles accuracy: {formatPercent(accuracy(stats.byType.articles ?? []))}</p>
                   <p>Question forms accuracy: {formatPercent(accuracy(stats.byType.question_form ?? []))}</p>
+                  <p>Short answers accuracy: {formatPercent(accuracy(stats.byType.short_answer ?? []))}</p>
                   <p>Last practice date: {lastSession ? new Date(lastSession.started_at).toLocaleDateString("ru-RU") : "нет данных"}</p>
                 </div>
               </Panel>

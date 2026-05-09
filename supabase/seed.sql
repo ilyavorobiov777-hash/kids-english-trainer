@@ -105,5 +105,58 @@ begin
     (v_family, v_course, 'like', 'like + plural noun / -ing', 'Говорим, что нам что-то нравится.', 'I like apples.', 'Я люблю яблоки.'),
     (v_family, v_course, 'would like', 'would like + noun', 'Вежливо просим или говорим, что хотели бы.', 'I would like some juice.', 'Я бы хотел немного сока.'),
     (v_family, v_course, 'articles a / an / the', 'a dog, an apple, the sun', 'A/an для одного предмета, the для знакомого или единственного.', 'Would you like an apple?', 'Хочешь яблоко?');
+  update public.grammar_patterns
+  set
+    pattern_key = lower(title),
+    title_ru = coalesce(title_ru, title),
+    affirmative_examples = case
+      when lower(title) like '%have got%' then '["I have got a dog."]'::jsonb
+      when lower(title) = 'can' then '["I can swim."]'::jsonb
+      when lower(title) = 'like' then '["I like apples."]'::jsonb
+      when lower(title) like '%would like%' then '["I would like some juice."]'::jsonb
+      when lower(title) like '%article%' then '["I have got an apple.","The sun is yellow."]'::jsonb
+      else affirmative_examples
+    end,
+    negative_examples = case
+      when lower(title) like '%have got%' then '["I have not got a dog."]'::jsonb
+      when lower(title) = 'can' then '["I can not swim."]'::jsonb
+      when lower(title) = 'like' then '["I do not like apples."]'::jsonb
+      when lower(title) like '%would like%' then '["I would not like juice."]'::jsonb
+      else negative_examples
+    end,
+    question_examples = case
+      when lower(title) like '%have got%' then '["Have you got a dog?"]'::jsonb
+      when lower(title) = 'can' then '["Can you swim?"]'::jsonb
+      when lower(title) = 'like' then '["Do you like apples?"]'::jsonb
+      when lower(title) like '%would like%' then '["Would you like some juice?"]'::jsonb
+      else question_examples
+    end,
+    short_positive_answers = case
+      when lower(title) like '%have got%' then '["Yes, I have."]'::jsonb
+      when lower(title) = 'can' then '["Yes, I can."]'::jsonb
+      when lower(title) = 'like' then '["Yes, I do."]'::jsonb
+      when lower(title) like '%would like%' then '["Yes, please."]'::jsonb
+      else short_positive_answers
+    end,
+    short_negative_answers = case
+      when lower(title) like '%have got%' then '["No, I haven''t."]'::jsonb
+      when lower(title) = 'can' then '["No, I can''t."]'::jsonb
+      when lower(title) = 'like' then '["No, I don''t."]'::jsonb
+      when lower(title) like '%would like%' then '["No, thank you."]'::jsonb
+      else short_negative_answers
+    end,
+    common_mistakes = case
+      when lower(title) like '%have got%' then '["Do you have got a dog?"]'::jsonb
+      when lower(title) = 'can' then '["Do you can swim?"]'::jsonb
+      when lower(title) = 'like' then '["Like you apples?"]'::jsonb
+      when lower(title) like '%would like%' then '["Do you would like juice?"]'::jsonb
+      when lower(title) like '%article%' then '["a apple","an cat"]'::jsonb
+      else common_mistakes
+    end,
+    exercise_templates = case
+      when lower(title) like '%article%' then '[{"type":"articles","prompt":"I have got ___ apple.","answer":"an"}]'::jsonb
+      else '[{"type":"question_form"},{"type":"short_answer"}]'::jsonb
+    end
+  where family_id = v_family and course_id = v_course;
 end;
 $$;

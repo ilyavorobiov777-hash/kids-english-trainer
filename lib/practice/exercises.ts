@@ -72,37 +72,62 @@ const articleExamples = [
 
 const shortAnswerExamples = [
   {
+    prompt: "Have you got a dog?",
+    answer: "Yes, I have.",
+    options: ["Yes, I have.", "No, I haven't.", "Yes, I do.", "No, thank you."]
+  },
+  {
+    prompt: "Have you got a pencil?",
+    answer: "No, I haven't.",
+    options: ["No, I haven't.", "Yes, I have.", "No, I can't.", "No, I don't."]
+  },
+  {
     prompt: "Can you swim?",
     answer: "Yes, I can.",
-    options: ["Yes, I can.", "Yes, I do.", "No, I am.", "Yes, please."]
+    options: ["Yes, I can.", "No, I can't.", "Yes, I do.", "Yes, please."]
+  },
+  {
+    prompt: "Can you jump?",
+    answer: "No, I can't.",
+    options: ["No, I can't.", "Yes, I can.", "No, I don't.", "No, I haven't."]
   },
   {
     prompt: "Do you like bananas?",
     answer: "Yes, I do.",
-    options: ["Yes, I do.", "Yes, I can.", "No, I have.", "Yes, please."]
+    options: ["Yes, I do.", "No, I don't.", "Yes, I can.", "Yes, please."]
   },
   {
-    prompt: "Have you got a pencil?",
-    answer: "Yes, I have.",
-    options: ["Yes, I have.", "Yes, I do.", "Yes, I can.", "No, thank you."]
+    prompt: "Do you like apples?",
+    answer: "No, I don't.",
+    options: ["No, I don't.", "Yes, I do.", "No, I can't.", "No, thank you."]
   },
   {
     prompt: "Would you like an apple?",
     answer: "Yes, please.",
-    options: ["Yes, please.", "Yes, I can.", "Yes, I have.", "No, I do."]
+    options: ["Yes, please.", "No, thank you.", "Yes, I can.", "No, I don't."]
+  },
+  {
+    prompt: "Would you like some juice?",
+    answer: "No, thank you.",
+    options: ["No, thank you.", "Yes, please.", "No, I don't.", "No, I haven't."]
   }
 ];
 
 const miniDialogueExamples = [
   {
-    prompt: "Would you like an apple?",
+    prompt: "Would you like some juice?",
     answer: "Yes, please.",
     options: ["Yes, please.", "I can swim.", "It is blue.", "I have got a pencil."]
   },
   {
-    prompt: "Thank you!",
-    answer: "You are welcome.",
-    options: ["You are welcome.", "I like apples.", "Can you jump?", "It is a dog."]
+    prompt: "Have you got a pencil?",
+    answer: "No, I haven't.",
+    options: ["No, I haven't.", "Yes, please.", "I like apples.", "It is black."]
+  },
+  {
+    prompt: "Do you like bananas?",
+    answer: "Yes, I do.",
+    options: ["Yes, I do.", "No, I can't.", "Yes, I have.", "No, thank you."]
   }
 ];
 
@@ -235,7 +260,7 @@ export function buildDailyPractice(params: {
     return buildCardExercise(card, activeCards, preferred);
   });
 
-  const questionExercises = questionFormExamples.slice(0, 1).map((item) => ({
+  const questionExercises = shuffle(questionFormExamples).slice(0, 1).map((item) => ({
     id: `question_form:${item.key}`,
     type: "question_form" as ExerciseType,
     grammarPattern: findPattern(grammarPatterns, item.key),

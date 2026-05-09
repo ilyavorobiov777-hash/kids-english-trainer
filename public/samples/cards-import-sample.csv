@@ -1,6 +1,7 @@
 english,russian,type,topic,course,source,unit,lesson,example_en,example_ru,difficulty,tags,status
 dog,собака,word,Animals,Starter English,CSV sample,Unit 1,Lesson 1,I have got a dog.,У меня есть собака.,1,"animals,have got",active
-apple,яблоко,word,Food,Starter English,CSV sample,Unit 1,Lesson 1,Would you like an apple?,Хочешь яблоко?,1,"food,articles",active
 I can swim.,Я умею плавать.,phrase,Actions,Starter English,CSV sample,Unit 1,Lesson 2,I can swim.,Я умею плавать.,2,"can,actions",active
-Do you like bananas?,Ты любишь бананы?,phrase,Food,Starter English,CSV sample,Unit 1,Lesson 2,Do you like bananas?,Ты любишь бананы?,2,"like,food",active
+The cat is black.,Кошка черная.,sentence,Animals,Starter English,CSV sample,Unit 1,Lesson 2,I have got a cat. The cat is black.,У меня есть кошка. Кошка черная.,2,"animals,articles",active
 articles a / an / the,артикли a / an / the,grammar_pattern,Grammar,Starter English,CSV sample,Unit 2,Lesson 1,Would you like an apple?,Хочешь яблоко?,3,"grammar,articles",active
+Would you like some juice?,Да пожалуйста.,dialogue,Polite phrases,Starter English,CSV sample,Unit 2,Lesson 2,Would you like some juice? Yes please.,Хочешь сок? Да пожалуйста.,2,"dialogue,would like",active
+My little dog can jump.,Моя маленькая собака умеет прыгать.,mini_story,Mini stories,Starter English,CSV sample,Unit 3,Lesson 1,My little dog can jump. It is happy.,Моя маленькая собака умеет прыгать. Она счастлива.,3,"story,can,animals",active
