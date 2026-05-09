@@ -475,16 +475,18 @@ ilyavorobiov777-hash/kids-english-trainer
 
 4. Deploy from Vercel.
 5. Copy the Vercel production URL.
-6. Add the Vercel production URL to Supabase `Authentication -> URL Configuration`:
+6. In Supabase `Authentication -> URL Configuration`, set `Site URL` to:
 
 ```text
-https://your-vercel-domain/**
+https://kids-english-trainer.vercel.app
 ```
 
-7. Keep local auth redirect for development:
+7. Add these Redirect URLs:
 
 ```text
 http://localhost:3000/**
+https://kids-english-trainer.vercel.app/**
+https://*.vercel.app/**
 ```
 
 8. Run the production smoke test from [PRODUCTION_SMOKE_TEST.md](PRODUCTION_SMOKE_TEST.md).

@@ -17,6 +17,24 @@ https://kids-english-trainer.vercel.app
 - [x] `/grammar` returns HTTP 200.
 - [x] `/manifest.webmanifest` returns HTTP 200.
 - [x] `/` returns HTTP 307 redirect, which is acceptable for the app root.
+- [x] Supabase CLI can see linked project `etuvgikfrlndeayczbrm`.
+
+## Auth Redirect Status
+
+Supabase Auth URL Configuration still needs the manual dashboard update from `SUPABASE_REDIRECT_TODO.md`.
+
+Required values:
+
+```text
+Site URL: https://kids-english-trainer.vercel.app
+
+Redirect URLs:
+http://localhost:3000/**
+https://kids-english-trainer.vercel.app/**
+https://*.vercel.app/**
+```
+
+Automatic update was not performed because `SUPABASE_ACCESS_TOKEN` is not present locally and Supabase CLI does not provide a direct safe command for this setting.
 
 Manual checks still required after updating Supabase Auth redirect URLs in `SUPABASE_REDIRECT_TODO.md`.
 

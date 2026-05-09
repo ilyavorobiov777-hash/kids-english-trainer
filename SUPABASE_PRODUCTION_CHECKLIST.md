@@ -45,7 +45,13 @@ Use this before and after Vercel deployment.
 - [ ] Parent signup works.
 - [ ] Parent login works.
 - [ ] Password reset, if used, points to production URL.
-- [ ] `Site URL` is set to the Vercel production URL after deploy.
+- [ ] `Site URL` is set to the Vercel production URL:
+
+```text
+https://kids-english-trainer.vercel.app
+```
+
+- [ ] Automatic redirect update status is understood: it was not changed automatically because no `SUPABASE_ACCESS_TOKEN` is available locally and there is no direct safe CLI command for Auth URL Configuration.
 
 ## Redirect URLs
 
@@ -58,10 +64,10 @@ http://localhost:3000/**
 Include production:
 
 ```text
-https://your-production-domain/**
+https://kids-english-trainer.vercel.app/**
 ```
 
-Optional preview pattern if you test auth on Vercel preview URLs:
+Include Vercel preview pattern if you test auth on Vercel preview URLs:
 
 ```text
 https://*.vercel.app/**

@@ -16,11 +16,13 @@ Remaining manual actions:
 
 1. Open `SUPABASE_REDIRECT_TODO.md`.
 2. Add the production URL to Supabase Auth `Site URL`.
-3. Add the production redirect URL to Supabase Auth Redirect URLs.
+3. Add the local, production, and Vercel preview redirect URLs to Supabase Auth Redirect URLs.
 4. Test parent signup/login on production.
 5. In Vercel dashboard, connect the GitHub repository to the existing Vercel project if you want automatic deploys from `main`.
 
 Note: CLI deploy works. During `vercel link`, Vercel could not automatically connect the GitHub repository to the project, so Preview branch env variables were not configured.
+
+Supabase Auth redirect update status: not completed automatically. Supabase CLI can see the linked project `etuvgikfrlndeayczbrm`, but there is no direct safe CLI command for Auth URL Configuration. `SUPABASE_ACCESS_TOKEN` is not present locally, so the Management API was not used. See `SUPABASE_REDIRECT_TODO.md` for exact manual steps and the optional local-token retry path.
 
 ## 1. Before Deploy
 
@@ -96,25 +98,34 @@ https://kids-english-trainer.vercel.app
 
 ## 5. Configure Supabase Auth Redirects
 
+Production URL:
+
+```text
+https://kids-english-trainer.vercel.app
+```
+
 After Vercel gives you the production URL:
 
 1. Open Supabase dashboard.
-2. Go to `Authentication` -> `URL Configuration`.
-3. Set `Site URL` to the Vercel production URL.
-4. Add Redirect URLs:
+2. Open project `etuvgikfrlndeayczbrm`.
+3. Go to `Authentication` -> `URL Configuration`.
+4. Set `Site URL` to:
 
 ```text
-https://your-production-domain/**
-http://localhost:3000/**
+https://kids-english-trainer.vercel.app
 ```
 
-If you use Vercel preview deployments for auth testing, add a preview URL pattern too, for example:
+5. Add Redirect URLs:
 
 ```text
+http://localhost:3000/**
+https://kids-english-trainer.vercel.app/**
 https://*.vercel.app/**
 ```
 
-Use a narrower preview pattern if your Supabase project is shared or sensitive.
+6. Save changes.
+
+Keep `http://localhost:3000/**` for local development. Use a narrower preview pattern if your Supabase project is shared or sensitive.
 
 ## 6. Production Checks
 
@@ -172,6 +183,7 @@ Fix:
 1. Copy the exact Vercel production URL.
 2. Add it to Supabase `Authentication` -> `URL Configuration`.
 3. Set `Site URL` to production.
-4. Add `https://your-production-domain/**` to Redirect URLs.
+4. Add `https://kids-english-trainer.vercel.app/**` to Redirect URLs.
 5. Keep `http://localhost:3000/**` for local development.
-6. Try login/signup again.
+6. Keep `https://*.vercel.app/**` if you want Vercel preview auth testing.
+7. Try login/signup again.
