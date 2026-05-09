@@ -1,0 +1,6 @@
+english,russian,type,topic,course,source,unit,lesson,example_en,example_ru,difficulty,tags,status
+dog,собака,word,Animals,Starter English,CSV sample,Unit 1,Lesson 1,I have got a dog.,У меня есть собака.,1,"animals,have got",active
+apple,яблоко,word,Food,Starter English,CSV sample,Unit 1,Lesson 1,Would you like an apple?,Хочешь яблоко?,1,"food,articles",active
+I can swim.,Я умею плавать.,phrase,Actions,Starter English,CSV sample,Unit 1,Lesson 2,I can swim.,Я умею плавать.,2,"can,actions",active
+Do you like bananas?,Ты любишь бананы?,phrase,Food,Starter English,CSV sample,Unit 1,Lesson 2,Do you like bananas?,Ты любишь бананы?,2,"like,food",active
+articles a / an / the,артикли a / an / the,grammar_pattern,Grammar,Starter English,CSV sample,Unit 2,Lesson 1,Would you like an apple?,Хочешь яблоко?,3,"grammar,articles",active

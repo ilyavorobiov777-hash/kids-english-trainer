@@ -1,6 +1,6 @@
 # kids-english-trainer
 
-Browser PWA for helping a primary-school child learn English with a Russian-first interface. The MVP covers the core loop: a parent signs in, creates a child profile, adds cards, the child selects a profile and completes a simple practice session, and the parent sees progress stats from saved attempts.
+Browser PWA for helping a primary-school child learn English with a Russian-first interface. The MVP covers the core loop: a parent signs in, creates a child profile, adds/imports cards, the child selects a profile and completes a short daily practice session, and the parent sees progress stats from saved attempts.
 
 ## Tech Stack
 
@@ -60,17 +60,18 @@ npm run typecheck
 3. In `Authentication -> Providers -> Email`, enable email/password auth.
 4. For local MVP testing, you may temporarily disable required email confirmation. If confirmation is enabled, confirm the parent email after signup.
 
-Apply the migration:
+Apply all migrations:
 
 ```bash
 supabase link --project-ref your-project-ref
 supabase db push
 ```
 
-Or manually run this file in the Supabase SQL Editor:
+Or manually run these files in the Supabase SQL Editor in order:
 
 ```text
 supabase/migrations/20260509130000_initial_schema.sql
+supabase/migrations/20260509160000_learning_mechanics.sql
 ```
 
 The migration creates:
@@ -92,7 +93,7 @@ The migration creates:
 - `review_schedule`
 - `rewards`
 
-RLS is enabled on application tables. Data is separated by `family_id`. Parent-managed tables require the authenticated user's profile to have role `parent`.
+RLS is enabled on application tables. Data is separated by `family_id`. Parent-managed tables require the authenticated user's profile to have role `parent`. The frontend uses only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; never expose a service role key in the browser.
 
 ## Seed Data
 
@@ -115,11 +116,11 @@ Seed content includes 30 words, 10 phrases, and 5 grammar patterns, including `h
 1. Open `/login`.
 2. Sign up as a parent with email/password.
 3. Open `/parent/children` and create a child profile.
-4. Open `/parent/import` and add seed data, or add cards manually on `/parent/cards`.
+4. Open `/parent/import` and add seed data, import CSV, or add cards manually on `/parent/cards`.
 5. Open `/child/select` and choose the child profile.
 6. Open `/child/practice`.
 7. Use `Listen` or `Listen slowly`.
-8. Choose the Russian translation.
+8. Complete the mixed daily practice.
 9. Open `/parent/dashboard` or `/parent/progress` to see saved stats.
 
 ## Pages
@@ -129,12 +130,83 @@ Seed content includes 30 words, 10 phrases, and 5 grammar patterns, including `h
 - `/parent/children` - child profile creation
 - `/parent/courses` - basic course creation
 - `/parent/cards` - card list, add, edit, archive, filters
-- `/parent/import` - seed data import
-- `/parent/progress` - detailed progress and weak cards
+- `/parent/import` - CSV preview import and seed data import
+- `/parent/progress` - detailed progress, weak cards, weak grammar, due cards
 - `/child/select` - child profile selection without email
 - `/child/dashboard` - simple child home screen
-- `/child/practice` - Choose translation practice
+- `/child/practice` - mixed daily practice
 - `/grammar` - grammar patterns
+
+## CSV Import
+
+Open `/parent/import`, choose a `.csv` file, review the preview table, fix highlighted rows, then confirm import. The importer supports:
+
+```text
+english,russian,type,topic,course,source,unit,lesson,example_en,example_ru,difficulty,tags,status
+```
+
+Required data:
+
+- `english`
+- `russian`
+- `type` defaults to `word` when empty
+- `status` defaults to `active` when empty
+- `difficulty` defaults to `1` when empty
+
+`tags` are comma-separated. If `topic`, `course`, `source`, `unit`, or `lesson` do not exist yet, the app creates them for the current family. Sample file:
+
+```text
+public/samples/cards-import-sample.csv
+```
+
+## Exercise Types
+
+The child practice flow can build a short mixed session from cards, review schedule, previous mistakes, and grammar patterns:
+
+- `choose_translation` - English to Russian multiple choice
+- `russian_to_english` - Russian to English multiple choice
+- `listen_and_choose` - listen to English, choose Russian translation
+- `build_sentence` - tap words in order
+- `fill_the_gap` - choose a missing word
+- `question_form` - choose the correct question form
+- `short_answer` - choose a short answer
+- `articles` - choose `a`, `an`, `the`, or `no article`
+- `mini_dialogue` - choose the next reply
+
+## Daily Practice
+
+`/child/practice` does not show the child every card. It builds a short session from:
+
+- due cards from `review_schedule`
+- weak cards with previous mistakes
+- a few new active cards
+- phrase/sentence cards when available
+- one question form exercise
+- one articles exercise
+- one mini-dialogue when data is available
+
+If the family has little content, the builder uses what exists and still opens without crashing.
+
+## Question Forms Trainer
+
+The `question_form` exercise stores `exercise_type = question_form` in `practice_attempts`. MVP examples include:
+
+- `I have got a dog.` -> `Have you got a dog?`
+- `I can swim.` -> `Can you swim?`
+- `I like apples.` -> `Do you like apples?`
+- `I would like some juice.` -> `Would you like some juice?`
+
+## Articles Trainer
+
+The `articles` exercise uses sentence gaps and saves attempts with `exercise_type = articles`. MVP examples include:
+
+- `I have got ___ apple.` -> `an`
+- `I have got ___ cat.` -> `a`
+- `I have got a cat. ___ cat is black.` -> `the`
+- `___ sun is yellow.` -> `the`
+- `Open ___ door.` -> `the`
+
+After an incorrect answer, the child sees a short Russian explanation.
 
 ## Card Types
 
@@ -166,12 +238,28 @@ Service workers require `localhost` or HTTPS.
 - [ ] Parent can sign up.
 - [ ] Parent can create a child profile.
 - [ ] Parent can add a card.
+- [ ] Parent can import `public/samples/cards-import-sample.csv` with preview.
 - [ ] Child can select profile.
 - [ ] Child can open practice.
 - [ ] Listen button speaks.
-- [ ] Child can choose translation.
+- [ ] Child can choose translation, build a sentence, and answer grammar exercises.
 - [ ] Attempt is saved in `practice_attempts`.
-- [ ] Parent dashboard shows stats.
+- [ ] `review_schedule` is updated after card exercises.
+- [ ] Parent dashboard shows stats by exercise type.
+
+## Manual Child Flow Check
+
+1. Create/sign in as parent.
+2. Create a child profile.
+3. Run seed data or import the sample CSV.
+4. Select the child at `/child/select`.
+5. Open `/child/practice`.
+6. Complete the session and check the summary.
+7. Open `/parent/progress` and verify total attempts, accuracy by type, weak cards, weak grammar, and due cards.
+
+## Audit Note
+
+`npm audit --audit-level=moderate` currently reports 5 vulnerabilities from the Next.js 14 dependency tree. The suggested automatic fix is `npm audit fix --force`, which would install Next 16 and can break the app. Do not run the forced fix as a stabilization step. Safe plan: upgrade Next/React intentionally in a separate branch, run `npm install`, `npm run typecheck`, `npm run build`, and manually smoke-test auth/practice/import.
 
 ## How To Connect This Folder To GitHub
 
@@ -204,13 +292,10 @@ git status
 
 ## Next Stage
 
-Do not add larger features until the local install/build smoke test passes on a normal Node.js LTS environment.
-
-Good next items after stabilization:
+Good next items:
 
 - Real child PIN/session instead of child mode inside parent auth session.
-- CSV/Excel import.
-- More exercise types.
+- E2E tests for import and practice flow.
+- Dedicated authoring UI for grammar pattern exercises.
 - Stronger spaced repetition logic.
 - Storage buckets for images/audio.
-- E2E tests.

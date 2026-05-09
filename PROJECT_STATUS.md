@@ -1,29 +1,51 @@
 # Project Status
 
-Last stabilization pass: 2026-05-09.
+Last development pass: 2026-05-09.
 
 ## Implemented
 
-- Next.js App Router project structure.
-- TypeScript config with `@/*` path alias.
-- Tailwind CSS config and global styles.
-- PWA manifest route, service worker, and placeholder icons.
-- Supabase browser client using only public URL and anon key.
-- Supabase migration with tables, indexes, timestamps, enums, triggers, and RLS.
-- Parent login/signup page.
-- Parent pages for dashboard, children, courses, cards, import, and progress.
-- Child pages for profile selection, dashboard, and Choose translation practice.
-- Grammar page.
-- Card CRUD basics: list, add, edit, archive, type filter, topic filter.
-- Practice flow: SpeechSynthesis listen, slow listen, rate slider, translation options, saved attempts, session updates, review schedule upsert.
-- Seed RPC for 30 words, 10 phrases, and 5 grammar patterns.
-- Windows local run guide.
+- Next.js App Router, TypeScript, Tailwind CSS, PWA manifest/service worker/icons.
+- Supabase Auth/Postgres foundation with RLS and `family_id` separation.
+- Parent flows: login/signup, children, courses, cards CRUD, CSV import, seed import, dashboard, progress.
+- Child flows: profile select, dashboard, mixed daily practice.
+- CSV import with client-side parsing, preview, row validation, error highlighting, and summary.
+- Sample CSV: `public/samples/cards-import-sample.csv`.
+- Practice exercise types:
+  - `choose_translation`
+  - `russian_to_english`
+  - `listen_and_choose`
+  - `build_sentence`
+  - `fill_the_gap`
+  - `question_form`
+  - `short_answer`
+  - `articles`
+  - `mini_dialogue`
+- Question form trainer examples for `have got`, `can`, `like`, and `would like`.
+- Articles trainer with `a / an / the / no article` options and Russian explanations.
+- Daily practice builder using due cards, weak cards, new cards, phrases, and grammar exercises.
+- Practice attempts save `card_id` when applicable and `grammar_pattern_id` when applicable.
+- Review schedule updates with simple intervals and FSRS-ready fields.
+- Parent statistics for total sessions, attempts, accuracy, accuracy by exercise type, weak cards, weak grammar, articles/question accuracy, last practice date, and due cards.
+
+## Commands Verified In This Environment
+
+The Codex desktop app has a bundled `node.exe` earlier in PATH that returns `Access is denied`. Commands pass when normal Node.js is put first in PATH:
+
+```powershell
+$env:PATH='C:\Program Files\nodejs;' + $env:PATH
+& 'C:\Program Files\nodejs\npm.cmd' run typecheck
+& 'C:\Program Files\nodejs\npm.cmd' run build
+```
+
+Results:
+
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- Build produced only existing React hook dependency warnings in several components.
 
 ## Commands To Run Locally
 
-Recommended package manager: `npm`. The project has no existing lockfile yet, and npm is the simplest default for Windows and Vercel.
-
-Run these on a normal Windows terminal with Node.js LTS installed:
+On a normal Windows terminal with Node.js installed:
 
 ```powershell
 cd D:\Projects\kids-english-trainer
@@ -34,8 +56,6 @@ npm run build
 npm run dev
 ```
 
-If PowerShell blocks `npm.ps1`, use `npm.cmd install`, `npm.cmd run typecheck`, `npm.cmd run build`, and `npm.cmd run dev`.
-
 Fill `.env.local` before starting the app:
 
 ```env
@@ -43,66 +63,53 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-## Expected Checks
-
-- `npm install` completes and creates `package-lock.json`.
-- `npm run typecheck` passes.
-- `npm run build` passes.
-- `npm run dev` starts Next.js.
-- `/login` opens.
-- Parent signup works.
-- Parent can create a child profile.
-- Parent can add or seed cards.
-- Child can select profile.
-- Child can open practice.
-- `Listen` speaks English text through the browser.
-- A translation answer creates a `practice_attempts` row.
-- Parent dashboard reads stats from saved attempts.
-
-## Current Environment Findings
-
-- `node.exe` is present in PATH from the Codex desktop app, but executing `node --version` returns `Access is denied`.
-- `npm`, `pnpm`, and `yarn` are not available in PATH.
-- A separate bundled Node executable exists and can print a version, but it does not provide npm. This is not a suitable substitute for normal project setup.
-- Because npm is unavailable, dependency installation, TypeScript, lint, build, and dev server checks could not be executed in this environment.
-- `.git` has been initialized in `D:\Projects\kids-english-trainer`.
-- Local branch: `main`.
-- Remote: `origin` -> `https://github.com/ilyavorobiov777-hash/kids-english-trainer.git`.
-- Initial local commit exists: `514d78e Initial MVP foundation`.
-- Push was not completed because local GitHub credentials are not available to command-line Git. HTTPS push waits for Git Credential Manager authentication; SSH key `id_ed25519` is present locally but GitHub rejects it with `Permission denied (publickey)`.
-
 ## Supabase Readiness
 
-- `.env.example` contains only:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `.env.local` is ignored by git and not tracked.
+- `.env.example` contains only public frontend env variables.
 - No service role key is used in frontend code.
-- Migration path: `supabase/migrations/20260509130000_initial_schema.sql`.
+- Migration order:
+  1. `supabase/migrations/20260509130000_initial_schema.sql`
+  2. `supabase/migrations/20260509160000_learning_mechanics.sql`
 - Seed path: `supabase/seed.sql`.
-- The app relies on Supabase RLS plus `family_id` to separate data.
+- New migration extends `practice_attempts`, `grammar_patterns`, and `review_schedule` without dropping existing data.
+
+## Minimal Smoke Test Checklist
+
+- [ ] Login page opens.
+- [ ] Parent can sign up.
+- [ ] Parent can create a child profile.
+- [ ] Parent can add a card.
+- [ ] Parent can import `public/samples/cards-import-sample.csv`.
+- [ ] Child can select profile.
+- [ ] Child can open daily practice.
+- [ ] Listen and Listen slowly speak English.
+- [ ] Child can complete translation, sentence, question, and articles exercises.
+- [ ] Attempts are saved in `practice_attempts`.
+- [ ] Review rows are updated in `review_schedule`.
+- [ ] Parent dashboard/progress shows stats by exercise type.
+
+## Audit Finding
+
+`npm audit --audit-level=moderate` reports 5 vulnerabilities in the current dependency tree:
+
+- `next` high severity advisories.
+- `glob` high severity advisory via `eslint-config-next`.
+- `postcss` moderate advisory under Next dependency tree.
+
+The suggested automatic remediation is `npm audit fix --force`, which would upgrade to Next 16 and is a breaking dependency jump. This was intentionally not run. Safe plan: perform a dedicated framework-upgrade branch later, run full typecheck/build/manual smoke tests, then merge.
 
 ## Known Risks
 
-- Child mode currently runs inside the authenticated parent browser session and stores selected child in `localStorage`. The UI prevents child editing, but database-level distinction between parent and child is not complete until a real child PIN/session model is implemented.
-- `cards` has a parent manage policy that lets parents view archived cards. This is intentional for management, but child-facing queries should continue filtering `status = active`.
-- The seed function can be run multiple times and will add duplicate demo content. Use it once per family for MVP testing.
-- Service worker behavior should be tested after a real browser launch because build/dev checks could not be run here.
+- Child mode still uses the authenticated parent session plus selected child id in `localStorage`. A real child PIN/session model remains a next-stage security improvement.
+- Seed RPC can still create duplicate demo data if clicked repeatedly.
+- Grammar exercises are MVP template-based; a dedicated grammar authoring UI is still needed.
+- Review scheduling is intentionally simple and FSRS-ready, not a full FSRS implementation.
 
-## Do Next
+## Next Stage
 
-1. Install Node.js LTS on Windows.
-2. Run `npm install`.
-3. Run `npm run typecheck`.
-4. Run `npm run build`.
-5. Apply Supabase migration and seed SQL.
-6. Complete the smoke test checklist.
-7. Authenticate command-line GitHub access, then run `git push -u origin main`.
-
-## Not Included In This Stabilization Step
-
-- 350 cards.
-- Excel import.
-- OCR.
-- AI generation.
-- Pronunciation checking.
-- New exercise types.
+1. Apply both Supabase migrations in the hosted project.
+2. Run the seed SQL if needed.
+3. Smoke-test CSV import and mixed child practice against real Supabase.
+4. Add E2E tests for import, practice attempts, and parent stats.
+5. Add a real child PIN/session model.
