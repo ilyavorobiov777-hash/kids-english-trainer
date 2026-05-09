@@ -42,6 +42,7 @@ Results:
 - `npm run typecheck` passed.
 - `npm run build` passed.
 - Build produced only existing React hook dependency warnings in several components.
+- Supabase CLI is installed as a project dev dependency and verified with `npx supabase --version` -> `2.98.2`.
 
 ## Commands To Run Locally
 
@@ -68,6 +69,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 - `.env.local` is ignored by git and not tracked.
 - `.env.example` contains only public frontend env variables.
 - No service role key is used in frontend code.
+- Use `npx supabase link --project-ref your-project-ref` and `npm run db:push` after `npm install`.
 - Migration order:
   1. `supabase/migrations/20260509130000_initial_schema.sql`
   2. `supabase/migrations/20260509160000_learning_mechanics.sql`

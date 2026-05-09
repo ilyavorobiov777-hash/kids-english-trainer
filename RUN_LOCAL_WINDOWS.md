@@ -29,6 +29,12 @@ If PowerShell says `npm.ps1 cannot be loaded because running scripts is disabled
 npm.cmd install
 ```
 
+If `npm` is not recognized, close PowerShell and open a new window after installing Node.js. The expected PATH entry is:
+
+```text
+C:\Program Files\nodejs
+```
+
 6. Create `.env.local` from the example:
 
 ```powershell
@@ -55,6 +61,16 @@ PowerShell fallback:
 ```powershell
 npm.cmd run dev
 ```
+
+Supabase CLI is installed as a project dev dependency. After `npm install`, use:
+
+```powershell
+npx supabase --version
+npx supabase link --project-ref your-project-ref
+npm run db:push
+```
+
+Do not use `npm install -g supabase`; Supabase does not support global npm installation for the CLI.
 
 9. Open:
 

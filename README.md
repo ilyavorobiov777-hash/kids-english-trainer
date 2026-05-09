@@ -26,7 +26,7 @@ copy .env.example .env.local
 npm run dev
 ```
 
-If PowerShell blocks `npm.ps1`, run the same commands through `npm.cmd`, for example `npm.cmd install` and `npm.cmd run dev`.
+If `npm` is not recognized after installing Node.js, close PowerShell and open a new window. This project expects `C:\Program Files\nodejs` in PATH. If PowerShell blocks `npm.ps1`, run the same commands through `npm.cmd`, for example `npm.cmd install` and `npm.cmd run dev`.
 
 Then open `http://localhost:3000`.
 
@@ -49,9 +49,11 @@ npm run build
 npm run start
 npm run lint
 npm run typecheck
+npm run db:push
 ```
 
 `typecheck` runs `tsc --noEmit`.
+Supabase CLI is installed as a project dev dependency, so you can also run it with `npx supabase --version`.
 
 ## Supabase Setup
 
@@ -63,8 +65,8 @@ npm run typecheck
 Apply all migrations:
 
 ```bash
-supabase link --project-ref your-project-ref
-supabase db push
+npx supabase link --project-ref your-project-ref
+npm run db:push
 ```
 
 Or manually run these files in the Supabase SQL Editor in order:
