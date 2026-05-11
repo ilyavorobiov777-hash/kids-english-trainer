@@ -334,6 +334,43 @@ The extension adds:
 
 Check `/grammar` for the child-friendly explanation and the `Потренировать` button. It opens `/child/practice?grammar_key=demonstratives_this_that_these_those` and builds a short focused grammar practice.
 
+## Grammar: -ing / Present Continuous
+
+The `-ing / Present Continuous` pack teaches actions happening now:
+
+- `I am running.`
+- `She is sleeping.`
+- `He is playing football.`
+- `They are jumping.`
+- `What are you doing?`
+- `Are they jumping?`
+
+Rule: `I am + ing`, `he/she/it is + ing`, `you/we/they are + ing`. The practice focuses on not dropping `am/is/are`.
+
+## Grammar: Days And Time Expressions
+
+The `Days and time expressions` pack teaches:
+
+- `on + day`: `on Monday`, `on Sunday`
+- `in + part of day`: `in the morning`, `in the afternoon`, `in the evening`
+- `at night`
+- `at + clock time`: `at seven o'clock`
+- no preposition with `last / next / this`: `last weekend`, `next week`, `this morning`
+
+Apply the latest migration, then add both packs from `/parent/import` with `Добавить grammar pack: -ing + time`, or run:
+
+```sql
+select public.seed_ing_time_content();
+```
+
+The pack adds 2 grammar pattern rows, 109 cards, and 3 original short texts:
+
+- `My morning`
+- `In the park`
+- `Last weekend`
+
+Every grammar pattern card on `/grammar` now has a `Потренировать` button. It opens focused practice by `grammar_key` and uses the existing child practice summary, saved attempts, review schedule, and mistake review.
+
 ## Child Management
 
 Parents can manage child profiles on `/parent/children`:

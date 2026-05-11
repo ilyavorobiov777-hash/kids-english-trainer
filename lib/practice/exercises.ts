@@ -85,6 +85,42 @@ const questionFormExamples = [
     statement: "Those are toys.",
     question: "What are those?",
     options: ["What are those?", "What is those?", "What are that?", "What do those?"]
+  },
+  {
+    key: "present_continuous_ing",
+    statement: "I am running.",
+    question: "Are you running?",
+    options: ["Are you running?", "Do you running?", "Is you running?", "Are you run?"]
+  },
+  {
+    key: "present_continuous_ing",
+    statement: "She is sleeping.",
+    question: "Is she sleeping?",
+    options: ["Is she sleeping?", "Are she sleeping?", "Does she sleeping?", "Is she sleep?"]
+  },
+  {
+    key: "present_continuous_ing",
+    statement: "They are jumping.",
+    question: "Are they jumping?",
+    options: ["Are they jumping?", "Is they jumping?", "Do they jumping?", "Are they jump?"]
+  },
+  {
+    key: "present_continuous_ing",
+    statement: "You are drawing.",
+    question: "What are you doing?",
+    options: ["What are you doing?", "What is you doing?", "What do you doing?", "What are you do?"]
+  },
+  {
+    key: "days_time_expressions",
+    statement: "I play football on Sunday.",
+    question: "What do you do on Sunday?",
+    options: ["What do you do on Sunday?", "What do you do in Sunday?", "What do you do at Sunday?", "What are Sunday?"]
+  },
+  {
+    key: "days_time_expressions",
+    statement: "I get up at seven o'clock.",
+    question: "What time do you get up?",
+    options: ["What time do you get up?", "What day do you get up?", "Where time do you get up?", "What are you get up?"]
   }
 ];
 
@@ -156,6 +192,92 @@ const demonstrativeGapExamples = [
     prompt: "Those ___ her toys.",
     answer: "are",
     explanationRu: "С those всегда используем are: Those are her toys."
+  }
+];
+
+const ingGapExamples = [
+  {
+    prompt: "I ___ running.",
+    answer: "am",
+    explanationRu: "С I используем am: I am running."
+  },
+  {
+    prompt: "She ___ sleeping.",
+    answer: "is",
+    explanationRu: "С she используем is: She is sleeping."
+  },
+  {
+    prompt: "He ___ playing.",
+    answer: "is",
+    explanationRu: "С he используем is: He is playing."
+  },
+  {
+    prompt: "They ___ jumping.",
+    answer: "are",
+    explanationRu: "С they используем are: They are jumping."
+  },
+  {
+    prompt: "We ___ going to school.",
+    answer: "are",
+    explanationRu: "С we используем are: We are going to school."
+  },
+  {
+    prompt: "What ___ you doing?",
+    answer: "are",
+    explanationRu: "В вопросе с you используем are: What are you doing?"
+  },
+  {
+    prompt: "___ she sleeping?",
+    answer: "Is",
+    explanationRu: "В вопросе с she ставим is вперед: Is she sleeping?"
+  },
+  {
+    prompt: "___ they playing?",
+    answer: "Are",
+    explanationRu: "В вопросе с they ставим are вперед: Are they playing?"
+  }
+];
+
+const timeGapExamples = [
+  {
+    prompt: "I go to school ___ Monday.",
+    answer: "on",
+    explanationRu: "С днями недели используем on: on Monday."
+  },
+  {
+    prompt: "I read ___ the evening.",
+    answer: "in",
+    explanationRu: "С частями дня используем in: in the evening."
+  },
+  {
+    prompt: "I sleep ___ night.",
+    answer: "at",
+    explanationRu: "Правильно: at night."
+  },
+  {
+    prompt: "I get up ___ seven o'clock.",
+    answer: "at",
+    explanationRu: "Со временем на часах используем at: at seven o'clock."
+  },
+  {
+    prompt: "I played football ___ weekend.",
+    answer: "last",
+    explanationRu: "С last предлог не нужен: last weekend."
+  },
+  {
+    prompt: "I will play ___ weekend.",
+    answer: "next",
+    explanationRu: "С next предлог не нужен: next weekend."
+  },
+  {
+    prompt: "I have breakfast ___ the morning.",
+    answer: "in",
+    explanationRu: "Правильно: in the morning."
+  },
+  {
+    prompt: "I have English ___ Wednesday.",
+    answer: "on",
+    explanationRu: "С днями недели используем on: on Wednesday."
   }
 ];
 
@@ -231,6 +353,30 @@ const shortAnswerExamples = [
     prompt: "Whose pencils are those?",
     answer: "Those are her pencils.",
     options: ["Those are her pencils.", "That is her pencil.", "These is her pencils.", "No, they aren't."]
+  },
+  {
+    key: "present_continuous_ing",
+    prompt: "Are you running?",
+    answer: "Yes, I am.",
+    options: ["Yes, I am.", "No, I am not.", "Yes, I do.", "Yes, they are."]
+  },
+  {
+    key: "present_continuous_ing",
+    prompt: "Is she sleeping?",
+    answer: "No, she isn't.",
+    options: ["No, she isn't.", "Yes, she is.", "No, she doesn't.", "No, they aren't."]
+  },
+  {
+    key: "present_continuous_ing",
+    prompt: "Is he playing?",
+    answer: "Yes, he is.",
+    options: ["Yes, he is.", "No, he isn't.", "Yes, he does.", "Yes, I am."]
+  },
+  {
+    key: "present_continuous_ing",
+    prompt: "Are they jumping?",
+    answer: "No, they aren't.",
+    options: ["No, they aren't.", "Yes, they are.", "No, they don't.", "No, it isn't."]
   }
 ];
 
@@ -376,6 +522,29 @@ function isDemonstrativesKey(key?: string) {
   return normalize(key ?? "").includes("demonstratives") || normalize(key ?? "").includes("these");
 }
 
+function isIngKey(key?: string) {
+  const value = normalize(key ?? "");
+  return value.includes("present_continuous") || value.includes("continuous") || value.includes("ing");
+}
+
+function isTimeKey(key?: string) {
+  const value = normalize(key ?? "");
+  return value.includes("days_time") || value.includes("time expressions") || value.includes("monday") || value.includes("weekend");
+}
+
+function matchesGrammarKey(card: Card, key: string) {
+  const value = normalize(key);
+  const compactValue = value.replace(/\s+/g, "_");
+  const haystack = normalize(`${card.english} ${card.russian} ${card.type} ${card.tags.join(" ")}`);
+
+  if (isDemonstrativesKey(value)) return card.tags.some((tag) => normalize(tag).includes("demonstratives")) || haystack.includes("these") || haystack.includes("those");
+  if (isIngKey(value)) return card.tags.some((tag) => normalize(tag).includes("present_continuous")) || haystack.includes("running") || haystack.includes("sleeping") || haystack.includes("jumping");
+  if (isTimeKey(value)) return card.tags.some((tag) => normalize(tag).includes("days_time")) || haystack.includes("monday") || haystack.includes("morning") || haystack.includes("weekend");
+
+  const tokens = uniqueValues([...value.split(/[_\s/+-]+/), ...compactValue.split("_")]).filter((token) => token.length >= 3);
+  return tokens.some((token) => haystack.includes(token));
+}
+
 function buildDemonstrativesPractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
   const activeCards = cards.filter((card) => card.status === "active");
   const grammarPattern = findPattern(grammarPatterns, "demonstratives") ?? findPattern(grammarPatterns, "this that these those");
@@ -447,6 +616,133 @@ function buildDemonstrativesPractice(cards: Card[], grammarPatterns: GrammarPatt
   );
 }
 
+function buildIngPractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
+  const activeCards = cards.filter((card) => card.status === "active");
+  const grammarPattern = findPattern(grammarPatterns, "present_continuous_ing") ?? findPattern(grammarPatterns, "continuous");
+  const ingCards = activeCards.filter((card) => matchesGrammarKey(card, "present_continuous_ing"));
+
+  const cardExercises = ingCards.slice(0, 6).map((card, index) => {
+    const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence"];
+    return buildCardExercise(card, activeCards.length ? activeCards : ingCards, cycle[index % cycle.length]);
+  });
+
+  const gapExercises = ingGapExamples.map((item, index) => ({
+    id: `ing_fill:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern,
+    prompt: item.prompt,
+    promptRu: "Выбери am / is / are",
+    options: pickOptions(item.answer, ["am", "is", "are", "do", "does"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
+  const questionExercises = questionFormExamples
+    .filter((item) => isIngKey(item.key))
+    .map((item, index) => ({
+      id: `ing_question:${index}:${item.statement}`,
+      type: "question_form" as ExerciseType,
+      grammarPattern,
+      prompt: item.statement,
+      promptRu: "Выбери правильный вопрос",
+      options: shuffle(item.options),
+      correctAnswer: item.question,
+      explanationRu: "В Present Continuous am/is/are выходит вперед: Are you running? Is she sleeping?"
+    }));
+
+  const shortAnswerExercises = shortAnswerExamples
+    .filter((item) => isIngKey(item.key))
+    .map((item, index) => ({
+      id: `ing_short:${index}:${item.prompt}`,
+      type: "short_answer" as ExerciseType,
+      grammarPattern,
+      prompt: item.prompt,
+      promptRu: "Выбери короткий ответ",
+      options: shuffle(item.options),
+      correctAnswer: item.answer,
+      listenText: item.prompt,
+      explanationRu: "Короткий ответ повторяет am / is / are: Yes, I am. No, she isn't. Yes, they are."
+    }));
+
+  return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises, ...shortAnswerExercises]), 12);
+}
+
+function buildTimePractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
+  const activeCards = cards.filter((card) => card.status === "active");
+  const grammarPattern = findPattern(grammarPatterns, "days_time_expressions") ?? findPattern(grammarPatterns, "time expressions");
+  const timeCards = activeCards.filter((card) => matchesGrammarKey(card, "days_time_expressions"));
+
+  const cardExercises = timeCards.slice(0, 6).map((card, index) => {
+    const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence"];
+    return buildCardExercise(card, activeCards.length ? activeCards : timeCards, cycle[index % cycle.length]);
+  });
+
+  const gapExercises = timeGapExamples.map((item, index) => ({
+    id: `time_fill:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern,
+    prompt: item.prompt,
+    promptRu: "Выбери on / in / at / last / next",
+    options: pickOptions(item.answer, ["on", "in", "at", "last", "next"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
+  const questionExercises = questionFormExamples
+    .filter((item) => isTimeKey(item.key))
+    .map((item, index) => ({
+      id: `time_question:${index}:${item.statement}`,
+      type: "question_form" as ExerciseType,
+      grammarPattern,
+      prompt: item.statement,
+      promptRu: "Выбери правильный вопрос",
+      options: shuffle(item.options),
+      correctAnswer: item.question,
+      explanationRu: "С днями недели говорим on Sunday. С частями дня: in the morning, но at night."
+    }));
+
+  return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises]), 12);
+}
+
+function buildGenericGrammarPractice(cards: Card[], grammarPatterns: GrammarPattern[], grammarKey: string) {
+  const activeCards = cards.filter((card) => card.status === "active");
+  const grammarPattern = findPattern(grammarPatterns, grammarKey);
+  const matchedCards = activeCards.filter((card) => matchesGrammarKey(card, grammarKey));
+  const sourceCards = matchedCards.length ? matchedCards : activeCards.filter((card) => card.type === "grammar_pattern");
+
+  const cardExercises = sourceCards.slice(0, 10).map((card, index) => {
+    const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence", "fill_the_gap"];
+    return buildCardExercise(card, activeCards.length ? activeCards : sourceCards, cycle[index % cycle.length]);
+  });
+
+  const questionExercises = questionFormExamples
+    .filter((item) => findPattern([grammarPattern].filter(Boolean) as GrammarPattern[], item.key) || normalize(grammarKey).includes(normalize(item.key)))
+    .map((item, index) => ({
+      id: `generic_question:${index}:${item.statement}`,
+      type: "question_form" as ExerciseType,
+      grammarPattern,
+      prompt: item.statement,
+      promptRu: "Выбери правильный вопрос",
+      options: shuffle(item.options),
+      correctAnswer: item.question
+    }));
+
+  const shortAnswerExercises = shortAnswerExamples
+    .filter((item) => findPattern([grammarPattern].filter(Boolean) as GrammarPattern[], item.key) || normalize(grammarKey).includes(normalize(item.key)))
+    .map((item, index) => ({
+      id: `generic_short:${index}:${item.prompt}`,
+      type: "short_answer" as ExerciseType,
+      grammarPattern,
+      prompt: item.prompt,
+      promptRu: "Выбери короткий ответ",
+      options: shuffle(item.options),
+      correctAnswer: item.answer,
+      listenText: item.prompt
+    }));
+
+  return dedupeValidExercises(shuffle([...questionExercises, ...shortAnswerExercises, ...cardExercises]), 12);
+}
+
 function isValidExercise(exercise: PracticeExercise) {
   if (!exercise.prompt.trim() || !exercise.correctAnswer.trim()) return false;
 
@@ -498,6 +794,15 @@ export function buildDailyPractice(params: {
   const { cards, attempts, schedules, grammarPatterns, grammarKey } = params;
   if (isDemonstrativesKey(grammarKey ?? undefined)) {
     return buildDemonstrativesPractice(cards, grammarPatterns);
+  }
+  if (isIngKey(grammarKey ?? undefined)) {
+    return buildIngPractice(cards, grammarPatterns);
+  }
+  if (isTimeKey(grammarKey ?? undefined)) {
+    return buildTimePractice(cards, grammarPatterns);
+  }
+  if (grammarKey) {
+    return buildGenericGrammarPractice(cards, grammarPatterns, grammarKey);
   }
 
   const activeCards = cards.filter((card) => card.status === "active");
@@ -604,6 +909,30 @@ export function buildDailyPractice(params: {
     explanationRu: item.explanationRu
   }));
 
+  const ingPattern = findPattern(grammarPatterns, "present_continuous_ing") ?? findPattern(grammarPatterns, "continuous");
+  const ingExercise = shuffle(ingGapExamples).slice(0, 1).map((item, index) => ({
+    id: `ing_daily:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern: ingPattern,
+    prompt: item.prompt,
+    promptRu: "am / is / are + -ing",
+    options: pickOptions(item.answer, ["am", "is", "are", "do", "does"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
+  const timePattern = findPattern(grammarPatterns, "days_time_expressions") ?? findPattern(grammarPatterns, "time expressions");
+  const timeExercise = shuffle(timeGapExamples).slice(0, 1).map((item, index) => ({
+    id: `time_daily:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern: timePattern,
+    prompt: item.prompt,
+    promptRu: "on / in / at / last / next",
+    options: pickOptions(item.answer, ["on", "in", "at", "last", "next"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
   const shortAnswerExercise = shuffle(shortAnswerExamples).slice(0, 1).map((item, index) => ({
     id: `short_answer:${index}:${item.prompt}`,
     type: "short_answer" as ExerciseType,
@@ -662,6 +991,8 @@ export function buildDailyPractice(params: {
       ...shortAnswerExercise,
       ...articleExercise,
       ...demonstrativeExercise,
+      ...ingExercise,
+      ...timeExercise,
       ...miniDialogueExercise,
       ...listenExercise
     ]),

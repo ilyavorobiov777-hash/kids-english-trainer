@@ -134,7 +134,45 @@ Check expected exercise content:
 - `Are these your books?` -> `Yes, they are.` / `No, they aren't.`
 - Fill gaps use `these/those + are`, never `these/those + is`.
 
-## 6B. Check How The Child Learns Words
+## 6B. Grammar: -ing And Time
+
+Add the grammar pack:
+
+1. Apply the latest migrations.
+2. Open `/parent/import`.
+3. Click `Добавить grammar pack: -ing + time`.
+4. Click it again and confirm inserted cards/texts are `0` or the UI says the pack already exists.
+
+Check grammar UI:
+
+1. Open `/grammar`.
+2. Confirm every grammar pattern card has a `Потренировать` button.
+3. Find `-ing: что кто-то делает сейчас`.
+4. Click `Потренировать`.
+5. Check exercises with `I am`, `She is`, `He is`, `They are`.
+6. Find `Дни недели и время: on, in, at, last, next`.
+7. Click `Потренировать`.
+8. Check exercises with `on Sunday`, `in the morning`, `at night`, `at seven o'clock`, `last weekend`, `next weekend`.
+
+Expected:
+
+- `I ___ running` -> `am`.
+- `She ___ sleeping` -> `is`.
+- `They ___ jumping` -> `are`.
+- `What ___ you doing?` -> `are`.
+- `I go to school ___ Monday` -> `on`.
+- `I read ___ the evening` -> `in`.
+- `I sleep ___ night` -> `at`.
+- `I played football ___ weekend` -> `last`.
+
+Check texts:
+
+1. Open `/child/texts`.
+2. Find `My morning`, `In the park`, and `Last weekend` after adding the pack.
+3. Open each text and answer comprehension questions.
+4. Confirm attempts save and `/parent/progress` shows text attempts.
+
+## 6C. Check How The Child Learns Words
 
 1. Open `/child/dashboard`.
 2. Confirm there are large buttons:

@@ -20,6 +20,10 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     if (prompt.startsWith("are these") || prompt.startsWith("are those")) {
       return "В вопросах Are these...? и Are those...? короткий ответ строится с they are: Yes, they are / No, they aren't.";
     }
+    if (prompt.startsWith("are you")) return "В вопросе Are you ...? короткий ответ строится с am: Yes, I am / No, I am not.";
+    if (prompt.startsWith("is she")) return "В вопросе Is she ...? короткий ответ строится с is: Yes, she is / No, she isn't.";
+    if (prompt.startsWith("is he")) return "В вопросе Is he ...? короткий ответ строится с is: Yes, he is / No, he isn't.";
+    if (prompt.startsWith("are they")) return "В вопросе Are they ...? короткий ответ строится с are: Yes, they are / No, they aren't.";
     if (prompt.startsWith("have you got")) return "В вопросе Have you got...? короткий ответ строится с have.";
     if (prompt.startsWith("can you")) return "В вопросе Can you...? короткий ответ строится с can.";
     if (prompt.startsWith("do you like")) return "В вопросе Do you like...? короткий ответ строится с do.";
@@ -32,6 +36,12 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     if (correct.startsWith("what are these")) return "These - это несколько предметов рядом, поэтому вопрос: What are these?";
     if (correct.startsWith("what are those")) return "Those - это несколько предметов далеко, поэтому вопрос: What are those?";
     if (correct.startsWith("are these") || correct.startsWith("are those")) return "С these/those используем are, не is.";
+    if (correct.startsWith("are you") || correct.startsWith("is she") || correct.startsWith("is he") || correct.startsWith("are they")) {
+      return "В Present Continuous am/is/are ставится перед человеком: Are you running? Is she sleeping?";
+    }
+    if (correct.startsWith("what time") || correct.includes(" on sunday")) {
+      return "В вопросах про время ищи day/time слова: on Sunday, in the morning, at seven o'clock.";
+    }
     if (correct.startsWith("have you got")) return "Вопрос с have got начинается с Have you got...";
     if (correct.startsWith("can you")) return "Вопрос с can начинается с Can you...";
     if (correct.startsWith("do you like")) return "Вопрос с like начинается с Do you like...";
@@ -58,6 +68,13 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     if ((prompt.includes("this") || prompt.includes("that")) && answer === "is") {
       return "С this и that используем is: This is..., That is...";
     }
+    if ((prompt.includes("running") || prompt.includes("sleeping") || prompt.includes("playing") || prompt.includes("jumping") || prompt.includes("doing")) && ["am", "is", "are"].includes(answer)) {
+      return "В -ing форме не забываем am/is/are: I am, she/he/it is, you/we/they are.";
+    }
+    if (answer === "on") return "С днями недели используем on: on Monday, on Sunday.";
+    if (answer === "in") return "С частями дня используем in: in the morning, in the afternoon, in the evening.";
+    if (answer === "at") return "At используем для at night и времени на часах: at seven o'clock.";
+    if (answer === "last" || answer === "next") return "С last/next предлог не нужен: last weekend, next week.";
   }
 
   if (["choose_translation", "russian_to_english", "listen_and_choose"].includes(exercise.type)) {

@@ -9,11 +9,19 @@ import { useEffect, useState } from "react";
 type GrammarPattern = {
   id: string;
   title: string;
+  title_ru?: string | null;
   pattern: string;
+  pattern_key?: string | null;
   explanation_ru: string | null;
   example_en: string | null;
   example_ru: string | null;
+  question_examples?: string[];
+  common_mistakes?: string[];
 };
+
+function grammarPracticeHref(patternKey: string | null | undefined, title: string) {
+  return `/child/practice?grammar_key=${encodeURIComponent(patternKey || title)}`;
+}
 
 export default function GrammarPage() {
   const { api, family, loading, error } = useFamily();
@@ -88,14 +96,78 @@ export default function GrammarPage() {
               </div>
             </div>
           </Panel>
+          <div className="mb-5 grid gap-5 lg:grid-cols-2">
+            <Panel className="bg-mint">
+              <h2 className="text-2xl font-bold">-ing: что кто-то делает сейчас</h2>
+              <p className="mt-3 text-slate-700">
+                Окончание <b>-ing</b> показывает действие, которое происходит сейчас:
+                <b> I am running</b>, <b>She is sleeping</b>, <b>They are playing</b>.
+                Важно не забывать <b>am / is / are</b>.
+              </p>
+              <div className="mt-4 grid gap-1 text-sm">
+                <p>I am running. - Я бегу.</p>
+                <p>She is sleeping. - Она спит.</p>
+                <p>He is playing. - Он играет.</p>
+                <p>They are jumping. - Они прыгают.</p>
+                <p>What are you doing? - Что ты делаешь?</p>
+                <p>Are they jumping? - Они прыгают?</p>
+              </div>
+              <p className="mt-3 rounded-lg bg-white p-3 text-sm">
+                Правило: I am + ing; He / She / It is + ing; You / We / They are + ing.
+              </p>
+              <Link className="mt-5 inline-block rounded-lg bg-berry px-5 py-3 font-bold text-white" href={grammarPracticeHref("present_continuous_ing", "-ing / Present Continuous")}>
+                Потренировать
+              </Link>
+            </Panel>
+
+            <Panel className="bg-peach">
+              <h2 className="text-2xl font-bold">Дни недели и время: on, in, at, last, next</h2>
+              <p className="mt-3 text-slate-700">
+                С днями недели часто говорят <b>on</b>: on Monday. С частями дня - <b>in</b>: in the morning.
+                Но: <b>at night</b> и <b>at seven o&apos;clock</b>. С <b>last / next / this</b> предлог обычно не нужен.
+              </p>
+              <div className="mt-4 grid gap-1 text-sm">
+                <p>I go to school on Monday. - Я хожу в школу в понедельник.</p>
+                <p>I have breakfast in the morning. - Я завтракаю утром.</p>
+                <p>I sleep at night. - Я сплю ночью.</p>
+                <p>I get up at seven o&apos;clock. - Я встаю в семь часов.</p>
+                <p>I visited my grandma last weekend. - Я навещал бабушку на прошлых выходных.</p>
+                <p>I will play next weekend. - Я буду играть на следующих выходных.</p>
+              </div>
+              <p className="mt-3 rounded-lg bg-white p-3 text-sm">
+                Правило: on + day, in + part of day, at night/time, last/next/this без предлога.
+              </p>
+              <Link className="mt-5 inline-block rounded-lg bg-ink px-5 py-3 font-bold text-white" href={grammarPracticeHref("days_time_expressions", "Days and time expressions")}>
+                Потренировать
+              </Link>
+            </Panel>
+          </div>
           <div className="grid gap-3 md:grid-cols-2">
             {items.map((item) => (
               <Panel key={item.id}>
-                <h2 className="text-xl font-bold">{item.title}</h2>
+                <h2 className="text-xl font-bold">{item.title_ru || item.title}</h2>
                 <p className="mt-2 rounded-lg bg-slate-50 p-3 font-mono text-sm">{item.pattern}</p>
                 <p className="mt-3 text-slate-700">{item.explanation_ru}</p>
                 <p className="mt-3 font-semibold">{item.example_en}</p>
                 <p className="text-slate-500">{item.example_ru}</p>
+                {item.question_examples?.length ? (
+                  <div className="mt-3 text-sm text-slate-600">
+                    <p className="font-semibold">Вопросы:</p>
+                    {item.question_examples.slice(0, 4).map((example) => <p key={example}>{example}</p>)}
+                  </div>
+                ) : null}
+                {item.common_mistakes?.length ? (
+                  <div className="mt-3 text-sm text-slate-600">
+                    <p className="font-semibold">Частые ошибки:</p>
+                    {item.common_mistakes.slice(0, 3).map((mistake) => <p key={mistake}>{mistake}</p>)}
+                  </div>
+                ) : null}
+                <Link
+                  className="mt-4 inline-block rounded-lg bg-berry px-4 py-3 font-bold text-white"
+                  href={grammarPracticeHref(item.pattern_key, item.title)}
+                >
+                  Потренировать
+                </Link>
               </Panel>
             ))}
             {!items.length ? <Panel>Грамматические паттерны появятся после seed или ручного добавления.</Panel> : null}

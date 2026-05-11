@@ -30,18 +30,23 @@ type DemonstrativesSeedResult = {
   total_texts?: number;
 };
 
+type IngTimeSeedResult = DemonstrativesSeedResult;
+
 type StarterStatus = {
   cards: number;
   grammarPatterns: number;
   texts: number;
   demonstrativeCards: number;
   demonstrativeTexts: number;
+  ingTimeCards: number;
+  ingTimeTexts: number;
   loading: boolean;
 };
 
 const starterCourseTitle = "Starter 350 Pre-A1";
 const starterTextsCourseTitle = "Starter Texts Pre-A1";
 const demonstrativesCourseTitle = "Grammar: Demonstratives";
+const ingTimeCourseTitle = "Grammar: -ing and time";
 
 export default function ParentImportPage() {
   const { api, family, loading, error } = useFamily();
@@ -53,6 +58,8 @@ export default function ParentImportPage() {
     texts: 0,
     demonstrativeCards: 0,
     demonstrativeTexts: 0,
+    ingTimeCards: 0,
+    ingTimeTexts: 0,
     loading: true
   });
 
@@ -60,17 +67,27 @@ export default function ParentImportPage() {
     if (!family) return;
     setStarterStatus((current) => ({ ...current, loading: true }));
 
-    const [starterCourseRes, textsCourseRes, demonstrativesCourseRes] = await Promise.all([
+    const [starterCourseRes, textsCourseRes, demonstrativesCourseRes, ingTimeCourseRes] = await Promise.all([
       api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterCourseTitle).maybeSingle(),
       api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterTextsCourseTitle).maybeSingle(),
-      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", demonstrativesCourseTitle).maybeSingle()
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", demonstrativesCourseTitle).maybeSingle(),
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", ingTimeCourseTitle).maybeSingle()
     ]);
 
     const starterCourse = starterCourseRes.data;
     const textsCourse = textsCourseRes.data;
     const demonstrativesCourse = demonstrativesCourseRes.data;
+    const ingTimeCourse = ingTimeCourseRes.data;
 
-    const [{ count: cardsCount }, { count: grammarCount }, { count: textsCount }, { count: demonstrativeCardsCount }, { count: demonstrativeTextsCount }] = await Promise.all([
+    const [
+      { count: cardsCount },
+      { count: grammarCount },
+      { count: textsCount },
+      { count: demonstrativeCardsCount },
+      { count: demonstrativeTextsCount },
+      { count: ingTimeCardsCount },
+      { count: ingTimeTextsCount }
+    ] = await Promise.all([
       starterCourse
         ? api.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
         : Promise.resolve({ count: 0 }),
@@ -85,6 +102,12 @@ export default function ParentImportPage() {
         : Promise.resolve({ count: 0 }),
       demonstrativesCourse
         ? api.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", demonstrativesCourse.id)
+        : Promise.resolve({ count: 0 }),
+      ingTimeCourse
+        ? api.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", ingTimeCourse.id)
+        : Promise.resolve({ count: 0 }),
+      ingTimeCourse
+        ? api.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", ingTimeCourse.id)
         : Promise.resolve({ count: 0 })
     ]);
 
@@ -94,6 +117,8 @@ export default function ParentImportPage() {
       texts: textsCount ?? 0,
       demonstrativeCards: demonstrativeCardsCount ?? 0,
       demonstrativeTexts: demonstrativeTextsCount ?? 0,
+      ingTimeCards: ingTimeCardsCount ?? 0,
+      ingTimeTexts: ingTimeTextsCount ?? 0,
       loading: false
     });
   }, [family, api]);
@@ -184,6 +209,35 @@ export default function ParentImportPage() {
     setStarterLoading(false);
   }
 
+  async function seedIngTime() {
+    setStarterLoading(true);
+    setMessage("Добавляю grammar pack: -ing + time. Повторный запуск безопасен...");
+
+    const { data, error: rpcError } = await api.rpc("seed_ing_time_content");
+
+    if (rpcError) {
+      setStarterLoading(false);
+      setMessage(`Не удалось добавить -ing + time: ${rpcError.message}`);
+      return;
+    }
+
+    const result = data as IngTimeSeedResult | null;
+    const insertedCards = result?.inserted_cards ?? 0;
+    const existingCards = result?.existing_cards ?? Math.max((result?.total_cards ?? 0) - insertedCards, 0);
+    const totalCards = result?.total_cards ?? 0;
+    const insertedTexts = result?.inserted_texts ?? 0;
+    const existingTexts = result?.existing_texts ?? Math.max((result?.total_texts ?? 0) - insertedTexts, 0);
+    const totalTexts = result?.total_texts ?? 0;
+    const insertedGrammar = result?.inserted_grammar_patterns ?? 0;
+    const totalGrammar = result?.total_grammar_patterns ?? 0;
+
+    setMessage(
+      `-ing + time готово: добавлено карточек ${insertedCards}, уже было ${existingCards}, всего карточек ${totalCards}. Текстов добавлено ${insertedTexts}, уже было ${existingTexts}, всего текстов ${totalTexts}. Grammar patterns: добавлено ${insertedGrammar}, всего ${totalGrammar}. Повторный запуск безопасен: дубли не создаются.`
+    );
+    await loadStarterStatus();
+    setStarterLoading(false);
+  }
+
   return (
     <AuthRequired loading={loading} error={error}>
       {!family ? (
@@ -202,13 +256,16 @@ export default function ParentImportPage() {
                   <h2 className="text-lg font-bold">Стартовые наборы</h2>
                   <p className="mt-2 text-sm text-ink/70">
                     Starter 350 добавляет базовые слова, фразы, грамматику, диалоги и истории. Starter Texts добавляет короткие собственные тексты для чтения и аудирования.
-                    Отдельный набор this/that/these/those добавляет грамматику с акцентом на these и those. Все наборы можно запускать повторно безопасно: дубли не создаются.
+                    Отдельные наборы this/that/these/those и -ing + time добавляют фокусную грамматику. Все наборы можно запускать повторно безопасно: дубли не создаются.
+                  </p>
+                  <p className="mt-2 text-sm text-ink/70">
+                    Grammar pack -ing + time добавляет -ing, Present Continuous, дни недели, части дня и выражения времени.
                   </p>
                   <p className="mt-3 rounded-lg bg-sky/20 px-3 py-2 text-sm font-semibold">
                     Сейчас:{" "}
                     {starterStatus.loading
                       ? "считаю..."
-                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns, ${starterStatus.texts} texts, demonstratives: ${starterStatus.demonstrativeCards} карточек и ${starterStatus.demonstrativeTexts} texts`}
+                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns, ${starterStatus.texts} texts, demonstratives: ${starterStatus.demonstrativeCards} карточек и ${starterStatus.demonstrativeTexts} texts, -ing + time: ${starterStatus.ingTimeCards} карточек и ${starterStatus.ingTimeTexts} texts`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 md:justify-end">
@@ -221,6 +278,9 @@ export default function ParentImportPage() {
                   </Button>
                   <Button className="bg-skysoft text-ink" disabled={starterLoading} onClick={seedDemonstratives}>
                     {starterLoading ? "Добавляю..." : "Добавить grammar: this/that/these/those"}
+                  </Button>
+                  <Button className="bg-peach text-ink" disabled={starterLoading} onClick={seedIngTime}>
+                    {starterLoading ? "Добавляю..." : "Добавить grammar pack: -ing + time"}
                   </Button>
                 </div>
               </div>

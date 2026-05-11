@@ -2,6 +2,7 @@ import { writeFileSync } from "node:fs";
 import { allCards, exerciseTypesSupported, grammarPatterns } from "./learning-content-data.mjs";
 import { starterTexts } from "./starter-texts-data.mjs";
 import { demonstrativeCards, demonstrativesPattern, demonstrativeTexts } from "./demonstratives-content-data.mjs";
+import { ingTimeCards, ingTimePatterns, ingTimeTexts } from "./ing-time-content-data.mjs";
 
 function sqlString(value) {
   if (value === null || value === undefined) return "null";
@@ -267,10 +268,13 @@ const byType = countBy(allCards, "type");
 const byTopic = countBy(allCards, "topic");
 const demonstrativesByType = countBy(demonstrativeCards, "type");
 const demonstrativesByTopic = countBy(demonstrativeCards, "topic");
+const ingTimeByType = countBy(ingTimeCards, "type");
+const ingTimeByTopic = countBy(ingTimeCards, "topic");
 const textsByTopic = countBy(starterTexts, "topic");
 const textsByDifficulty = countBy(starterTexts, "difficulty");
 const grammarFocus = countBy(starterTexts.flatMap((text) => text.grammar_focus.map((focus) => ({ focus }))), "focus");
 const totalTextQuestions = starterTexts.reduce((sum, text) => sum + text.comprehension_questions.length, 0);
+const totalIngTimeTextQuestions = ingTimeTexts.reduce((sum, text) => sum + text.questions, 0);
 const report = `# Content Seed Report
 
 Generated from \`scripts/learning-content-data.mjs\`.
@@ -279,6 +283,7 @@ Generated from \`scripts/learning-content-data.mjs\`.
 
 - total cards: ${allCards.length}
 - total cards with demonstratives extension: ${allCards.length + demonstrativeCards.length}
+- total cards with demonstratives + ing/time extensions: ${allCards.length + demonstrativeCards.length + ingTimeCards.length}
 - total words: ${byType.word ?? 0}
 - total phrases: ${byType.phrase ?? 0}
 - total sentences: ${byType.sentence ?? 0}
@@ -331,6 +336,29 @@ ${demonstrativeTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${tex
 
 ${demonstrativesPattern.covered_examples.map((example) => `- ${example}`).join("\n")}
 
+## -ing And Time Extension
+
+- RPC: \`public.seed_ing_time_content()\`
+- seed helper: \`supabase/seed_ing_time_content.sql\`
+- migration: \`supabase/migrations/20260511110000_ing_time_content.sql\`
+- grammar patterns: ${ingTimePatterns.map((pattern) => `${pattern.title} (${pattern.pattern_key})`).join(", ")}
+- extension cards: ${ingTimeCards.length}
+- extension texts: ${ingTimeTexts.length}
+- extension text comprehension questions: ${totalIngTimeTextQuestions}
+- focus: -ing / Present Continuous, days of the week, in/on/at, last/next/this time expressions
+
+### -ing And Time Cards By Type
+
+${Object.entries(ingTimeByType).sort(([a], [b]) => a.localeCompare(b)).map(([type, count]) => `- ${type}: ${count}`).join("\n")}
+
+### -ing And Time Cards By Topic
+
+${Object.entries(ingTimeByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([topic, count]) => `- ${topic}: ${count}`).join("\n")}
+
+### -ing And Time Texts
+
+${ingTimeTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topic}, difficulty ${text.difficulty}, questions ${text.questions}, grammar focus ${text.grammar_focus.join(", ")}`).join("\n")}
+
 ## Starter Texts
 
 - total texts: ${starterTexts.length}
@@ -355,6 +383,8 @@ ${Object.entries(grammarFocus).sort(([a], [b]) => a.localeCompare(b)).map(([focu
 \`public.seed_starter_texts()\` inserts into a stable course/source pair and checks existing rows by \`family_id + source_id + title_en\` before inserting texts.
 
 \`public.seed_demonstratives_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by \`pattern_key\`.
+
+\`public.seed_ing_time_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by \`pattern_key\`.
 `;
 
 writeFileSync("CONTENT_SEED_REPORT.md", report, "utf8");
@@ -367,6 +397,9 @@ console.log(JSON.stringify({
   starterTexts: starterTexts.length,
   demonstrativeCards: demonstrativeCards.length,
   demonstrativeTexts: demonstrativeTexts.length,
+  ingTimeCards: ingTimeCards.length,
+  ingTimeTexts: ingTimeTexts.length,
+  ingTimeTextQuestions: totalIngTimeTextQuestions,
   textQuestions: totalTextQuestions,
   sql: "supabase/seed_350_learning_content.sql",
   textSql: "supabase/seed_starter_texts.sql",

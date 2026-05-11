@@ -5,7 +5,8 @@ const allowedRpcs = new Set([
   "seed_demo_content",
   "seed_starter_learning_content",
   "seed_starter_texts",
-  "seed_demonstratives_content"
+  "seed_demonstratives_content",
+  "seed_ing_time_content"
 ]);
 
 export async function POST(request: Request, { params }: { params: { name: string } }) {

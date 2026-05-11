@@ -6,6 +6,7 @@ Generated from `scripts/learning-content-data.mjs`.
 
 - total cards: 467
 - total cards with demonstratives extension: 529
+- total cards with demonstratives + ing/time extensions: 638
 - total words: 300
 - total phrases: 74
 - total sentences: 45
@@ -131,6 +132,43 @@ Generated from `scripts/learning-content-data.mjs`.
 - Are these your books?
 - Are those your pencils?
 
+## -ing And Time Extension
+
+- RPC: `public.seed_ing_time_content()`
+- seed helper: `supabase/seed_ing_time_content.sql`
+- migration: `supabase/migrations/20260511110000_ing_time_content.sql`
+- grammar patterns: -ing / Present Continuous (present_continuous_ing), Days and time expressions (days_time_expressions)
+- extension cards: 109
+- extension texts: 3
+- extension text comprehension questions: 9
+- focus: -ing / Present Continuous, days of the week, in/on/at, last/next/this time expressions
+
+### -ing And Time Cards By Type
+
+- grammar_pattern: 17
+- phrase: 34
+- sentence: 22
+- word: 36
+
+### -ing And Time Cards By Topic
+
+- actions: 24
+- animals: 2
+- days of the week: 21
+- family: 1
+- grammar: 9
+- hobbies: 5
+- school: 2
+- school routine: 4
+- simple questions: 24
+- time and daily routine: 17
+
+### -ing And Time Texts
+
+- My morning / Мое утро: time and daily routine, difficulty 2, questions 3, grammar focus present_continuous_ing, in the morning, on Monday, at eight o'clock
+- In the park / В парке: places, difficulty 2, questions 3, grammar focus present_continuous_ing, on Sunday
+- Last weekend / Прошлые выходные: days of the week, difficulty 2, questions 3, grammar focus last weekend, in the evening, next weekend, would like
+
 ## Starter Texts
 
 - total texts: 15
@@ -186,3 +224,5 @@ Generated from `scripts/learning-content-data.mjs`.
 `public.seed_starter_texts()` inserts into a stable course/source pair and checks existing rows by `family_id + source_id + title_en` before inserting texts.
 
 `public.seed_demonstratives_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by `pattern_key`.
+
+`public.seed_ing_time_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by `pattern_key`.

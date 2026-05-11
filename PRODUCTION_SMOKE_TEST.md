@@ -53,34 +53,43 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 8. [ ] Re-running Starter Texts does not create duplicates.
 9. [ ] `Добавить grammar: this/that/these/those` works.
 10. [ ] Re-running demonstratives does not create duplicates.
-11. [ ] `/grammar` shows `This / that / these / those`.
-12. [ ] `/child/practice?grammar_key=demonstratives_this_that_these_those` starts a focused grammar practice.
-13. [ ] Demonstratives practice uses `these/those + are`, not `these/those + is`.
-14. [ ] `/parent/cards` shows cards.
-15. [ ] `/parent/texts` shows texts.
-16. [ ] Create child profile.
-17. [ ] `/child/select` shows the child.
-18. [ ] `/child/practice` starts a short session.
-19. [ ] `Listen` works.
-20. [ ] `Listen slowly` works.
-21. [ ] Articles exercise works.
-22. [ ] Mini dialogue exercise works.
-23. [ ] Complete the daily session.
-24. [ ] `/child/words/new` works.
-25. [ ] `/child/words/review` works.
-26. [ ] `/child/words/mistakes` works.
-27. [ ] `/child/words/topics` works.
-28. [ ] `/child/texts` opens.
-29. [ ] A text opens.
-30. [ ] Translation is hidden by default.
-31. [ ] `Показать перевод` works.
-32. [ ] Text comprehension questions work.
-33. [ ] `Повторить слова из текста` works.
-34. [ ] `/parent/dashboard` shows updated statistics.
-35. [ ] `/parent/progress` shows recent mistakes and text statistics.
-36. [ ] Android tablet works.
-37. [ ] iPhone Safari works.
-38. [ ] Windows Yandex Browser works.
+11. [ ] `Добавить grammar pack: -ing + time` works.
+12. [ ] Re-running -ing + time does not create duplicates.
+13. [ ] `/grammar` shows `This / that / these / those`.
+14. [ ] `/grammar` shows `-ing: что кто-то делает сейчас`.
+15. [ ] `/grammar` shows `Дни недели и время: on, in, at, last, next`.
+16. [ ] Every grammar pattern card has `Потренировать`.
+17. [ ] `/child/practice?grammar_key=demonstratives_this_that_these_those` starts focused grammar practice.
+18. [ ] `/child/practice?grammar_key=present_continuous_ing` starts focused -ing practice.
+19. [ ] `/child/practice?grammar_key=days_time_expressions` starts focused time practice.
+20. [ ] Demonstratives practice uses `these/those + are`, not `these/those + is`.
+21. [ ] -ing practice checks `I am`, `She is`, `They are`.
+22. [ ] Time practice checks `on Sunday`, `in the morning`, `at night`, `at seven o'clock`, `last weekend`.
+23. [ ] `/parent/cards` shows cards.
+24. [ ] `/parent/texts` shows texts.
+25. [ ] Create child profile.
+26. [ ] `/child/select` shows the child.
+27. [ ] `/child/practice` starts a short session.
+28. [ ] `Listen` works.
+29. [ ] `Listen slowly` works.
+30. [ ] Articles exercise works.
+31. [ ] Mini dialogue exercise works.
+32. [ ] Complete the daily session.
+33. [ ] `/child/words/new` works.
+34. [ ] `/child/words/review` works.
+35. [ ] `/child/words/mistakes` works.
+36. [ ] `/child/words/topics` works.
+37. [ ] `/child/texts` opens.
+38. [ ] A text opens.
+39. [ ] Translation is hidden by default.
+40. [ ] `Показать перевод` works.
+41. [ ] Text comprehension questions work.
+42. [ ] `Повторить слова из текста` works.
+43. [ ] `/parent/dashboard` shows updated statistics.
+44. [ ] `/parent/progress` shows recent mistakes and text statistics.
+45. [ ] Android tablet works.
+46. [ ] iPhone Safari works.
+47. [ ] Windows Yandex Browser works.
 
 ## Critical Failures
 
@@ -91,7 +100,10 @@ Stop and fix if:
 - Starter 350 duplicates cards;
 - Starter Texts duplicates texts;
 - Demonstratives seed duplicates cards/texts;
+- -ing + time seed duplicates cards/texts;
 - demonstratives practice offers `these is` or `those is` as a correct answer;
+- -ing practice accepts `I running`, `She are sleeping`, or `They is playing` as correct;
+- time practice accepts `in Sunday`, `in night`, or `on seven o'clock` as correct;
 - child practice starts with an empty exercise;
 - exercise options do not contain the correct answer;
 - practice attempts are not saved;
