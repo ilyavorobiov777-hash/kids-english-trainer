@@ -82,6 +82,7 @@ export function PracticeFlow() {
   useEffect(() => {
     async function load() {
       if (!family || !childId) return;
+      const grammarKey = searchParams.get("grammar_key");
       const [childRes, cardsRes, attemptsRes, scheduleRes, grammarRes] = await Promise.all([
         api.from("children").select("*").eq("family_id", family.familyId).eq("id", childId).maybeSingle(),
         api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
@@ -107,10 +108,10 @@ export function PracticeFlow() {
       const reviewSchedules = (scheduleRes.data ?? []) as ReviewSchedule[];
       const grammarPatterns = (grammarRes.data ?? []) as GrammarPattern[];
       setSchedules(reviewSchedules);
-      await beginSession(buildDailyPractice({ cards, attempts, schedules: reviewSchedules, grammarPatterns }), childId);
+      await beginSession(buildDailyPractice({ cards, attempts, schedules: reviewSchedules, grammarPatterns, grammarKey }), childId);
     }
     void load();
-  }, [beginSession, childId, family, api]);
+  }, [beginSession, childId, family, api, searchParams]);
 
   const current = exercises[index];
   const finished = exercises.length > 0 && index >= exercises.length;
@@ -280,7 +281,13 @@ export function PracticeFlow() {
         <>
           <PageHeader
             title={title}
-            subtitle={childName ? `${childName}, короткое занятие на сегодня.` : "Короткое занятие на сегодня."}
+            subtitle={
+              searchParams.get("grammar_key")
+                ? "Короткая грамматическая тренировка."
+                : childName
+                  ? `${childName}, короткое занятие на сегодня.`
+                  : "Короткое занятие на сегодня."
+            }
           />
           {!exercises.length ? (
             <Panel>

@@ -1,7 +1,12 @@
 import { getAuthedServerSupabase } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-const allowedRpcs = new Set(["seed_demo_content", "seed_starter_learning_content", "seed_starter_texts"]);
+const allowedRpcs = new Set([
+  "seed_demo_content",
+  "seed_starter_learning_content",
+  "seed_starter_texts",
+  "seed_demonstratives_content"
+]);
 
 export async function POST(request: Request, { params }: { params: { name: string } }) {
   if (!allowedRpcs.has(params.name)) {

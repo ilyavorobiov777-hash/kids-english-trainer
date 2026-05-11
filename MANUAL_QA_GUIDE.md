@@ -108,7 +108,33 @@ Expected:
 - `Повторить ошибки` starts a short retry session from current-session mistakes;
 - `Повторить это задание` repeats one missed task.
 
-## 6A. Check How The Child Learns Words
+## 6A. Grammar: this / that / these / those
+
+Add the demonstratives pack:
+
+1. Apply the latest migrations.
+2. Open `/parent/import`.
+3. Click `Добавить grammar: this/that/these/those`.
+4. Click it again and confirm inserted cards/texts are `0` or the UI says the pack already exists.
+
+Check grammar UI:
+
+1. Open `/grammar`.
+2. Confirm the block `This / that / these / those` is visible.
+3. Confirm the table shows `near + singular = this`, `far + singular = that`, `near + plural = these`, `far + plural = those`.
+4. Click `Потренировать`.
+5. Confirm `/child/practice?grammar_key=demonstratives_this_that_these_those` opens a focused practice.
+
+Check expected exercise content:
+
+- `These are my books.` -> `Are these your books?`
+- `Those are your pencils.` -> `Are those your pencils?`
+- `These are apples.` -> `What are these?`
+- `Those are toys.` -> `What are those?`
+- `Are these your books?` -> `Yes, they are.` / `No, they aren't.`
+- Fill gaps use `these/those + are`, never `these/those + is`.
+
+## 6B. Check How The Child Learns Words
 
 1. Open `/child/dashboard`.
 2. Confirm there are large buttons:

@@ -97,6 +97,8 @@ for (const requiredFile of [
   "package-lock.json",
   "supabase/seed_350_learning_content.sql",
   "supabase/seed_starter_texts.sql",
+  "supabase/seed_demonstratives_content.sql",
+  "supabase/migrations/20260511100000_demonstratives_content.sql",
   "supabase/migrations/20260509210000_learning_texts.sql"
 ]) {
   assertFile(requiredFile);

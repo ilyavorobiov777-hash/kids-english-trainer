@@ -309,6 +309,31 @@ npx supabase db query --linked -f supabase/seed_starter_texts.sql
 
 Then open `/parent/import` and click `Добавить Starter Texts`. The seed is idempotent: it uses the stable course/source pair `Starter Texts Pre-A1` / `Starter texts generated seed` and checks existing texts by `family_id + source_id + title_en`.
 
+## Grammar: this / that / these / those
+
+The app includes a separate idempotent grammar extension for demonstratives:
+
+- `this` - one thing near: `This is my book.`
+- `that` - one thing far: `That is my bag.`
+- `these` - several things near: `These are my pencils.`
+- `those` - several things far: `Those are my books.`
+
+Important rule: `this/that` use `is`; `these/those` use `are`.
+
+Apply the migration, then add the content from `/parent/import` with `Добавить grammar: this/that/these/those`, or run:
+
+```sql
+select public.seed_demonstratives_content();
+```
+
+The extension adds:
+
+- 1 grammar pattern row: `demonstratives_this_that_these_those`
+- 62 cards for sentences, question forms, short answers, fill gaps and mini-dialogues
+- 2 original starter texts with `these/those`
+
+Check `/grammar` for the child-friendly explanation and the `Потренировать` button. It opens `/child/practice?grammar_key=demonstratives_this_that_these_those` and builds a short focused grammar practice.
+
 ## Child Management
 
 Parents can manage child profiles on `/parent/children`:

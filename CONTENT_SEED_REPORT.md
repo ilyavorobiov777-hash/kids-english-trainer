@@ -5,6 +5,7 @@ Generated from `scripts/learning-content-data.mjs`.
 ## Totals
 
 - total cards: 467
+- total cards with demonstratives extension: 529
 - total words: 300
 - total phrases: 74
 - total sentences: 45
@@ -86,6 +87,50 @@ Generated from `scripts/learning-content-data.mjs`.
 - articles
 - mini_dialogue
 
+## Demonstratives Extension
+
+- RPC: `public.seed_demonstratives_content()`
+- seed helper: `supabase/seed_demonstratives_content.sql`
+- migration: `supabase/migrations/20260511100000_demonstratives_content.sql`
+- grammar pattern: This, that, these, those (demonstratives_this_that_these_those)
+- extension cards: 62
+- extension texts: 2
+- focus: this / that / these / those, especially these/those + are
+
+### Demonstratives Cards By Type
+
+- dialogue: 4
+- grammar_pattern: 38
+- phrase: 6
+- sentence: 14
+
+### Demonstratives Cards By Topic
+
+- animals: 2
+- classroom objects: 7
+- clothes: 1
+- food and drinks: 2
+- grammar: 28
+- school: 1
+- simple questions: 20
+- toys: 1
+
+### Demonstratives Texts
+
+- My school things / Мои школьные вещи: classroom objects, difficulty 1, questions 3
+- In the classroom / В классе: school, difficulty 1, questions 3
+
+### Demonstratives Examples Covered
+
+- This is my book.
+- That is my bag.
+- These are my pencils.
+- Those are my books.
+- What are these?
+- What are those?
+- Are these your books?
+- Are those your pencils?
+
 ## Starter Texts
 
 - total texts: 15
@@ -139,3 +184,5 @@ Generated from `scripts/learning-content-data.mjs`.
 `public.seed_starter_learning_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` before inserting cards. Grammar patterns are updated by `family_id + course_id + title` and inserted only when missing.
 
 `public.seed_starter_texts()` inserts into a stable course/source pair and checks existing rows by `family_id + source_id + title_en` before inserting texts.
+
+`public.seed_demonstratives_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by `pattern_key`.

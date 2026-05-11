@@ -61,6 +61,30 @@ const questionFormExamples = [
     statement: "I would like some juice.",
     question: "Would you like some juice?",
     options: ["Would you like some juice?", "Do you would like juice?", "Can you would juice?", "Are you like juice?"]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    statement: "These are my books.",
+    question: "Are these your books?",
+    options: ["Are these your books?", "Is these your books?", "Are this your books?", "Do these your books?"]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    statement: "Those are your pencils.",
+    question: "Are those your pencils?",
+    options: ["Are those your pencils?", "Is those your pencils?", "Are that your pencils?", "Do those your pencils?"]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    statement: "These are apples.",
+    question: "What are these?",
+    options: ["What are these?", "What is these?", "What are this?", "What do these?"]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    statement: "Those are toys.",
+    question: "What are those?",
+    options: ["What are those?", "What is those?", "What are that?", "What do those?"]
   }
 ];
 
@@ -89,6 +113,49 @@ const articleExamples = [
     prompt: "Open ___ door.",
     answer: "the",
     explanationRu: "the подходит, когда понятно, какую именно дверь нужно открыть."
+  }
+];
+
+const demonstrativeGapExamples = [
+  {
+    prompt: "___ are my books.",
+    answer: "These",
+    explanationRu: "These используется для нескольких предметов рядом: These are my books."
+  },
+  {
+    prompt: "___ are her pencils.",
+    answer: "Those",
+    explanationRu: "Those используется для нескольких предметов далеко: Those are her pencils."
+  },
+  {
+    prompt: "What are ___?",
+    answer: "these",
+    explanationRu: "В вопросе про несколько предметов рядом говорим: What are these?"
+  },
+  {
+    prompt: "What are ___?",
+    answer: "those",
+    explanationRu: "В вопросе про несколько предметов далеко говорим: What are those?"
+  },
+  {
+    prompt: "___ is my book.",
+    answer: "This",
+    explanationRu: "This используется для одного предмета рядом: This is my book."
+  },
+  {
+    prompt: "___ is her bag.",
+    answer: "That",
+    explanationRu: "That используется для одного предмета далеко: That is her bag."
+  },
+  {
+    prompt: "These ___ my books.",
+    answer: "are",
+    explanationRu: "С these всегда используем are: These are my books."
+  },
+  {
+    prompt: "Those ___ her toys.",
+    answer: "are",
+    explanationRu: "С those всегда используем are: Those are her toys."
   }
 ];
 
@@ -140,6 +207,30 @@ const shortAnswerExamples = [
     prompt: "Would you like some juice?",
     answer: "No, thank you.",
     options: ["No, thank you.", "Yes, please.", "No, I don't.", "No, I haven't."]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    prompt: "Are these your books?",
+    answer: "Yes, they are.",
+    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I do."]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    prompt: "Are those your pencils?",
+    answer: "No, they aren't.",
+    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I don't."]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    prompt: "Whose books are these?",
+    answer: "These are my books.",
+    options: ["These are my books.", "This is my book.", "Those is my books.", "Yes, they are."]
+  },
+  {
+    key: "demonstratives_this_that_these_those",
+    prompt: "Whose pencils are those?",
+    answer: "Those are her pencils.",
+    options: ["Those are her pencils.", "That is her pencil.", "These is her pencils.", "No, they aren't."]
   }
 ];
 
@@ -158,6 +249,16 @@ const miniDialogueExamples = [
     prompt: "Do you like bananas?",
     answer: "Yes, I do.",
     options: ["Yes, I do.", "No, I can't.", "Yes, I have.", "No, thank you."]
+  },
+  {
+    prompt: "What are these?",
+    answer: "These are my books.",
+    options: ["These are my books.", "This is my book.", "That is my bag.", "Yes, please."]
+  },
+  {
+    prompt: "Are those your toys?",
+    answer: "No, they aren't.",
+    options: ["No, they aren't.", "No, it isn't.", "No, I don't.", "No, thank you."]
   }
 ];
 
@@ -271,6 +372,81 @@ function findPattern(patterns: GrammarPattern[], key: string) {
   return patterns.find((item) => normalize(`${item.pattern_key || ""} ${item.title || ""}`).includes(normalize(key)));
 }
 
+function isDemonstrativesKey(key?: string) {
+  return normalize(key ?? "").includes("demonstratives") || normalize(key ?? "").includes("these");
+}
+
+function buildDemonstrativesPractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
+  const activeCards = cards.filter((card) => card.status === "active");
+  const grammarPattern = findPattern(grammarPatterns, "demonstratives") ?? findPattern(grammarPatterns, "this that these those");
+  const demonstrativeCards = activeCards.filter((card) =>
+    card.tags.some((tag) => normalize(tag).includes("demonstratives")) ||
+    normalize(`${card.english} ${card.russian}`).includes("these") ||
+    normalize(`${card.english} ${card.russian}`).includes("those")
+  );
+
+  const cardExercises = demonstrativeCards.slice(0, 6).map((card, index) => {
+    const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence"];
+    return buildCardExercise(card, activeCards.length ? activeCards : demonstrativeCards, cycle[index % cycle.length]);
+  });
+
+  const gapExercises = demonstrativeGapExamples.map((item, index) => ({
+    id: `demonstratives_fill:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern,
+    prompt: item.prompt,
+    promptRu: "Выбери правильное слово",
+    options: pickOptions(item.answer, ["This", "That", "These", "Those", "is", "are"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
+  const questionExercises = questionFormExamples
+    .filter((item) => isDemonstrativesKey(item.key))
+    .map((item, index) => ({
+      id: `demonstratives_question:${index}:${item.statement}`,
+      type: "question_form" as ExerciseType,
+      grammarPattern,
+      prompt: item.statement,
+      promptRu: "Выбери правильный вопрос",
+      options: shuffle(item.options),
+      correctAnswer: item.question,
+      explanationRu: "Для these/those нужен are: What are these? Are those your pencils?"
+    }));
+
+  const shortAnswerExercises = shortAnswerExamples
+    .filter((item) => isDemonstrativesKey(item.key))
+    .map((item, index) => ({
+      id: `demonstratives_short:${index}:${item.prompt}`,
+      type: "short_answer" as ExerciseType,
+      grammarPattern,
+      prompt: item.prompt,
+      promptRu: "Выбери короткий ответ",
+      options: shuffle(item.options),
+      correctAnswer: item.answer,
+      listenText: item.prompt,
+      explanationRu: "В вопросах Are these...? и Are those...? короткий ответ: Yes, they are / No, they aren't."
+    }));
+
+  const dialogueExercises = miniDialogueExamples
+    .filter((item) => normalize(item.prompt).includes("these") || normalize(item.prompt).includes("those"))
+    .map((item, index) => ({
+      id: `demonstratives_dialogue:${index}:${item.prompt}`,
+      type: "mini_dialogue" as ExerciseType,
+      grammarPattern,
+      prompt: item.prompt,
+      promptRu: "Выбери подходящую реплику",
+      options: shuffle(item.options),
+      correctAnswer: item.answer,
+      listenText: item.prompt
+    }));
+
+  return dedupeValidExercises(
+    shuffle([...cardExercises, ...gapExercises, ...questionExercises, ...shortAnswerExercises, ...dialogueExercises]),
+    12
+  );
+}
+
 function isValidExercise(exercise: PracticeExercise) {
   if (!exercise.prompt.trim() || !exercise.correctAnswer.trim()) return false;
 
@@ -317,8 +493,13 @@ export function buildDailyPractice(params: {
   attempts: PracticeAttempt[];
   schedules: ReviewSchedule[];
   grammarPatterns: GrammarPattern[];
+  grammarKey?: string | null;
 }) {
-  const { cards, attempts, schedules, grammarPatterns } = params;
+  const { cards, attempts, schedules, grammarPatterns, grammarKey } = params;
+  if (isDemonstrativesKey(grammarKey ?? undefined)) {
+    return buildDemonstrativesPractice(cards, grammarPatterns);
+  }
+
   const activeCards = cards.filter((card) => card.status === "active");
   const now = Date.now();
   const usedCardIds = new Set<string>();
@@ -411,6 +592,18 @@ export function buildDailyPractice(params: {
     explanationRu: item.explanationRu
   }));
 
+  const demonstrativePattern = findPattern(grammarPatterns, "demonstratives") ?? findPattern(grammarPatterns, "this that these those");
+  const demonstrativeExercise = shuffle(demonstrativeGapExamples).slice(0, 1).map((item, index) => ({
+    id: `demonstratives_daily:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern: demonstrativePattern,
+    prompt: item.prompt,
+    promptRu: "This/that или these/those?",
+    options: pickOptions(item.answer, ["This", "That", "These", "Those", "is", "are"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
   const shortAnswerExercise = shuffle(shortAnswerExamples).slice(0, 1).map((item, index) => ({
     id: `short_answer:${index}:${item.prompt}`,
     type: "short_answer" as ExerciseType,
@@ -468,6 +661,7 @@ export function buildDailyPractice(params: {
       ...questionExercise,
       ...shortAnswerExercise,
       ...articleExercise,
+      ...demonstrativeExercise,
       ...miniDialogueExercise,
       ...listenExercise
     ]),

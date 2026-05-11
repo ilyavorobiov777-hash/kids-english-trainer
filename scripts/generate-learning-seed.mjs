@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { allCards, exerciseTypesSupported, grammarPatterns } from "./learning-content-data.mjs";
 import { starterTexts } from "./starter-texts-data.mjs";
+import { demonstrativeCards, demonstrativesPattern, demonstrativeTexts } from "./demonstratives-content-data.mjs";
 
 function sqlString(value) {
   if (value === null || value === undefined) return "null";
@@ -264,6 +265,8 @@ writeFileSync("supabase/seed_starter_texts.sql", textSql, "utf8");
 
 const byType = countBy(allCards, "type");
 const byTopic = countBy(allCards, "topic");
+const demonstrativesByType = countBy(demonstrativeCards, "type");
+const demonstrativesByTopic = countBy(demonstrativeCards, "topic");
 const textsByTopic = countBy(starterTexts, "topic");
 const textsByDifficulty = countBy(starterTexts, "difficulty");
 const grammarFocus = countBy(starterTexts.flatMap((text) => text.grammar_focus.map((focus) => ({ focus }))), "focus");
@@ -275,6 +278,7 @@ Generated from \`scripts/learning-content-data.mjs\`.
 ## Totals
 
 - total cards: ${allCards.length}
+- total cards with demonstratives extension: ${allCards.length + demonstrativeCards.length}
 - total words: ${byType.word ?? 0}
 - total phrases: ${byType.phrase ?? 0}
 - total sentences: ${byType.sentence ?? 0}
@@ -301,6 +305,32 @@ ${grammarPatterns.map((item) => `- ${item.title} (${item.pattern_key})`).join("\
 
 ${exerciseTypesSupported.map((type) => `- ${type}`).join("\n")}
 
+## Demonstratives Extension
+
+- RPC: \`public.seed_demonstratives_content()\`
+- seed helper: \`supabase/seed_demonstratives_content.sql\`
+- migration: \`supabase/migrations/20260511100000_demonstratives_content.sql\`
+- grammar pattern: ${demonstrativesPattern.title} (${demonstrativesPattern.pattern_key})
+- extension cards: ${demonstrativeCards.length}
+- extension texts: ${demonstrativeTexts.length}
+- focus: this / that / these / those, especially these/those + are
+
+### Demonstratives Cards By Type
+
+${Object.entries(demonstrativesByType).sort(([a], [b]) => a.localeCompare(b)).map(([type, count]) => `- ${type}: ${count}`).join("\n")}
+
+### Demonstratives Cards By Topic
+
+${Object.entries(demonstrativesByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([topic, count]) => `- ${topic}: ${count}`).join("\n")}
+
+### Demonstratives Texts
+
+${demonstrativeTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topic}, difficulty ${text.difficulty}, questions ${text.questions}`).join("\n")}
+
+### Demonstratives Examples Covered
+
+${demonstrativesPattern.covered_examples.map((example) => `- ${example}`).join("\n")}
+
 ## Starter Texts
 
 - total texts: ${starterTexts.length}
@@ -323,6 +353,8 @@ ${Object.entries(grammarFocus).sort(([a], [b]) => a.localeCompare(b)).map(([focu
 \`public.seed_starter_learning_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` before inserting cards. Grammar patterns are updated by \`family_id + course_id + title\` and inserted only when missing.
 
 \`public.seed_starter_texts()\` inserts into a stable course/source pair and checks existing rows by \`family_id + source_id + title_en\` before inserting texts.
+
+\`public.seed_demonstratives_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by \`pattern_key\`.
 `;
 
 writeFileSync("CONTENT_SEED_REPORT.md", report, "utf8");
@@ -333,6 +365,8 @@ console.log(JSON.stringify({
   byTopic,
   grammarPatterns: grammarPatterns.length,
   starterTexts: starterTexts.length,
+  demonstrativeCards: demonstrativeCards.length,
+  demonstrativeTexts: demonstrativeTexts.length,
   textQuestions: totalTextQuestions,
   sql: "supabase/seed_350_learning_content.sql",
   textSql: "supabase/seed_starter_texts.sql",
