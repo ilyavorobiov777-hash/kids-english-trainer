@@ -74,6 +74,11 @@ export function TextReader({ textId }: { textId: string }) {
   const [showVocabulary, setShowVocabulary] = useState(false);
   const [vocabIndex, setVocabIndex] = useState(0);
   const [vocabStats, setVocabStats] = useState({ total: 0, correct: 0 });
+  const [feedbackCorrect, setFeedbackCorrect] = useState<boolean | null>(null);
+  const [lastAnswer, setLastAnswer] = useState<string | null>(null);
+  const [lastCorrectAnswer, setLastCorrectAnswer] = useState<string | null>(null);
+  const [lastExplanation, setLastExplanation] = useState<string | null>(null);
+  const [pendingAdvance, setPendingAdvance] = useState<"question" | "vocab" | null>(null);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -140,7 +145,12 @@ export function TextReader({ textId }: { textId: string }) {
     const correct = isCorrectAnswer(answer, currentQuestion.correctAnswer);
     const nextAnswers = { total: answers.total + 1, correct: answers.correct + (correct ? 1 : 0) };
     setAnswers(nextAnswers);
-    setFeedback(correct ? "Отлично!" : "Почти! Посмотри правильный ответ.");
+    setFeedback(correct ? "Отлично!" : "Почти! Давай разберем.");
+    setFeedbackCorrect(correct);
+    setLastAnswer(answer);
+    setLastCorrectAnswer(currentQuestion.correctAnswer);
+    setLastExplanation(questionExplanation(currentQuestion));
+    setPendingAdvance(correct ? null : "question");
 
     if (!correct) {
       setMistakes((items) => [
@@ -173,13 +183,19 @@ export function TextReader({ textId }: { textId: string }) {
 
     await updateSession(nextAnswers.total + vocabStats.total, nextAnswers.correct + vocabStats.correct, false, activeSession);
 
-    window.setTimeout(() => {
-      setFeedback(null);
-      setSelectedWords([]);
-      setUsedWordIndexes([]);
-      setQuestionIndex((value) => value + 1);
-      setStartedAt(Date.now());
-    }, correct ? 750 : 1400);
+    if (correct) {
+      window.setTimeout(() => {
+        setFeedback(null);
+        setFeedbackCorrect(null);
+        setLastAnswer(null);
+        setLastCorrectAnswer(null);
+        setLastExplanation(null);
+        setSelectedWords([]);
+        setUsedWordIndexes([]);
+        setQuestionIndex((value) => value + 1);
+        setStartedAt(Date.now());
+      }, 750);
+    }
   }
 
   async function saveVocabularyAnswer(task: VocabTask, answer: string) {
@@ -189,7 +205,12 @@ export function TextReader({ textId }: { textId: string }) {
     const correct = isCorrectAnswer(answer, task.word.russian);
     const nextStats = { total: vocabStats.total + 1, correct: vocabStats.correct + (correct ? 1 : 0) };
     setVocabStats(nextStats);
-    setFeedback(correct ? "Отлично!" : "Хорошая попытка. Запомни эту пару.");
+    setFeedback(correct ? "Отлично!" : "Почти! Давай разберем.");
+    setFeedbackCorrect(correct);
+    setLastAnswer(answer);
+    setLastCorrectAnswer(task.word.russian);
+    setLastExplanation("Запомни слово из текста и его перевод.");
+    setPendingAdvance(correct ? null : "vocab");
 
     if (!correct) {
       setMistakes((items) => [
@@ -234,11 +255,36 @@ export function TextReader({ textId }: { textId: string }) {
 
     await updateSession(answers.total + nextStats.total, answers.correct + nextStats.correct, false, activeSession);
 
-    window.setTimeout(() => {
-      setFeedback(null);
+    if (correct) {
+      window.setTimeout(() => {
+        setFeedback(null);
+        setFeedbackCorrect(null);
+        setLastAnswer(null);
+        setLastCorrectAnswer(null);
+        setLastExplanation(null);
+        setVocabIndex((value) => value + 1);
+        setStartedAt(Date.now());
+      }, 750);
+    }
+  }
+
+  function continueAfterFeedback() {
+    if (!feedback || feedbackCorrect !== false) return;
+    setFeedback(null);
+    setFeedbackCorrect(null);
+    setLastAnswer(null);
+    setLastCorrectAnswer(null);
+    setLastExplanation(null);
+    if (pendingAdvance === "question") {
+      setSelectedWords([]);
+      setUsedWordIndexes([]);
+      setQuestionIndex((value) => value + 1);
+    }
+    if (pendingAdvance === "vocab") {
       setVocabIndex((value) => value + 1);
-      setStartedAt(Date.now());
-    }, correct ? 750 : 1400);
+    }
+    setPendingAdvance(null);
+    setStartedAt(Date.now());
   }
 
   async function finishTextSession() {
@@ -370,7 +416,21 @@ export function TextReader({ textId }: { textId: string }) {
                       ))}
                     </div>
                   )}
-                  {feedback ? <p className="mt-4 rounded-lg bg-mint p-4 text-center text-xl font-bold">{feedback}</p> : null}
+                  {feedback ? (
+                    <div className={`mt-4 rounded-lg p-4 ${feedbackCorrect === false ? "bg-peach text-left" : "bg-mint text-center"}`}>
+                      <p className="text-xl font-bold">{feedback}</p>
+                      {feedbackCorrect === false ? (
+                        <div className="mt-3 grid gap-2 text-sm text-slate-700">
+                          <p><b>Твой ответ:</b> {lastAnswer}</p>
+                          <p><b>Правильно:</b> {lastCorrectAnswer}</p>
+                          <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
+                          <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
+                            Продолжить
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </Panel>
@@ -401,7 +461,21 @@ export function TextReader({ textId }: { textId: string }) {
                       </button>
                     ))}
                   </div>
-                  {feedback ? <p className="mt-4 rounded-lg bg-mint p-4 text-center text-xl font-bold">{feedback}</p> : null}
+                  {feedback ? (
+                    <div className={`mt-4 rounded-lg p-4 ${feedbackCorrect === false ? "bg-peach text-left" : "bg-mint text-center"}`}>
+                      <p className="text-xl font-bold">{feedback}</p>
+                      {feedbackCorrect === false ? (
+                        <div className="mt-3 grid gap-2 text-sm text-slate-700">
+                          <p><b>Твой ответ:</b> {lastAnswer}</p>
+                          <p><b>Правильно:</b> {lastCorrectAnswer}</p>
+                          <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
+                          <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
+                            Продолжить
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </Panel>

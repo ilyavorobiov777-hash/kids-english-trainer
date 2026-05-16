@@ -371,6 +371,8 @@ The pack adds 2 grammar pattern rows, 109 cards, and 3 original short texts:
 
 Every grammar pattern card on `/grammar` now has a `Потренировать` button. It opens focused practice by `grammar_key` and uses the existing child practice summary, saved attempts, review schedule, and mistake review.
 
+Targeted grammar practice is strict: if a child clicks `Practice` / `Потренировать` for one grammar topic, the session uses only cards/templates for that `grammar_key`. Daily practice can still mix topics, but focused grammar practice must not pull unrelated review cards or random weak cards.
+
 ## Grammar: Personal Pronouns
 
 The `Personal pronouns` pack teaches:
@@ -406,6 +408,14 @@ select public.seed_pronouns_content();
 ```
 
 The pack adds 2 grammar pattern rows, pronoun/possessive cards, fill gaps, question forms, short answers, build-sentence cards, and 2 original short texts: `My family` and `Our classroom`.
+
+Possessive fill gaps use context so the correct answer is unambiguous:
+
+- `Anna has a bag. This is ___ bag.` -> `her`
+- `Tom has a dog. This is ___ dog.` -> `his`
+- `They have toys. These are ___ toys.` -> `their`
+
+Avoid bare prompts like `These are ___ toys.` when several possessive words are grammatically possible. `npm run content:check` guards these known ambiguous patterns.
 
 Focused practice URLs:
 
@@ -496,6 +506,7 @@ Service workers require `localhost` or HTTPS.
 - [ ] Child can open practice.
 - [ ] Listen button speaks.
 - [ ] Child can choose translation, build a sentence, and answer grammar exercises.
+- [ ] Wrong answers show the explanation and wait for `Продолжить`.
 - [ ] Attempt is saved in `practice_attempts`.
 - [ ] `review_schedule` is updated after card exercises.
 - [ ] Parent dashboard shows stats by exercise type.
@@ -571,6 +582,7 @@ Short path:
 npm.cmd run typecheck
 npm.cmd run build
 npm.cmd run content:report
+npm.cmd run content:check
 npm.cmd run deploy:check
 ```
 

@@ -88,12 +88,12 @@ export const pronounCards = [
     "___ is my sister. Correct: She",
     "___ are pupils. Correct: We",
     "___ are happy. Correct: They",
-    "This is ___ book. Correct: my",
-    "This is ___ pencil. Correct: your",
-    "This is ___ dog. Correct: his",
-    "This is ___ bag. Correct: her",
-    "These are ___ toys. Correct: their",
-    "This is ___ classroom. Correct: our"
+    "I have a book. This is ___ book. Correct: my",
+    "You have a pencil. This is ___ pencil. Correct: your",
+    "Tom has a dog. This is ___ dog. Correct: his",
+    "Anna has a bag. This is ___ bag. Correct: her",
+    "They have toys. These are ___ toys. Correct: their",
+    "We have a classroom. This is ___ classroom. Correct: our"
   ].map((english) => ({ type: "grammar_pattern", topic: "pronouns", english })),
   ...[
     "I / am / eight",

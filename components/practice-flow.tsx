@@ -19,7 +19,6 @@ type MistakeReview = {
 };
 
 const positiveFeedback = ["Отлично!", "Здорово!", "Так держать!"];
-const retryFeedback = ["Почти! Давай еще раз", "Хорошая попытка", "Не страшно, повторим"];
 
 export function PracticeFlow() {
   const { api, family, loading, error } = useFamily();
@@ -34,6 +33,7 @@ export function PracticeFlow() {
   const [startedAt, setStartedAt] = useState(Date.now());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [speechMessage, setSpeechMessage] = useState<string | null>(null);
   const [rate, setRate] = useState(0.9);
   const [stats, setStats] = useState({ total: 0, correct: 0 });
@@ -69,6 +69,7 @@ export function PracticeFlow() {
       setStats({ total: 0, correct: 0 });
       setFeedback(null);
       setLastCorrect(null);
+      setLastAnswer(null);
       setSpeechMessage(null);
       setSelectedWords([]);
       setUsedWordIndexes([]);
@@ -171,7 +172,8 @@ export function PracticeFlow() {
     const nextStats = { total: stats.total + 1, correct: stats.correct + (isCorrect ? 1 : 0) };
     setStats(nextStats);
     setLastCorrect(isCorrect);
-    setFeedback(isCorrect ? positiveFeedback[nextStats.correct % positiveFeedback.length] : retryFeedback[nextStats.total % retryFeedback.length]);
+    setLastAnswer(answer);
+    setFeedback(isCorrect ? positiveFeedback[nextStats.correct % positiveFeedback.length] : "Почти! Давай разберем.");
 
     if (!isCorrect) {
       setMistakes((currentMistakes) => [
@@ -226,15 +228,30 @@ export function PracticeFlow() {
       );
     }
 
-    window.setTimeout(() => {
-      setFeedback(null);
-      setLastCorrect(null);
-      setSpeechMessage(null);
-      setSelectedWords([]);
-      setUsedWordIndexes([]);
-      setIndex((value) => value + 1);
-      setStartedAt(Date.now());
-    }, isCorrect ? 850 : 1600);
+    if (isCorrect) {
+      window.setTimeout(() => {
+        setFeedback(null);
+        setLastCorrect(null);
+        setLastAnswer(null);
+        setSpeechMessage(null);
+        setSelectedWords([]);
+        setUsedWordIndexes([]);
+        setIndex((value) => value + 1);
+        setStartedAt(Date.now());
+      }, 850);
+    }
+  }
+
+  function continueAfterFeedback() {
+    if (!feedback) return;
+    setFeedback(null);
+    setLastCorrect(null);
+    setLastAnswer(null);
+    setSpeechMessage(null);
+    setSelectedWords([]);
+    setUsedWordIndexes([]);
+    setIndex((value) => value + 1);
+    setStartedAt(Date.now());
   }
 
   function addWord(word: string, wordIndex: number) {
@@ -366,6 +383,11 @@ export function PracticeFlow() {
 
               <div className="mt-5 rounded-lg bg-skysoft p-6 text-center">
                 {current.promptRu ? <p className="mb-2 text-sm font-semibold text-slate-500">{current.promptRu}</p> : null}
+                {current.context ? (
+                  <p className="mb-3 rounded-lg bg-white/80 p-3 text-xl font-semibold text-slate-700">
+                    {current.context}
+                  </p>
+                ) : null}
                 <p className="text-3xl font-bold leading-tight">{current.prompt}</p>
                 {current.card?.example_en && current.type === "choose_translation" ? (
                   <p className="mt-3 text-lg text-slate-700">{current.card.example_en}</p>
@@ -439,10 +461,20 @@ export function PracticeFlow() {
               )}
 
               {feedback ? (
-                <div className="mt-5 rounded-lg bg-mint p-4 text-center">
+                <div className={`mt-5 rounded-lg p-4 ${lastCorrect === false ? "bg-peach text-left" : "bg-mint text-center"}`}>
                   <p className="text-2xl font-bold">{feedback}</p>
-                  <p className="mt-2 text-sm">{explainAnswer(current)}</p>
-                  {lastCorrect === false ? <p className="mt-2 text-sm text-slate-600">Правильный ответ: {current.correctAnswer}</p> : null}
+                  {lastCorrect === false ? (
+                    <div className="mt-3 grid gap-2 text-sm text-slate-700">
+                      <p><b>Твой ответ:</b> {lastAnswer}</p>
+                      <p><b>Правильно:</b> {current.correctAnswer}</p>
+                      <p><b>Почему:</b> {explainAnswer(current) || "Посмотри на правильный ответ и попробуй запомнить."}</p>
+                      <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
+                        Продолжить
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm">{explainAnswer(current)}</p>
+                  )}
                 </div>
               ) : null}
             </Panel>

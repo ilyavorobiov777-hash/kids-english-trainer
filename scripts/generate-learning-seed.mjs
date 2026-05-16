@@ -369,11 +369,13 @@ ${ingTimeTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topi
 - RPC: \`public.seed_pronouns_content()\`
 - seed helper: \`supabase/seed_pronouns_content.sql\`
 - migration: \`supabase/migrations/20260516103000_pronouns_content.sql\`
+- ambiguity fix migration: \`supabase/migrations/20260516113000_fix_pronouns_ambiguity.sql\`
 - grammar patterns: ${pronounPatterns.map((pattern) => `${pattern.title} (${pattern.pattern_key})`).join(", ")}
 - extension cards: ${pronounCards.length}
 - extension texts: ${pronounTexts.length}
 - extension text comprehension questions: ${totalPronounTextQuestions}
 - focus: personal pronouns I/you/he/she/it/we/they and possessive adjectives my/your/his/her/its/our/their
+- ambiguity guard: possessive fill gaps use context, for example \`Anna has a bag. This is ___ bag.\` -> \`her\`
 
 ### Pronouns Cards By Type
 
@@ -414,7 +416,7 @@ ${Object.entries(grammarFocus).sort(([a], [b]) => a.localeCompare(b)).map(([focu
 
 \`public.seed_ing_time_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by \`pattern_key\`.
 
-\`public.seed_pronouns_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by \`pattern_key\`.
+\`public.seed_pronouns_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates, updates the two grammar pattern rows by \`pattern_key\`, and archives the old bare possessive fill-gap cards when they exist.
 `;
 
 writeFileSync("CONTENT_SEED_REPORT.md", report, "utf8");

@@ -22,6 +22,7 @@ type StarterTextsSeedResult = {
 type DemonstrativesSeedResult = {
   inserted_cards?: number;
   existing_cards?: number;
+  archived_cards?: number;
   total_cards?: number;
   inserted_grammar_patterns?: number;
   total_grammar_patterns?: number;
@@ -271,6 +272,7 @@ export default function ParentImportPage() {
     const result = data as PronounsSeedResult | null;
     const insertedCards = result?.inserted_cards ?? 0;
     const existingCards = result?.existing_cards ?? Math.max((result?.total_cards ?? 0) - insertedCards, 0);
+    const archivedCards = result?.archived_cards ?? 0;
     const totalCards = result?.total_cards ?? 0;
     const insertedTexts = result?.inserted_texts ?? 0;
     const existingTexts = result?.existing_texts ?? Math.max((result?.total_texts ?? 0) - insertedTexts, 0);
@@ -279,7 +281,7 @@ export default function ParentImportPage() {
     const totalGrammar = result?.total_grammar_patterns ?? 0;
 
     setMessage(
-      `Pronouns готовы: добавлено карточек ${insertedCards}, уже было ${existingCards}, всего карточек ${totalCards}. Текстов добавлено ${insertedTexts}, уже было ${existingTexts}, всего текстов ${totalTexts}. Grammar patterns: добавлено ${insertedGrammar}, всего ${totalGrammar}. Повторный запуск безопасен: дубли не создаются.`
+      `Pronouns готовы: добавлено карточек ${insertedCards}, архивировано неоднозначных ${archivedCards}, уже было ${existingCards}, всего активных/архивных карточек pack ${totalCards}. Текстов добавлено ${insertedTexts}, уже было ${existingTexts}, всего текстов ${totalTexts}. Grammar patterns: добавлено ${insertedGrammar}, всего ${totalGrammar}. Повторный запуск безопасен: дубли не создаются.`
     );
     await loadStarterStatus();
     setStarterLoading(false);

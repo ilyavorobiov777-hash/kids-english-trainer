@@ -5,6 +5,7 @@ export type PracticeExercise = {
   id: string;
   type: ExerciseType;
   prompt: string;
+  context?: string;
   promptRu?: string;
   card?: Card;
   grammarPattern?: GrammarPattern;
@@ -359,34 +360,40 @@ const pronounGapExamples = [
 
 const possessiveGapExamples = [
   {
+    context: "I have a book.",
     prompt: "This is ___ book.",
     answer: "my",
-    explanationRu: "My показывает, что предмет мой: my book. Не говорим I book."
+    explanationRu: "I = я, поэтому говорим my book. Не говорим I book."
   },
   {
+    context: "You have a pencil.",
     prompt: "This is ___ pencil.",
     answer: "your",
-    explanationRu: "Your значит твой или ваш: your pencil."
+    explanationRu: "You = ты/вы, поэтому говорим your pencil."
   },
   {
+    context: "Tom has a dog.",
     prompt: "This is ___ dog.",
     answer: "his",
-    explanationRu: "His значит его: his dog."
+    explanationRu: "Tom - мальчик, поэтому his dog."
   },
   {
+    context: "Anna has a bag.",
     prompt: "This is ___ bag.",
     answer: "her",
-    explanationRu: "Her значит ее: her bag."
+    explanationRu: "Anna - девочка, поэтому her bag."
   },
   {
+    context: "They have toys.",
     prompt: "These are ___ toys.",
     answer: "their",
-    explanationRu: "Their значит их: their toys."
+    explanationRu: "They = они, поэтому their toys."
   },
   {
+    context: "We have a classroom.",
     prompt: "This is ___ classroom.",
     answer: "our",
-    explanationRu: "Our значит наш: our classroom."
+    explanationRu: "We = мы, поэтому our classroom."
   }
 ];
 
@@ -900,6 +907,7 @@ function buildPronounsPractice(cards: Card[], grammarPatterns: GrammarPattern[],
     id: `${personalMode ? "personal" : "possessive"}_fill:${index}:${item.prompt}`,
     type: "fill_the_gap" as ExerciseType,
     grammarPattern,
+    context: "context" in item ? item.context : undefined,
     prompt: item.prompt,
     promptRu: personalMode ? "Выбери I / he / she / we / they" : "Выбери my / your / his / her / our / their",
     options: pickOptions(item.answer, optionSource, 4),
@@ -946,6 +954,7 @@ function buildGenericGrammarPractice(cards: Card[], grammarPatterns: GrammarPatt
   const grammarPattern = findPattern(grammarPatterns, grammarKey);
   const matchedCards = activeCards.filter((card) => matchesGrammarKey(card, grammarKey));
   const sourceCards = matchedCards.length ? matchedCards : activeCards.filter((card) => card.type === "grammar_pattern");
+  if (!matchedCards.length) return [];
 
   const cardExercises = sourceCards.slice(0, 10).map((card, index) => {
     const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence", "fill_the_gap"];
@@ -1181,6 +1190,7 @@ export function buildDailyPractice(params: {
     id: `pronouns_daily:${index}:${item.prompt}`,
     type: "fill_the_gap" as ExerciseType,
     grammarPattern: pronounPattern,
+    context: "context" in item ? item.context : undefined,
     prompt: item.prompt,
     promptRu: "Местоимение или притяжательное слово",
     options: pickOptions(item.answer, ["I", "He", "She", "We", "They", "my", "your", "his", "her", "our", "their"], 4),

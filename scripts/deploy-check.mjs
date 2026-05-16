@@ -58,7 +58,7 @@ function assertFile(path, label = path) {
 assertFile("package.json");
 
 const packageJson = JSON.parse(read("package.json"));
-for (const script of ["dev", "build", "start", "typecheck", "content:report", "deploy:check"]) {
+for (const script of ["dev", "build", "start", "typecheck", "content:report", "content:check", "deploy:check"]) {
   if (!packageJson.scripts?.[script]) fail(`package.json script is missing: ${script}`);
 }
 
@@ -103,6 +103,8 @@ for (const requiredFile of [
   "supabase/migrations/20260511100000_demonstratives_content.sql",
   "supabase/migrations/20260511110000_ing_time_content.sql",
   "supabase/migrations/20260516103000_pronouns_content.sql",
+  "supabase/migrations/20260516113000_fix_pronouns_ambiguity.sql",
+  "scripts/check-ambiguous-exercises.mjs",
   "supabase/migrations/20260509210000_learning_texts.sql"
 ]) {
   assertFile(requiredFile);

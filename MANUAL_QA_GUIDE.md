@@ -275,6 +275,44 @@ Critical errors:
 - dashboard crashes when there are no attempts;
 - parent sees another family's attempts.
 
+## 7A. Practice Feedback And Focused Grammar QA
+
+Wrong answer flow:
+
+1. Open `/child/practice` or any focused grammar practice.
+2. Intentionally choose a wrong answer.
+3. Confirm the app stays on the same exercise.
+4. Confirm it shows:
+   - `Почти! Давай разберем.`
+   - the child's answer;
+   - the correct answer;
+   - a short explanation;
+   - the `Продолжить` button.
+5. Click `Продолжить`.
+6. Confirm the next exercise opens, or the summary opens if it was the last exercise.
+
+Focused grammar practice:
+
+1. Open `/grammar`.
+2. Click `Потренировать` on `Personal pronouns`.
+3. Confirm `/child/practice?grammar_key=personal_pronouns` uses only personal pronouns: `I am`, `He is`, `She is`, `We are`, `They are`.
+4. Click `Потренировать` on `Possessive words`.
+5. Confirm `/child/practice?grammar_key=possessive_adjectives` uses only possessive words: `my`, `your`, `his`, `her`, `our`, `their`.
+6. Repeat for demonstratives, -ing, days/time, articles, would like, have got, can, like, and there is / there are.
+
+Possessive fill gaps must include context:
+
+- `Anna has a bag. This is ___ bag.` Correct: `her`.
+- `Tom has a dog. This is ___ dog.` Correct: `his`.
+- `They have toys. These are ___ toys.` Correct: `their`.
+
+Critical errors:
+
+- wrong answer auto-advances before the explanation can be read;
+- focused grammar practice mixes another grammar topic;
+- a possessive fill gap appears without context, for example bare `These are ___ toys.`;
+- several answer options are grammatically correct but the app accepts only one.
+
 ## 8. Pages To Check
 
 - `/login`

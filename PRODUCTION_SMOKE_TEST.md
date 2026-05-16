@@ -101,6 +101,9 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 - [ ] `/child/practice?grammar_key=possessive_adjectives` starts focused practice.
 - [ ] Pronouns practice checks `I am`, `He is`, `She is`, `We are`, `They are`.
 - [ ] Possessive practice checks `my book`, `your pencil`, `his dog`, `her bag`, `our classroom`, `their toys`.
+- [ ] Possessive fill gaps include context, for example `Anna has a bag. This is ___ bag.` -> `her`.
+- [ ] Wrong answers do not auto-advance; they show the explanation and wait for `Продолжить`.
+- [ ] Focused grammar practice does not mix unrelated grammar topics.
 - [ ] `/child/texts` includes `My family` and `Our classroom` after adding the pack.
 
 ## Critical Failures
@@ -114,10 +117,12 @@ Stop and fix if:
 - Demonstratives seed duplicates cards/texts;
 - -ing + time seed duplicates cards/texts;
 - pronouns seed duplicates cards/texts;
+- wrong answer auto-advances before the child can read the explanation;
 - demonstratives practice offers `these is` or `those is` as a correct answer;
 - -ing practice accepts `I running`, `She are sleeping`, or `They is playing` as correct;
 - time practice accepts `in Sunday`, `in night`, or `on seven o'clock` as correct;
 - pronouns practice accepts `I book`, `he are`, `she are`, or `they is` as correct;
+- possessive practice shows bare ambiguous prompts such as `These are ___ toys.` without context;
 - child practice starts with an empty exercise;
 - exercise options do not contain the correct answer;
 - practice attempts are not saved;

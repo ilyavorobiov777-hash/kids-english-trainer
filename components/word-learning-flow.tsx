@@ -191,6 +191,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   const [mistakes, setMistakes] = useState<Mistake[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
 
   useEffect(() => {
@@ -264,7 +265,8 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     const nextStats = { total: stats.total + 1, correct: stats.correct + (correct ? 1 : 0) };
     setStats(nextStats);
     setLastCorrect(correct);
-    setFeedback(correct ? "Отлично!" : "Почти! Посмотри правильный ответ.");
+    setLastAnswer(answer);
+    setFeedback(correct ? "Отлично!" : "Почти! Давай разберем.");
 
     if (!correct) {
       setMistakes((items) => [
@@ -303,12 +305,24 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       { onConflict: "child_id,card_id" }
     );
 
-    window.setTimeout(() => {
-      setFeedback(null);
-      setLastCorrect(null);
-      setIndex((value) => value + 1);
-      setStartedAt(Date.now());
-    }, correct ? 750 : 1400);
+    if (correct) {
+      window.setTimeout(() => {
+        setFeedback(null);
+        setLastCorrect(null);
+        setLastAnswer(null);
+        setIndex((value) => value + 1);
+        setStartedAt(Date.now());
+      }, 750);
+    }
+  }
+
+  function continueAfterFeedback() {
+    if (!feedback) return;
+    setFeedback(null);
+    setLastCorrect(null);
+    setLastAnswer(null);
+    setIndex((value) => value + 1);
+    setStartedAt(Date.now());
   }
 
   function nextPresentation() {
@@ -330,6 +344,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     setMistakes([]);
     setFeedback(null);
     setLastCorrect(null);
+    setLastAnswer(null);
     setStartedAt(Date.now());
   }
 
@@ -431,10 +446,20 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
                     ))}
                   </div>
                   {feedback ? (
-                    <div className="mt-5 rounded-lg bg-mint p-4 text-center">
+                    <div className={`mt-5 rounded-lg p-4 ${lastCorrect === false ? "bg-peach text-left" : "bg-mint text-center"}`}>
                       <p className="text-2xl font-bold">{feedback}</p>
-                      <p className="mt-2 text-sm">{explainAnswer(current.exercise)}</p>
-                      {lastCorrect === false ? <p className="mt-2 text-sm text-slate-600">Правильно: {current.exercise.correctAnswer}</p> : null}
+                      {lastCorrect === false ? (
+                        <div className="mt-3 grid gap-2 text-sm text-slate-700">
+                          <p><b>Твой ответ:</b> {lastAnswer}</p>
+                          <p><b>Правильно:</b> {current.exercise.correctAnswer}</p>
+                          <p><b>Почему:</b> {explainAnswer(current.exercise) || "Посмотри на правильный ответ и попробуй запомнить."}</p>
+                          <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
+                            Продолжить
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm">{explainAnswer(current.exercise)}</p>
+                      )}
                     </div>
                   ) : null}
                 </div>
