@@ -142,6 +142,99 @@ export default function GrammarPage() {
               </Link>
             </Panel>
           </div>
+          <div className="mb-5 grid gap-5 lg:grid-cols-2">
+            <Panel className="bg-skysoft">
+              <h2 className="text-2xl font-bold">Личные местоимения: I, you, he, she, it, we, they</h2>
+              <p className="mt-3 text-slate-700">
+                Личные местоимения заменяют имена людей, животных или предметы. <b>I</b> - я, <b>you</b> - ты/вы,
+                <b> he</b> - он, <b>she</b> - она, <b>it</b> - оно/это, <b>we</b> - мы, <b>they</b> - они.
+              </p>
+              <div className="mt-4 overflow-hidden rounded-lg border border-white/70 bg-white">
+                <table className="w-full text-left text-sm">
+                  <tbody>
+                    {[
+                      ["I", "я", "I am eight."],
+                      ["you", "ты / вы", "You are my friend."],
+                      ["he", "он", "He is my brother."],
+                      ["she", "она", "She is my sister."],
+                      ["it", "оно / это", "It is a cat."],
+                      ["we", "мы", "We are pupils."],
+                      ["they", "они", "They are happy."]
+                    ].map(([word, ru, example]) => (
+                      <tr key={word} className="border-t border-slate-100 first:border-t-0">
+                        <td className="p-2 font-bold">{word}</td>
+                        <td className="p-2">{ru}</td>
+                        <td className="p-2 text-slate-600">{example}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 grid gap-1 text-sm">
+                <p>Are you happy? - Ты счастлив?</p>
+                <p>Is he your brother? - Он твой брат?</p>
+                <p>Is she your sister? - Она твоя сестра?</p>
+                <p>Are they pupils? - Они ученики?</p>
+                <p>Yes, they are. / No, they aren&apos;t.</p>
+              </div>
+              <p className="mt-3 rounded-lg bg-white p-3 text-sm">
+                Правило: I am; he/she/it is; you/we/they are. I всегда пишется с большой буквы.
+              </p>
+              <Link className="mt-5 inline-block rounded-lg bg-berry px-5 py-3 font-bold text-white" href={grammarPracticeHref("personal_pronouns", "Personal pronouns")}>
+                Потренировать
+              </Link>
+            </Panel>
+
+            <Panel className="bg-mint">
+              <h2 className="text-2xl font-bold">Притяжательные слова: my, your, his, her, our, their</h2>
+              <p className="mt-3 text-slate-700">
+                Эти слова показывают, кому принадлежит предмет. После них обычно идет предмет:
+                <b> my book</b>, <b>your pencil</b>, <b>his dog</b>, <b>her bag</b>, <b>our classroom</b>, <b>their toys</b>.
+              </p>
+              <div className="mt-4 overflow-hidden rounded-lg border border-white/70 bg-white">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="p-2">Кто?</th>
+                      <th className="p-2">Чей?</th>
+                      <th className="p-2">Пример</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ["I", "my", "my book"],
+                      ["you", "your", "your pencil"],
+                      ["he", "his", "his dog"],
+                      ["she", "her", "her bag"],
+                      ["it", "its", "its tail"],
+                      ["we", "our", "our classroom"],
+                      ["they", "their", "their toys"]
+                    ].map(([person, word, example]) => (
+                      <tr key={word} className="border-t border-slate-100">
+                        <td className="p-2 font-bold">{person}</td>
+                        <td className="p-2">{word}</td>
+                        <td className="p-2 text-slate-600">{example}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 grid gap-1 text-sm">
+                <p>This is my book. - Это моя книга.</p>
+                <p>This is your pencil. - Это твой карандаш.</p>
+                <p>This is his dog. - Это его собака.</p>
+                <p>This is her bag. - Это ее сумка.</p>
+                <p>These are their toys. - Это их игрушки.</p>
+                <p>Whose book is this? - Чья это книга?</p>
+              </div>
+              <p className="mt-3 rounded-lg bg-white p-3 text-sm">
+                Не говорим I book. Правильно: my book. His - его, her - ее, their - их, our - наш.
+              </p>
+              <Link className="mt-5 inline-block rounded-lg bg-ink px-5 py-3 font-bold text-white" href={grammarPracticeHref("possessive_adjectives", "Possessive words")}>
+                Потренировать
+              </Link>
+            </Panel>
+          </div>
           <div className="grid gap-3 md:grid-cols-2">
             {items.map((item) => (
               <Panel key={item.id}>

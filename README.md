@@ -371,6 +371,47 @@ The pack adds 2 grammar pattern rows, 109 cards, and 3 original short texts:
 
 Every grammar pattern card on `/grammar` now has a `Потренировать` button. It opens focused practice by `grammar_key` and uses the existing child practice summary, saved attempts, review schedule, and mistake review.
 
+## Grammar: Personal Pronouns
+
+The `Personal pronouns` pack teaches:
+
+- `I` - я: `I am eight.`
+- `you` - ты / вы: `You are my friend.`
+- `he` - он: `He is my brother.`
+- `she` - она: `She is my sister.`
+- `it` - оно / это: `It is a cat.`
+- `we` - мы: `We are pupils.`
+- `they` - они: `They are happy.`
+
+Rule: `I am`, `he/she/it is`, `you/we/they are`. The focused practice checks question forms such as `Are you happy?`, `Is he your brother?`, `Is she your sister?`, `Are they pupils?`, and short answers like `Yes, he is` / `No, they aren't`.
+
+## Grammar: Possessive Words
+
+The `Possessive words` pack teaches `my`, `your`, `his`, `her`, `its`, `our`, and `their`.
+
+Examples:
+
+- `This is my book.`
+- `This is your pencil.`
+- `This is his dog.`
+- `This is her bag.`
+- `This is our classroom.`
+- `These are their toys.`
+- `Whose book is this?`
+
+Apply the latest migration, then add the pack from `/parent/import` with `Добавить grammar: pronouns`, or run:
+
+```sql
+select public.seed_pronouns_content();
+```
+
+The pack adds 2 grammar pattern rows, pronoun/possessive cards, fill gaps, question forms, short answers, build-sentence cards, and 2 original short texts: `My family` and `Our classroom`.
+
+Focused practice URLs:
+
+- `/child/practice?grammar_key=personal_pronouns`
+- `/child/practice?grammar_key=possessive_adjectives`
+
 ## Child Management
 
 Parents can manage child profiles on `/parent/children`:

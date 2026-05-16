@@ -31,6 +31,7 @@ type DemonstrativesSeedResult = {
 };
 
 type IngTimeSeedResult = DemonstrativesSeedResult;
+type PronounsSeedResult = DemonstrativesSeedResult;
 
 type StarterStatus = {
   cards: number;
@@ -40,6 +41,8 @@ type StarterStatus = {
   demonstrativeTexts: number;
   ingTimeCards: number;
   ingTimeTexts: number;
+  pronounCards: number;
+  pronounTexts: number;
   loading: boolean;
 };
 
@@ -47,6 +50,7 @@ const starterCourseTitle = "Starter 350 Pre-A1";
 const starterTextsCourseTitle = "Starter Texts Pre-A1";
 const demonstrativesCourseTitle = "Grammar: Demonstratives";
 const ingTimeCourseTitle = "Grammar: -ing and time";
+const pronounsCourseTitle = "Grammar: Pronouns";
 
 export default function ParentImportPage() {
   const { api, family, loading, error } = useFamily();
@@ -60,6 +64,8 @@ export default function ParentImportPage() {
     demonstrativeTexts: 0,
     ingTimeCards: 0,
     ingTimeTexts: 0,
+    pronounCards: 0,
+    pronounTexts: 0,
     loading: true
   });
 
@@ -67,17 +73,19 @@ export default function ParentImportPage() {
     if (!family) return;
     setStarterStatus((current) => ({ ...current, loading: true }));
 
-    const [starterCourseRes, textsCourseRes, demonstrativesCourseRes, ingTimeCourseRes] = await Promise.all([
+    const [starterCourseRes, textsCourseRes, demonstrativesCourseRes, ingTimeCourseRes, pronounsCourseRes] = await Promise.all([
       api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterCourseTitle).maybeSingle(),
       api.from("courses").select("id").eq("family_id", family.familyId).eq("title", starterTextsCourseTitle).maybeSingle(),
       api.from("courses").select("id").eq("family_id", family.familyId).eq("title", demonstrativesCourseTitle).maybeSingle(),
-      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", ingTimeCourseTitle).maybeSingle()
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", ingTimeCourseTitle).maybeSingle(),
+      api.from("courses").select("id").eq("family_id", family.familyId).eq("title", pronounsCourseTitle).maybeSingle()
     ]);
 
     const starterCourse = starterCourseRes.data;
     const textsCourse = textsCourseRes.data;
     const demonstrativesCourse = demonstrativesCourseRes.data;
     const ingTimeCourse = ingTimeCourseRes.data;
+    const pronounsCourse = pronounsCourseRes.data;
 
     const [
       { count: cardsCount },
@@ -86,7 +94,9 @@ export default function ParentImportPage() {
       { count: demonstrativeCardsCount },
       { count: demonstrativeTextsCount },
       { count: ingTimeCardsCount },
-      { count: ingTimeTextsCount }
+      { count: ingTimeTextsCount },
+      { count: pronounCardsCount },
+      { count: pronounTextsCount }
     ] = await Promise.all([
       starterCourse
         ? api.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", starterCourse.id)
@@ -108,6 +118,12 @@ export default function ParentImportPage() {
         : Promise.resolve({ count: 0 }),
       ingTimeCourse
         ? api.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", ingTimeCourse.id)
+        : Promise.resolve({ count: 0 }),
+      pronounsCourse
+        ? api.from("cards").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", pronounsCourse.id)
+        : Promise.resolve({ count: 0 }),
+      pronounsCourse
+        ? api.from("learning_texts").select("id", { count: "exact", head: true }).eq("family_id", family.familyId).eq("course_id", pronounsCourse.id)
         : Promise.resolve({ count: 0 })
     ]);
 
@@ -119,6 +135,8 @@ export default function ParentImportPage() {
       demonstrativeTexts: demonstrativeTextsCount ?? 0,
       ingTimeCards: ingTimeCardsCount ?? 0,
       ingTimeTexts: ingTimeTextsCount ?? 0,
+      pronounCards: pronounCardsCount ?? 0,
+      pronounTexts: pronounTextsCount ?? 0,
       loading: false
     });
   }, [family, api]);
@@ -238,6 +256,35 @@ export default function ParentImportPage() {
     setStarterLoading(false);
   }
 
+  async function seedPronouns() {
+    setStarterLoading(true);
+    setMessage("Добавляю grammar: pronouns. Повторный запуск безопасен...");
+
+    const { data, error: rpcError } = await api.rpc("seed_pronouns_content");
+
+    if (rpcError) {
+      setStarterLoading(false);
+      setMessage(`Не удалось добавить pronouns: ${rpcError.message}`);
+      return;
+    }
+
+    const result = data as PronounsSeedResult | null;
+    const insertedCards = result?.inserted_cards ?? 0;
+    const existingCards = result?.existing_cards ?? Math.max((result?.total_cards ?? 0) - insertedCards, 0);
+    const totalCards = result?.total_cards ?? 0;
+    const insertedTexts = result?.inserted_texts ?? 0;
+    const existingTexts = result?.existing_texts ?? Math.max((result?.total_texts ?? 0) - insertedTexts, 0);
+    const totalTexts = result?.total_texts ?? 0;
+    const insertedGrammar = result?.inserted_grammar_patterns ?? 0;
+    const totalGrammar = result?.total_grammar_patterns ?? 0;
+
+    setMessage(
+      `Pronouns готовы: добавлено карточек ${insertedCards}, уже было ${existingCards}, всего карточек ${totalCards}. Текстов добавлено ${insertedTexts}, уже было ${existingTexts}, всего текстов ${totalTexts}. Grammar patterns: добавлено ${insertedGrammar}, всего ${totalGrammar}. Повторный запуск безопасен: дубли не создаются.`
+    );
+    await loadStarterStatus();
+    setStarterLoading(false);
+  }
+
   return (
     <AuthRequired loading={loading} error={error}>
       {!family ? (
@@ -256,16 +303,19 @@ export default function ParentImportPage() {
                   <h2 className="text-lg font-bold">Стартовые наборы</h2>
                   <p className="mt-2 text-sm text-ink/70">
                     Starter 350 добавляет базовые слова, фразы, грамматику, диалоги и истории. Starter Texts добавляет короткие собственные тексты для чтения и аудирования.
-                    Отдельные наборы this/that/these/those и -ing + time добавляют фокусную грамматику. Все наборы можно запускать повторно безопасно: дубли не создаются.
+                    Отдельные наборы this/that/these/those, -ing + time и pronouns добавляют фокусную грамматику. Все наборы можно запускать повторно безопасно: дубли не создаются.
                   </p>
                   <p className="mt-2 text-sm text-ink/70">
                     Grammar pack -ing + time добавляет -ing, Present Continuous, дни недели, части дня и выражения времени.
+                  </p>
+                  <p className="mt-2 text-sm text-ink/70">
+                    Grammar pronouns добавляет личные и притяжательные местоимения: I, you, he, she, it, we, they, my, your, his, her, our, their.
                   </p>
                   <p className="mt-3 rounded-lg bg-sky/20 px-3 py-2 text-sm font-semibold">
                     Сейчас:{" "}
                     {starterStatus.loading
                       ? "считаю..."
-                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns, ${starterStatus.texts} texts, demonstratives: ${starterStatus.demonstrativeCards} карточек и ${starterStatus.demonstrativeTexts} texts, -ing + time: ${starterStatus.ingTimeCards} карточек и ${starterStatus.ingTimeTexts} texts`}
+                      : `${starterStatus.cards} карточек, ${starterStatus.grammarPatterns} grammar patterns, ${starterStatus.texts} texts, demonstratives: ${starterStatus.demonstrativeCards} карточек и ${starterStatus.demonstrativeTexts} texts, -ing + time: ${starterStatus.ingTimeCards} карточек и ${starterStatus.ingTimeTexts} texts, pronouns: ${starterStatus.pronounCards} карточек и ${starterStatus.pronounTexts} texts`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 md:justify-end">
@@ -281,6 +331,9 @@ export default function ParentImportPage() {
                   </Button>
                   <Button className="bg-peach text-ink" disabled={starterLoading} onClick={seedIngTime}>
                     {starterLoading ? "Добавляю..." : "Добавить grammar pack: -ing + time"}
+                  </Button>
+                  <Button className="bg-ink text-white" disabled={starterLoading} onClick={seedPronouns}>
+                    {starterLoading ? "Добавляю..." : "Добавить grammar: pronouns"}
                   </Button>
                 </div>
               </div>

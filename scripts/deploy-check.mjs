@@ -99,8 +99,10 @@ for (const requiredFile of [
   "supabase/seed_starter_texts.sql",
   "supabase/seed_demonstratives_content.sql",
   "supabase/seed_ing_time_content.sql",
+  "supabase/seed_pronouns_content.sql",
   "supabase/migrations/20260511100000_demonstratives_content.sql",
   "supabase/migrations/20260511110000_ing_time_content.sql",
+  "supabase/migrations/20260516103000_pronouns_content.sql",
   "supabase/migrations/20260509210000_learning_texts.sql"
 ]) {
   assertFile(requiredFile);

@@ -20,6 +20,9 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     if (prompt.startsWith("are these") || prompt.startsWith("are those")) {
       return "В вопросах Are these...? и Are those...? короткий ответ строится с they are: Yes, they are / No, they aren't.";
     }
+    if (prompt.startsWith("is this") && (prompt.includes("your") || prompt.includes("his") || prompt.includes("her"))) {
+      return "В вопросе про один предмет отвечаем Yes, it is / No, it isn't. My/your/his/her показывают, чей предмет.";
+    }
     if (prompt.startsWith("are you")) return "В вопросе Are you ...? короткий ответ строится с am: Yes, I am / No, I am not.";
     if (prompt.startsWith("is she")) return "В вопросе Is she ...? короткий ответ строится с is: Yes, she is / No, she isn't.";
     if (prompt.startsWith("is he")) return "В вопросе Is he ...? короткий ответ строится с is: Yes, he is / No, he isn't.";
@@ -41,6 +44,12 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     }
     if (correct.startsWith("what time") || correct.includes(" on sunday")) {
       return "В вопросах про время ищи day/time слова: on Sunday, in the morning, at seven o'clock.";
+    }
+    if (correct.startsWith("is he") || correct.startsWith("is she") || correct.startsWith("are they")) {
+      return "С he/she используем is, с they используем are. В вопросе is/are ставим в начало.";
+    }
+    if (correct.startsWith("is this your") || correct.startsWith("whose")) {
+      return "Possessive words показывают, чей предмет: my book, your pencil, his dog, her bag, their toys.";
     }
     if (correct.startsWith("have you got")) return "Вопрос с have got начинается с Have you got...";
     if (correct.startsWith("can you")) return "Вопрос с can начинается с Can you...";
@@ -75,6 +84,12 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
     if (answer === "in") return "С частями дня используем in: in the morning, in the afternoon, in the evening.";
     if (answer === "at") return "At используем для at night и времени на часах: at seven o'clock.";
     if (answer === "last" || answer === "next") return "С last/next предлог не нужен: last weekend, next week.";
+    if (["i", "he", "she", "we", "they"].includes(answer)) {
+      return "I - я, he - он, she - она, we - мы, they - они. После I говорим am, после he/she - is, после we/they - are.";
+    }
+    if (["my", "your", "his", "her", "our", "their"].includes(answer)) {
+      return "После my/your/his/her/our/their нужен предмет: my book, her bag. Не говорим I book.";
+    }
   }
 
   if (["choose_translation", "russian_to_english", "listen_and_choose"].includes(exercise.type)) {

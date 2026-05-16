@@ -172,7 +172,45 @@ Check texts:
 3. Open each text and answer comprehension questions.
 4. Confirm attempts save and `/parent/progress` shows text attempts.
 
-## 6C. Check How The Child Learns Words
+## 6C. Grammar: Personal Pronouns And Possessive Words
+
+Add the pronouns pack:
+
+1. Apply the latest migrations.
+2. Open `/parent/import`.
+3. Click `Добавить grammar: pronouns`.
+4. Click it again and confirm inserted cards/texts are `0` or the UI says the pack already exists.
+
+Check grammar UI:
+
+1. Open `/grammar`.
+2. Find `Личные местоимения: I, you, he, she, it, we, they`.
+3. Click `Потренировать`.
+4. Check focused practice with `I am`, `He is`, `She is`, `We are`, `They are`.
+5. Find `Притяжательные слова: my, your, his, her, our, their`.
+6. Click `Потренировать`.
+7. Check `my book`, `your pencil`, `his dog`, `her bag`, `our classroom`, `their toys`.
+
+Expected:
+
+- `___ am eight` -> `I`.
+- `___ is my brother` -> `He`.
+- `___ is my sister` -> `She`.
+- `___ are pupils` -> `We`.
+- `This is ___ book` -> `my`.
+- `This is ___ pencil` -> `your`.
+- `These are ___ toys` -> `their`.
+- `Are they pupils?` -> `Yes, they are.` / `No, they aren't.`
+- `Whose book is this?` -> `It is my book.`
+
+Check texts:
+
+1. Open `/child/texts`.
+2. Find `My family` and `Our classroom` after adding the pack.
+3. Open each text and answer comprehension questions.
+4. Confirm attempts save and `/parent/progress` shows text attempts.
+
+## 6D. Check How The Child Learns Words
 
 1. Open `/child/dashboard`.
 2. Confirm there are large buttons:

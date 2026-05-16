@@ -91,6 +91,18 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 46. [ ] iPhone Safari works.
 47. [ ] Windows Yandex Browser works.
 
+## Pronouns Production Checks
+
+- [ ] `/parent/import` button `Добавить grammar: pronouns` works.
+- [ ] Re-running pronouns pack does not create duplicates.
+- [ ] `/grammar` shows `Личные местоимения: I, you, he, she, it, we, they`.
+- [ ] `/grammar` shows `Притяжательные слова: my, your, his, her, our, their`.
+- [ ] `/child/practice?grammar_key=personal_pronouns` starts focused practice.
+- [ ] `/child/practice?grammar_key=possessive_adjectives` starts focused practice.
+- [ ] Pronouns practice checks `I am`, `He is`, `She is`, `We are`, `They are`.
+- [ ] Possessive practice checks `my book`, `your pencil`, `his dog`, `her bag`, `our classroom`, `their toys`.
+- [ ] `/child/texts` includes `My family` and `Our classroom` after adding the pack.
+
 ## Critical Failures
 
 Stop and fix if:
@@ -101,9 +113,11 @@ Stop and fix if:
 - Starter Texts duplicates texts;
 - Demonstratives seed duplicates cards/texts;
 - -ing + time seed duplicates cards/texts;
+- pronouns seed duplicates cards/texts;
 - demonstratives practice offers `these is` or `those is` as a correct answer;
 - -ing practice accepts `I running`, `She are sleeping`, or `They is playing` as correct;
 - time practice accepts `in Sunday`, `in night`, or `on seven o'clock` as correct;
+- pronouns practice accepts `I book`, `he are`, `she are`, or `they is` as correct;
 - child practice starts with an empty exercise;
 - exercise options do not contain the correct answer;
 - practice attempts are not saved;

@@ -121,6 +121,54 @@ const questionFormExamples = [
     statement: "I get up at seven o'clock.",
     question: "What time do you get up?",
     options: ["What time do you get up?", "What day do you get up?", "Where time do you get up?", "What are you get up?"]
+  },
+  {
+    key: "personal_pronouns",
+    statement: "You are happy.",
+    question: "Are you happy?",
+    options: ["Are you happy?", "Is you happy?", "Do you happy?", "You are happy?"]
+  },
+  {
+    key: "personal_pronouns",
+    statement: "He is my brother.",
+    question: "Is he your brother?",
+    options: ["Is he your brother?", "Are he your brother?", "Is she your brother?", "Does he your brother?"]
+  },
+  {
+    key: "personal_pronouns",
+    statement: "She is my sister.",
+    question: "Is she your sister?",
+    options: ["Is she your sister?", "Are she your sister?", "Is he your sister?", "Does she your sister?"]
+  },
+  {
+    key: "personal_pronouns",
+    statement: "They are pupils.",
+    question: "Are they pupils?",
+    options: ["Are they pupils?", "Is they pupils?", "Do they pupils?", "Are it pupils?"]
+  },
+  {
+    key: "possessive_adjectives",
+    statement: "This is your book.",
+    question: "Is this your book?",
+    options: ["Is this your book?", "Are this your book?", "Is this you book?", "Does this your book?"]
+  },
+  {
+    key: "possessive_adjectives",
+    statement: "These are your toys.",
+    question: "Are these your toys?",
+    options: ["Are these your toys?", "Is these your toys?", "Are these you toys?", "Do these your toys?"]
+  },
+  {
+    key: "possessive_adjectives",
+    statement: "This is my book.",
+    question: "Whose book is this?",
+    options: ["Whose book is this?", "Who book is this?", "Whose is this book?", "What book this is?"]
+  },
+  {
+    key: "possessive_adjectives",
+    statement: "These are my pencils.",
+    question: "Whose pencils are these?",
+    options: ["Whose pencils are these?", "Whose pencil is these?", "Who pencils are these?", "What pencils is these?"]
   }
 ];
 
@@ -281,6 +329,67 @@ const timeGapExamples = [
   }
 ];
 
+const pronounGapExamples = [
+  {
+    prompt: "___ am eight.",
+    answer: "I",
+    explanationRu: "После I используется am: I am eight. I всегда пишется с большой буквы."
+  },
+  {
+    prompt: "___ is my brother.",
+    answer: "He",
+    explanationRu: "He значит он. После he используется is: He is my brother."
+  },
+  {
+    prompt: "___ is my sister.",
+    answer: "She",
+    explanationRu: "She значит она. После she используется is: She is my sister."
+  },
+  {
+    prompt: "___ are pupils.",
+    answer: "We",
+    explanationRu: "We значит мы. После we используется are: We are pupils."
+  },
+  {
+    prompt: "___ are happy.",
+    answer: "They",
+    explanationRu: "They значит они. После they используется are: They are happy."
+  }
+];
+
+const possessiveGapExamples = [
+  {
+    prompt: "This is ___ book.",
+    answer: "my",
+    explanationRu: "My показывает, что предмет мой: my book. Не говорим I book."
+  },
+  {
+    prompt: "This is ___ pencil.",
+    answer: "your",
+    explanationRu: "Your значит твой или ваш: your pencil."
+  },
+  {
+    prompt: "This is ___ dog.",
+    answer: "his",
+    explanationRu: "His значит его: his dog."
+  },
+  {
+    prompt: "This is ___ bag.",
+    answer: "her",
+    explanationRu: "Her значит ее: her bag."
+  },
+  {
+    prompt: "These are ___ toys.",
+    answer: "their",
+    explanationRu: "Their значит их: their toys."
+  },
+  {
+    prompt: "This is ___ classroom.",
+    answer: "our",
+    explanationRu: "Our значит наш: our classroom."
+  }
+];
+
 const shortAnswerExamples = [
   {
     key: "have got",
@@ -353,6 +462,60 @@ const shortAnswerExamples = [
     prompt: "Whose pencils are those?",
     answer: "Those are her pencils.",
     options: ["Those are her pencils.", "That is her pencil.", "These is her pencils.", "No, they aren't."]
+  },
+  {
+    key: "personal_pronouns",
+    prompt: "Are you happy?",
+    answer: "Yes, I am.",
+    options: ["Yes, I am.", "No, I am not.", "Yes, he is.", "Yes, they are."]
+  },
+  {
+    key: "personal_pronouns",
+    prompt: "Is he your brother?",
+    answer: "Yes, he is.",
+    options: ["Yes, he is.", "No, he isn't.", "Yes, she is.", "Yes, they are."]
+  },
+  {
+    key: "personal_pronouns",
+    prompt: "Is she your sister?",
+    answer: "No, she isn't.",
+    options: ["No, she isn't.", "Yes, she is.", "No, he isn't.", "No, they aren't."]
+  },
+  {
+    key: "personal_pronouns",
+    prompt: "Is it a dog?",
+    answer: "Yes, it is.",
+    options: ["Yes, it is.", "No, it isn't.", "Yes, he is.", "Yes, they are."]
+  },
+  {
+    key: "personal_pronouns",
+    prompt: "Are they pupils?",
+    answer: "Yes, they are.",
+    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I am."]
+  },
+  {
+    key: "possessive_adjectives",
+    prompt: "Is this your book?",
+    answer: "Yes, it is.",
+    options: ["Yes, it is.", "No, it isn't.", "Yes, they are.", "Yes, I am."]
+  },
+  {
+    key: "possessive_adjectives",
+    prompt: "Are these your toys?",
+    answer: "No, they aren't.",
+    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I am not."]
+  },
+  {
+    key: "possessive_adjectives",
+    prompt: "Whose book is this?",
+    answer: "It is my book.",
+    options: ["It is my book.", "They are her pencils.", "This is I book.", "Yes, they are."]
+  },
+  {
+    key: "possessive_adjectives",
+    prompt: "Whose pencils are these?",
+    answer: "They are her pencils.",
+    options: ["They are her pencils.", "It is my book.", "These is her pencils.", "No, it isn't."]
   },
   {
     key: "present_continuous_ing",
@@ -532,6 +695,16 @@ function isTimeKey(key?: string) {
   return value.includes("days_time") || value.includes("time expressions") || value.includes("monday") || value.includes("weekend");
 }
 
+function isPersonalPronounsKey(key?: string) {
+  const value = normalize(key ?? "");
+  return value.includes("personal_pronouns") || value.includes("personal pronouns") || value.includes("i you he she");
+}
+
+function isPossessiveAdjectivesKey(key?: string) {
+  const value = normalize(key ?? "");
+  return value.includes("possessive_adjectives") || value.includes("possessive") || value.includes("my your his her");
+}
+
 function matchesGrammarKey(card: Card, key: string) {
   const value = normalize(key);
   const compactValue = value.replace(/\s+/g, "_");
@@ -540,6 +713,8 @@ function matchesGrammarKey(card: Card, key: string) {
   if (isDemonstrativesKey(value)) return card.tags.some((tag) => normalize(tag).includes("demonstratives")) || haystack.includes("these") || haystack.includes("those");
   if (isIngKey(value)) return card.tags.some((tag) => normalize(tag).includes("present_continuous")) || haystack.includes("running") || haystack.includes("sleeping") || haystack.includes("jumping");
   if (isTimeKey(value)) return card.tags.some((tag) => normalize(tag).includes("days_time")) || haystack.includes("monday") || haystack.includes("morning") || haystack.includes("weekend");
+  if (isPersonalPronounsKey(value)) return card.tags.some((tag) => normalize(tag).includes("personal_pronouns")) || card.tags.some((tag) => normalize(tag).includes("pronouns")) || /\b(i|you|he|she|it|we|they)\b/i.test(card.english);
+  if (isPossessiveAdjectivesKey(value)) return card.tags.some((tag) => normalize(tag).includes("possessive_adjectives")) || haystack.includes("my book") || haystack.includes("your pencil") || haystack.includes("his ") || haystack.includes("her ") || haystack.includes("their ") || haystack.includes("our ");
 
   const tokens = uniqueValues([...value.split(/[_\s/+-]+/), ...compactValue.split("_")]).filter((token) => token.length >= 3);
   return tokens.some((token) => haystack.includes(token));
@@ -704,6 +879,68 @@ function buildTimePractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
   return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises]), 12);
 }
 
+function buildPronounsPractice(cards: Card[], grammarPatterns: GrammarPattern[], grammarKey: string) {
+  const activeCards = cards.filter((card) => card.status === "active");
+  const personalMode = isPersonalPronounsKey(grammarKey);
+  const grammarPattern =
+    findPattern(grammarPatterns, personalMode ? "personal_pronouns" : "possessive_adjectives") ??
+    findPattern(grammarPatterns, "pronouns");
+  const pronounCards = activeCards.filter((card) => matchesGrammarKey(card, grammarKey));
+  const gapSource = personalMode ? pronounGapExamples : possessiveGapExamples;
+  const optionSource = personalMode
+    ? ["I", "You", "He", "She", "It", "We", "They"]
+    : ["my", "your", "his", "her", "its", "our", "their"];
+
+  const cardExercises = pronounCards.slice(0, 6).map((card, index) => {
+    const cycle: ExerciseType[] = ["choose_translation", "russian_to_english", "listen_and_choose", "build_sentence"];
+    return buildCardExercise(card, activeCards.length ? activeCards : pronounCards, cycle[index % cycle.length]);
+  });
+
+  const gapExercises = gapSource.map((item, index) => ({
+    id: `${personalMode ? "personal" : "possessive"}_fill:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern,
+    prompt: item.prompt,
+    promptRu: personalMode ? "Выбери I / he / she / we / they" : "Выбери my / your / his / her / our / their",
+    options: pickOptions(item.answer, optionSource, 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
+  const questionExercises = questionFormExamples
+    .filter((item) => (personalMode ? isPersonalPronounsKey(item.key) : isPossessiveAdjectivesKey(item.key)))
+    .map((item, index) => ({
+      id: `${personalMode ? "personal" : "possessive"}_question:${index}:${item.statement}`,
+      type: "question_form" as ExerciseType,
+      grammarPattern,
+      prompt: item.statement,
+      promptRu: "Выбери правильный вопрос",
+      options: shuffle(item.options),
+      correctAnswer: item.question,
+      explanationRu: personalMode
+        ? "В вопросе am/is/are выходит вперед: Are you happy? Is he your brother?"
+        : "В вопросах с this/these и my/your/his/her важно сохранить possessive word: Is this your book?"
+    }));
+
+  const shortAnswerExercises = shortAnswerExamples
+    .filter((item) => (personalMode ? isPersonalPronounsKey(item.key) : isPossessiveAdjectivesKey(item.key)))
+    .map((item, index) => ({
+      id: `${personalMode ? "personal" : "possessive"}_short:${index}:${item.prompt}`,
+      type: "short_answer" as ExerciseType,
+      grammarPattern,
+      prompt: item.prompt,
+      promptRu: "Выбери короткий ответ",
+      options: shuffle(item.options),
+      correctAnswer: item.answer,
+      listenText: item.prompt,
+      explanationRu: personalMode
+        ? "Короткий ответ повторяет am/is/are из вопроса: Yes, he is. No, they aren't."
+        : "Если вопрос про один предмет, отвечаем Yes, it is / No, it isn't. Если предметов несколько: Yes, they are / No, they aren't."
+    }));
+
+  return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises, ...shortAnswerExercises]), 12);
+}
+
 function buildGenericGrammarPractice(cards: Card[], grammarPatterns: GrammarPattern[], grammarKey: string) {
   const activeCards = cards.filter((card) => card.status === "active");
   const grammarPattern = findPattern(grammarPatterns, grammarKey);
@@ -800,6 +1037,12 @@ export function buildDailyPractice(params: {
   }
   if (isTimeKey(grammarKey ?? undefined)) {
     return buildTimePractice(cards, grammarPatterns);
+  }
+  if (isPersonalPronounsKey(grammarKey ?? undefined)) {
+    return buildPronounsPractice(cards, grammarPatterns, "personal_pronouns");
+  }
+  if (isPossessiveAdjectivesKey(grammarKey ?? undefined)) {
+    return buildPronounsPractice(cards, grammarPatterns, "possessive_adjectives");
   }
   if (grammarKey) {
     return buildGenericGrammarPractice(cards, grammarPatterns, grammarKey);
@@ -933,6 +1176,18 @@ export function buildDailyPractice(params: {
     explanationRu: item.explanationRu
   }));
 
+  const pronounPattern = findPattern(grammarPatterns, "personal_pronouns") ?? findPattern(grammarPatterns, "possessive_adjectives");
+  const pronounExercise = shuffle([...pronounGapExamples, ...possessiveGapExamples]).slice(0, 1).map((item, index) => ({
+    id: `pronouns_daily:${index}:${item.prompt}`,
+    type: "fill_the_gap" as ExerciseType,
+    grammarPattern: pronounPattern,
+    prompt: item.prompt,
+    promptRu: "Местоимение или притяжательное слово",
+    options: pickOptions(item.answer, ["I", "He", "She", "We", "They", "my", "your", "his", "her", "our", "their"], 4),
+    correctAnswer: item.answer,
+    explanationRu: item.explanationRu
+  }));
+
   const shortAnswerExercise = shuffle(shortAnswerExamples).slice(0, 1).map((item, index) => ({
     id: `short_answer:${index}:${item.prompt}`,
     type: "short_answer" as ExerciseType,
@@ -993,6 +1248,7 @@ export function buildDailyPractice(params: {
       ...demonstrativeExercise,
       ...ingExercise,
       ...timeExercise,
+      ...pronounExercise,
       ...miniDialogueExercise,
       ...listenExercise
     ]),

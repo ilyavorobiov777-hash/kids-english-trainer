@@ -7,6 +7,7 @@ Generated from `scripts/learning-content-data.mjs`.
 - total cards: 467
 - total cards with demonstratives extension: 529
 - total cards with demonstratives + ing/time extensions: 638
+- total cards with all grammar extensions: 723
 - total words: 300
 - total phrases: 74
 - total sentences: 45
@@ -169,6 +170,34 @@ Generated from `scripts/learning-content-data.mjs`.
 - In the park / В парке: places, difficulty 2, questions 3, grammar focus present_continuous_ing, on Sunday
 - Last weekend / Прошлые выходные: days of the week, difficulty 2, questions 3, grammar focus last weekend, in the evening, next weekend, would like
 
+## Pronouns Extension
+
+- RPC: `public.seed_pronouns_content()`
+- seed helper: `supabase/seed_pronouns_content.sql`
+- migration: `supabase/migrations/20260516103000_pronouns_content.sql`
+- grammar patterns: Personal pronouns (personal_pronouns), Possessive words: my, your, his, her, our, their (possessive_adjectives)
+- extension cards: 85
+- extension texts: 2
+- extension text comprehension questions: 6
+- focus: personal pronouns I/you/he/she/it/we/they and possessive adjectives my/your/his/her/its/our/their
+
+### Pronouns Cards By Type
+
+- grammar_pattern: 29
+- phrase: 24
+- sentence: 18
+- word: 14
+
+### Pronouns Cards By Topic
+
+- pronouns: 63
+- simple questions: 22
+
+### Pronouns Texts
+
+- My family / Моя семья: family, difficulty 1, questions 3, grammar focus personal_pronouns, possessive_adjectives, to be
+- Our classroom / Наш класс: classroom objects, difficulty 1, questions 3, grammar focus possessive_adjectives, demonstratives_this_that_these_those
+
 ## Starter Texts
 
 - total texts: 15
@@ -226,3 +255,5 @@ Generated from `scripts/learning-content-data.mjs`.
 `public.seed_demonstratives_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by `pattern_key`.
 
 `public.seed_ing_time_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by `pattern_key`.
+
+`public.seed_pronouns_content()` inserts into a stable course/source pair and checks existing rows by `family_id + course_id + source_id + english + type` for cards and by `family_id + source_id + title_en` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by `pattern_key`.

@@ -3,6 +3,7 @@ import { allCards, exerciseTypesSupported, grammarPatterns } from "./learning-co
 import { starterTexts } from "./starter-texts-data.mjs";
 import { demonstrativeCards, demonstrativesPattern, demonstrativeTexts } from "./demonstratives-content-data.mjs";
 import { ingTimeCards, ingTimePatterns, ingTimeTexts } from "./ing-time-content-data.mjs";
+import { pronounCards, pronounPatterns, pronounTexts } from "./pronouns-content-data.mjs";
 
 function sqlString(value) {
   if (value === null || value === undefined) return "null";
@@ -270,11 +271,14 @@ const demonstrativesByType = countBy(demonstrativeCards, "type");
 const demonstrativesByTopic = countBy(demonstrativeCards, "topic");
 const ingTimeByType = countBy(ingTimeCards, "type");
 const ingTimeByTopic = countBy(ingTimeCards, "topic");
+const pronounsByType = countBy(pronounCards, "type");
+const pronounsByTopic = countBy(pronounCards, "topic");
 const textsByTopic = countBy(starterTexts, "topic");
 const textsByDifficulty = countBy(starterTexts, "difficulty");
 const grammarFocus = countBy(starterTexts.flatMap((text) => text.grammar_focus.map((focus) => ({ focus }))), "focus");
 const totalTextQuestions = starterTexts.reduce((sum, text) => sum + text.comprehension_questions.length, 0);
 const totalIngTimeTextQuestions = ingTimeTexts.reduce((sum, text) => sum + text.questions, 0);
+const totalPronounTextQuestions = pronounTexts.reduce((sum, text) => sum + text.questions, 0);
 const report = `# Content Seed Report
 
 Generated from \`scripts/learning-content-data.mjs\`.
@@ -284,6 +288,7 @@ Generated from \`scripts/learning-content-data.mjs\`.
 - total cards: ${allCards.length}
 - total cards with demonstratives extension: ${allCards.length + demonstrativeCards.length}
 - total cards with demonstratives + ing/time extensions: ${allCards.length + demonstrativeCards.length + ingTimeCards.length}
+- total cards with all grammar extensions: ${allCards.length + demonstrativeCards.length + ingTimeCards.length + pronounCards.length}
 - total words: ${byType.word ?? 0}
 - total phrases: ${byType.phrase ?? 0}
 - total sentences: ${byType.sentence ?? 0}
@@ -359,6 +364,29 @@ ${Object.entries(ingTimeByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([to
 
 ${ingTimeTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topic}, difficulty ${text.difficulty}, questions ${text.questions}, grammar focus ${text.grammar_focus.join(", ")}`).join("\n")}
 
+## Pronouns Extension
+
+- RPC: \`public.seed_pronouns_content()\`
+- seed helper: \`supabase/seed_pronouns_content.sql\`
+- migration: \`supabase/migrations/20260516103000_pronouns_content.sql\`
+- grammar patterns: ${pronounPatterns.map((pattern) => `${pattern.title} (${pattern.pattern_key})`).join(", ")}
+- extension cards: ${pronounCards.length}
+- extension texts: ${pronounTexts.length}
+- extension text comprehension questions: ${totalPronounTextQuestions}
+- focus: personal pronouns I/you/he/she/it/we/they and possessive adjectives my/your/his/her/its/our/their
+
+### Pronouns Cards By Type
+
+${Object.entries(pronounsByType).sort(([a], [b]) => a.localeCompare(b)).map(([type, count]) => `- ${type}: ${count}`).join("\n")}
+
+### Pronouns Cards By Topic
+
+${Object.entries(pronounsByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([topic, count]) => `- ${topic}: ${count}`).join("\n")}
+
+### Pronouns Texts
+
+${pronounTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topic}, difficulty ${text.difficulty}, questions ${text.questions}, grammar focus ${text.grammar_focus.join(", ")}`).join("\n")}
+
 ## Starter Texts
 
 - total texts: ${starterTexts.length}
@@ -385,6 +413,8 @@ ${Object.entries(grammarFocus).sort(([a], [b]) => a.localeCompare(b)).map(([focu
 \`public.seed_demonstratives_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the grammar pattern row by \`pattern_key\`.
 
 \`public.seed_ing_time_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by \`pattern_key\`.
+
+\`public.seed_pronouns_content()\` inserts into a stable course/source pair and checks existing rows by \`family_id + course_id + source_id + english + type\` for cards and by \`family_id + source_id + title_en\` for texts. Re-running it adds zero duplicates and updates the two grammar pattern rows by \`pattern_key\`.
 `;
 
 writeFileSync("CONTENT_SEED_REPORT.md", report, "utf8");
@@ -400,6 +430,9 @@ console.log(JSON.stringify({
   ingTimeCards: ingTimeCards.length,
   ingTimeTexts: ingTimeTexts.length,
   ingTimeTextQuestions: totalIngTimeTextQuestions,
+  pronounCards: pronounCards.length,
+  pronounTexts: pronounTexts.length,
+  pronounTextQuestions: totalPronounTextQuestions,
   textQuestions: totalTextQuestions,
   sql: "supabase/seed_350_learning_content.sql",
   textSql: "supabase/seed_starter_texts.sql",
