@@ -4,7 +4,7 @@ import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { Button, PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import type { Card, Child, GrammarPattern, PracticeAttempt, PracticeSession, ReviewSchedule } from "@/lib/database.types";
-import { explainAnswer } from "@/lib/practice/explanations";
+import { correctAnswerTranslation, explainAnswer } from "@/lib/practice/explanations";
 import { buildDailyPractice, isCorrectAnswer, nextReviewState, type PracticeExercise } from "@/lib/practice/exercises";
 import { speakEnglish } from "@/lib/speech";
 import Link from "next/link";
@@ -467,6 +467,7 @@ export function PracticeFlow() {
                     <div className="mt-3 grid gap-2 text-sm text-slate-700">
                       <p><b>Твой ответ:</b> {lastAnswer}</p>
                       <p><b>Правильно:</b> {current.correctAnswer}</p>
+                      <p><b>Перевод:</b> {correctAnswerTranslation(current)}</p>
                       <p><b>Почему:</b> {explainAnswer(current) || "Посмотри на правильный ответ и попробуй запомнить."}</p>
                       <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
                         Продолжить

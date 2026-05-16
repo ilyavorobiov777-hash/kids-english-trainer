@@ -4,6 +4,7 @@ import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { Button, PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import type { Card, LearningText, LearningTextQuestion, LearningTextVocabularyWord, PracticeSession, Topic } from "@/lib/database.types";
+import { correctAnswerTranslation } from "@/lib/practice/explanations";
 import { isCorrectAnswer, nextReviewState } from "@/lib/practice/exercises";
 import { speakEnglish } from "@/lib/speech";
 import { shuffle } from "@/lib/supabase/helpers";
@@ -77,6 +78,7 @@ export function TextReader({ textId }: { textId: string }) {
   const [feedbackCorrect, setFeedbackCorrect] = useState<boolean | null>(null);
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [lastCorrectAnswer, setLastCorrectAnswer] = useState<string | null>(null);
+  const [lastCorrectTranslation, setLastCorrectTranslation] = useState<string | null>(null);
   const [lastExplanation, setLastExplanation] = useState<string | null>(null);
   const [pendingAdvance, setPendingAdvance] = useState<"question" | "vocab" | null>(null);
 
@@ -149,6 +151,7 @@ export function TextReader({ textId }: { textId: string }) {
     setFeedbackCorrect(correct);
     setLastAnswer(answer);
     setLastCorrectAnswer(currentQuestion.correctAnswer);
+    setLastCorrectTranslation(correctAnswerTranslation({ correctAnswer: currentQuestion.correctAnswer }));
     setLastExplanation(questionExplanation(currentQuestion));
     setPendingAdvance(correct ? null : "question");
 
@@ -189,6 +192,7 @@ export function TextReader({ textId }: { textId: string }) {
         setFeedbackCorrect(null);
         setLastAnswer(null);
         setLastCorrectAnswer(null);
+        setLastCorrectTranslation(null);
         setLastExplanation(null);
         setSelectedWords([]);
         setUsedWordIndexes([]);
@@ -209,6 +213,7 @@ export function TextReader({ textId }: { textId: string }) {
     setFeedbackCorrect(correct);
     setLastAnswer(answer);
     setLastCorrectAnswer(task.word.russian);
+    setLastCorrectTranslation(task.word.russian);
     setLastExplanation("Запомни слово из текста и его перевод.");
     setPendingAdvance(correct ? null : "vocab");
 
@@ -261,6 +266,7 @@ export function TextReader({ textId }: { textId: string }) {
         setFeedbackCorrect(null);
         setLastAnswer(null);
         setLastCorrectAnswer(null);
+        setLastCorrectTranslation(null);
         setLastExplanation(null);
         setVocabIndex((value) => value + 1);
         setStartedAt(Date.now());
@@ -274,6 +280,7 @@ export function TextReader({ textId }: { textId: string }) {
     setFeedbackCorrect(null);
     setLastAnswer(null);
     setLastCorrectAnswer(null);
+    setLastCorrectTranslation(null);
     setLastExplanation(null);
     if (pendingAdvance === "question") {
       setSelectedWords([]);
@@ -423,6 +430,7 @@ export function TextReader({ textId }: { textId: string }) {
                         <div className="mt-3 grid gap-2 text-sm text-slate-700">
                           <p><b>Твой ответ:</b> {lastAnswer}</p>
                           <p><b>Правильно:</b> {lastCorrectAnswer}</p>
+                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод недоступен."}</p>
                           <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
                           <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
                             Продолжить
@@ -468,6 +476,7 @@ export function TextReader({ textId }: { textId: string }) {
                         <div className="mt-3 grid gap-2 text-sm text-slate-700">
                           <p><b>Твой ответ:</b> {lastAnswer}</p>
                           <p><b>Правильно:</b> {lastCorrectAnswer}</p>
+                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод недоступен."}</p>
                           <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
                           <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
                             Продолжить

@@ -4,6 +4,85 @@ function normalize(value: string) {
   return value.toLowerCase().replace(/[?.!,]/g, "").replace(/\s+/g, " ").trim();
 }
 
+const answerTranslations: Record<string, string> = {
+  "yes i have": "Да.",
+  "no i havent": "Нет.",
+  "yes i can": "Да.",
+  "no i cant": "Нет.",
+  "yes i do": "Да.",
+  "no i dont": "Нет.",
+  "yes please": "Да, пожалуйста.",
+  "no thank you": "Нет, спасибо.",
+  "yes i am": "Да.",
+  "no i am not": "Нет.",
+  "yes you are": "Да.",
+  "no you arent": "Нет.",
+  "yes he is": "Да.",
+  "no he isnt": "Нет.",
+  "yes she is": "Да.",
+  "no she isnt": "Нет.",
+  "yes it is": "Да.",
+  "no it isnt": "Нет.",
+  "yes we are": "Да.",
+  "no we arent": "Нет.",
+  "yes they are": "Да.",
+  "no they arent": "Нет.",
+  "this is my book": "Это моя книга.",
+  "this is your pencil": "Это твой карандаш.",
+  "this is his dog": "Это его собака.",
+  "this is her bag": "Это ее сумка.",
+  "this is our classroom": "Это наш класс.",
+  "these are their toys": "Это их игрушки.",
+  "they are happy": "Они счастливы.",
+  "i am eight": "Мне восемь.",
+  "he is my brother": "Он мой брат.",
+  "she is my sister": "Она моя сестра.",
+  "we are pupils": "Мы ученики.",
+  "it is a cat": "Это кошка.",
+  "my": "мой / моя / мое / мои",
+  "your": "твой / ваш",
+  "his": "его",
+  "her": "ее",
+  "our": "наш",
+  "their": "их",
+  "i": "я",
+  "you": "ты / вы",
+  "he": "он",
+  "she": "она",
+  "it": "оно / это",
+  "we": "мы",
+  "they": "они",
+  "a": "неопределенный артикль для одного предмета",
+  "an": "неопределенный артикль перед гласным звуком",
+  "the": "определенный артикль",
+  "no article": "артикль не нужен",
+  "am": "am после I",
+  "is": "is после he / she / it",
+  "are": "are после you / we / they или these / those",
+  "on": "on: в день недели",
+  "in": "in: утром, днем или вечером",
+  "at": "at: ночью или в точное время",
+  "last": "last: прошлый",
+  "next": "next: следующий"
+};
+
+function looksRussian(value: string) {
+  return /[А-Яа-яЁё]/.test(value);
+}
+
+export function correctAnswerTranslation(
+  exercise: Pick<PracticeExercise, "correctAnswer" | "correctAnswerRu" | "card">
+) {
+  if (exercise.correctAnswerRu?.trim()) return exercise.correctAnswerRu;
+  if (looksRussian(exercise.correctAnswer)) return exercise.correctAnswer;
+  if (exercise.card?.russian?.trim()) return exercise.card.russian;
+
+  const known = answerTranslations[normalize(exercise.correctAnswer)];
+  if (known) return known;
+
+  return "Перевод недоступен.";
+}
+
 export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt" | "correctAnswer" | "explanationRu">) {
   if (exercise.explanationRu) return exercise.explanationRu;
 

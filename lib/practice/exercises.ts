@@ -11,6 +11,7 @@ export type PracticeExercise = {
   grammarPattern?: GrammarPattern;
   options: string[];
   correctAnswer: string;
+  correctAnswerRu?: string;
   listenText?: string;
   words?: string[];
   explanationRu?: string;
