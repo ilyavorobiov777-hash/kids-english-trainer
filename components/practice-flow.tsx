@@ -9,7 +9,7 @@ import { buildDailyPractice, isCorrectAnswer, nextReviewState, type PracticeExer
 import { speakEnglish } from "@/lib/speech";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MistakeReview = {
   exercise: PracticeExercise;
@@ -41,6 +41,16 @@ export function PracticeFlow() {
   const [usedWordIndexes, setUsedWordIndexes] = useState<number[]>([]);
   const [completed, setCompleted] = useState(false);
   const [mistakes, setMistakes] = useState<MistakeReview[]>([]);
+  const autoAdvanceTimerRef = useRef<number | null>(null);
+
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
 
   useEffect(() => {
     const queryChildId = searchParams.get("childId");
@@ -57,6 +67,7 @@ export function PracticeFlow() {
   const beginSession = useCallback(
     async (nextExercises: PracticeExercise[], nextChildId: string, keepMistakes = false) => {
       if (!family) return;
+      clearAutoAdvanceTimer();
       const { data: newSession } = await api
         .from("practice_sessions")
         .insert({ family_id: family.familyId, child_id: nextChildId })
@@ -77,7 +88,7 @@ export function PracticeFlow() {
       if (!keepMistakes) setMistakes([]);
       setStartedAt(Date.now());
     },
-    [family, api]
+    [family, api, clearAutoAdvanceTimer]
   );
 
   useEffect(() => {
@@ -166,6 +177,7 @@ export function PracticeFlow() {
 
   async function saveAnswer(answer: string) {
     if (!family || !childId || !current || !session || feedback) return;
+    clearAutoAdvanceTimer();
     const isCorrect = isCorrectAnswer(answer, current.correctAnswer);
     const responseTime = Date.now() - startedAt;
     const rating = isCorrect ? 5 : 2;
@@ -229,7 +241,8 @@ export function PracticeFlow() {
     }
 
     if (isCorrect) {
-      window.setTimeout(() => {
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        autoAdvanceTimerRef.current = null;
         setFeedback(null);
         setLastCorrect(null);
         setLastAnswer(null);
@@ -238,12 +251,13 @@ export function PracticeFlow() {
         setUsedWordIndexes([]);
         setIndex((value) => value + 1);
         setStartedAt(Date.now());
-      }, 850);
+      }, 1000);
     }
   }
 
   function continueAfterFeedback() {
     if (!feedback) return;
+    clearAutoAdvanceTimer();
     setFeedback(null);
     setLastCorrect(null);
     setLastAnswer(null);

@@ -9,7 +9,7 @@ import { isCorrectAnswer, nextReviewState } from "@/lib/practice/exercises";
 import { speakEnglish } from "@/lib/speech";
 import { shuffle } from "@/lib/supabase/helpers";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type TextMistake = {
   question: string;
@@ -81,6 +81,16 @@ export function TextReader({ textId }: { textId: string }) {
   const [lastCorrectTranslation, setLastCorrectTranslation] = useState<string | null>(null);
   const [lastExplanation, setLastExplanation] = useState<string | null>(null);
   const [pendingAdvance, setPendingAdvance] = useState<"question" | "vocab" | null>(null);
+  const autoAdvanceTimerRef = useRef<number | null>(null);
+
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -142,6 +152,7 @@ export function TextReader({ textId }: { textId: string }) {
 
   async function saveQuestionAnswer(answer: string) {
     if (!family || !childId || !text || !currentQuestion || feedback) return;
+    clearAutoAdvanceTimer();
     const activeSession = await ensureSession();
     if (!activeSession) return;
     const correct = isCorrectAnswer(answer, currentQuestion.correctAnswer);
@@ -187,7 +198,8 @@ export function TextReader({ textId }: { textId: string }) {
     await updateSession(nextAnswers.total + vocabStats.total, nextAnswers.correct + vocabStats.correct, false, activeSession);
 
     if (correct) {
-      window.setTimeout(() => {
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        autoAdvanceTimerRef.current = null;
         setFeedback(null);
         setFeedbackCorrect(null);
         setLastAnswer(null);
@@ -198,12 +210,13 @@ export function TextReader({ textId }: { textId: string }) {
         setUsedWordIndexes([]);
         setQuestionIndex((value) => value + 1);
         setStartedAt(Date.now());
-      }, 750);
+      }, 1000);
     }
   }
 
   async function saveVocabularyAnswer(task: VocabTask, answer: string) {
     if (!family || !childId || !text || feedback) return;
+    clearAutoAdvanceTimer();
     const activeSession = await ensureSession();
     if (!activeSession) return;
     const correct = isCorrectAnswer(answer, task.word.russian);
@@ -261,7 +274,8 @@ export function TextReader({ textId }: { textId: string }) {
     await updateSession(answers.total + nextStats.total, answers.correct + nextStats.correct, false, activeSession);
 
     if (correct) {
-      window.setTimeout(() => {
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        autoAdvanceTimerRef.current = null;
         setFeedback(null);
         setFeedbackCorrect(null);
         setLastAnswer(null);
@@ -270,12 +284,13 @@ export function TextReader({ textId }: { textId: string }) {
         setLastExplanation(null);
         setVocabIndex((value) => value + 1);
         setStartedAt(Date.now());
-      }, 750);
+      }, 1000);
     }
   }
 
   function continueAfterFeedback() {
     if (!feedback || feedbackCorrect !== false) return;
+    clearAutoAdvanceTimer();
     setFeedback(null);
     setFeedbackCorrect(null);
     setLastAnswer(null);

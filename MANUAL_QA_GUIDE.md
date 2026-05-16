@@ -292,6 +292,15 @@ Wrong answer flow:
 5. Click `Продолжить`.
 6. Confirm the next exercise opens, or the summary opens if it was the last exercise.
 
+Correct answer timing:
+
+1. Open `/child/practice`, a focused grammar practice, or a word topic session.
+2. Choose a correct answer.
+3. Confirm the positive feedback appears briefly.
+4. Confirm the next exercise opens after about 1 second.
+5. Confirm no `Продолжить` button is required for a correct answer.
+6. On the last exercise, confirm the summary opens after about 1 second.
+
 Focused grammar practice:
 
 1. Open `/grammar`.
@@ -325,6 +334,13 @@ Curated topic blocks:
    - `-ing actions`
 3. Open each block with `Учить`.
 4. Confirm the topic training starts and is not empty.
+
+Topic shuffle check:
+
+1. Return to `/child/words/topics`.
+2. Open the same quick block or database topic again.
+3. Confirm the word/card order is not fixed between runs.
+4. Confirm answer options are shuffled and still include the correct answer.
 
 Grammar duplicate check:
 

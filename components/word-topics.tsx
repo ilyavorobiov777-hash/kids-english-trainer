@@ -86,10 +86,10 @@ export function WordTopics() {
                     <p className="mt-3 text-sm text-slate-500">Карточек: {total}</p>
                     <p className="text-sm text-slate-500">Уже встречались: {studied}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Link className="inline-block rounded-lg bg-berry px-4 py-3 font-semibold text-white" href={`/child/words/topic/${topic.id}`}>
+                      <Link className="inline-block rounded-lg bg-berry px-4 py-3 font-semibold text-white" href={`/child/words/topic/${topic.key}`}>
                         Учить
                       </Link>
-                      <Link className="inline-block rounded-lg bg-ink px-4 py-3 font-semibold text-white" href={`/child/words/topic/${topic.id}`}>
+                      <Link className="inline-block rounded-lg bg-ink px-4 py-3 font-semibold text-white" href={`/child/words/topic/${topic.key}`}>
                         Повторить
                       </Link>
                     </div>

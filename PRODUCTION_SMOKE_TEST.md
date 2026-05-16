@@ -109,6 +109,8 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 ## Curated Topic Blocks And Feedback Translation
 
 - [ ] Wrong answers show `Перевод`, and known grammar tasks do not show `Перевод недоступен`.
+- [ ] Correct answers show brief positive feedback and auto-advance after about 1 second.
+- [ ] Wrong answers still wait for the `Продолжить` button and do not auto-advance.
 - [ ] `/grammar` does not show duplicate `Personal pronouns` or duplicate `Possessive words`.
 - [ ] `/child/words/topics` shows `Вопросительные слова`.
 - [ ] `/child/words/topics` shows `Местоимения`.
@@ -116,6 +118,8 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 - [ ] `/child/words/topics` shows `This / that / these / those`.
 - [ ] `/child/words/topics` shows `-ing actions`.
 - [ ] Each curated block opens a non-empty `/child/words/topic/...` training flow.
+- [ ] Re-opening the same topic block gives a fresh word/card order.
+- [ ] Answer options are shuffled and always include the correct answer.
 
 ## Critical Failures
 

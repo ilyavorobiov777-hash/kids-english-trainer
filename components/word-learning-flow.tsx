@@ -10,7 +10,7 @@ import { speakEnglish } from "@/lib/speech";
 import { shuffle } from "@/lib/supabase/helpers";
 import { cardsForCuratedTopic, findCuratedTopic } from "@/lib/words/curated-topics";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type WordMode = "new" | "review" | "mistakes" | "topic";
 
@@ -150,7 +150,7 @@ function selectCards(params: {
   const { mode, cards, attempts, schedules, topicId } = params;
   const curatedTopic = findCuratedTopic(topicId);
   if (mode === "topic" && curatedTopic) {
-    return uniqueCards(cardsForCuratedTopic(cards, curatedTopic)).slice(0, 8);
+    return shuffle(uniqueCards(cardsForCuratedTopic(cards, curatedTopic))).slice(0, 8);
   }
 
   const wordCards = cards.filter((card) => card.status === "active" && (card.type === "word" || card.type === "phrase"));
@@ -169,7 +169,7 @@ function selectCards(params: {
   }
 
   if (mode === "topic") {
-    return uniqueCards(wordCards.filter((card) => card.topic_id === topicId)).slice(0, 8);
+    return shuffle(uniqueCards(wordCards.filter((card) => card.topic_id === topicId))).slice(0, 8);
   }
 
   const unseen = shuffle(wordOnly.filter((card) => !seen.has(card.id))).slice(0, 7);
@@ -200,6 +200,16 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [curatedTopicTitle, setCuratedTopicTitle] = useState<string | null>(null);
+  const autoAdvanceTimerRef = useRef<number | null>(null);
+
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -269,6 +279,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
 
   async function saveAnswer(answer: string) {
     if (!family || !childId || !session || !current?.exercise || feedback) return;
+    clearAutoAdvanceTimer();
     const exercise = current.exercise;
     const correct = isCorrectAnswer(answer, exercise.correctAnswer);
     const nextStats = { total: stats.total + 1, correct: stats.correct + (correct ? 1 : 0) };
@@ -315,18 +326,20 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     );
 
     if (correct) {
-      window.setTimeout(() => {
+      autoAdvanceTimerRef.current = window.setTimeout(() => {
+        autoAdvanceTimerRef.current = null;
         setFeedback(null);
         setLastCorrect(null);
         setLastAnswer(null);
         setIndex((value) => value + 1);
         setStartedAt(Date.now());
-      }, 750);
+      }, 1000);
     }
   }
 
   function continueAfterFeedback() {
     if (!feedback) return;
+    clearAutoAdvanceTimer();
     setFeedback(null);
     setLastCorrect(null);
     setLastAnswer(null);
@@ -347,7 +360,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       .select()
       .single();
     setSession(newSession as PracticeSession);
-    setTasks(buildLearningTasks(selectedCards, cards, false));
+    setTasks(buildLearningTasks(shuffle(selectedCards), cards, false));
     setIndex(0);
     setStats({ total: 0, correct: 0 });
     setMistakes([]);
