@@ -4,7 +4,7 @@ import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type GrammarPattern = {
   id: string;
@@ -23,6 +23,32 @@ function grammarPracticeHref(patternKey: string | null | undefined, title: strin
   return `/child/practice?grammar_key=${encodeURIComponent(patternKey || title)}`;
 }
 
+function normalizeGrammarKey(value: string | null | undefined) {
+  return (value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+const hardcodedGrammarKeys = new Set([
+  "demonstratives this that these those",
+  "present continuous ing",
+  "days time expressions",
+  "personal pronouns",
+  "possessive adjectives"
+]);
+
+function isHardcodedGrammarDuplicate(item: GrammarPattern) {
+  const key = normalizeGrammarKey(item.pattern_key || item.title);
+  const title = normalizeGrammarKey(`${item.title} ${item.title_ru ?? ""}`);
+  return (
+    hardcodedGrammarKeys.has(key) ||
+    title.includes("personal pronouns") ||
+    title.includes("possessive") ||
+    title.includes("pronouns") ||
+    title.includes("this that these those") ||
+    title.includes("present continuous") ||
+    title.includes("days and time")
+  );
+}
+
 export default function GrammarPage() {
   const { api, family, loading, error } = useFamily();
   const [items, setItems] = useState<GrammarPattern[]>([]);
@@ -35,6 +61,17 @@ export default function GrammarPage() {
     }
     void load();
   }, [family, api]);
+
+  const displayedItems = useMemo(() => {
+    const seen = new Set<string>();
+    return items.filter((item) => {
+      if (isHardcodedGrammarDuplicate(item)) return false;
+      const key = normalizeGrammarKey(item.pattern_key || item.title_ru || item.title);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [items]);
 
   return (
     <AuthRequired loading={loading} error={error}>
@@ -236,7 +273,7 @@ export default function GrammarPage() {
             </Panel>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {items.map((item) => (
+            {displayedItems.map((item) => (
               <Panel key={item.id}>
                 <h2 className="text-xl font-bold">{item.title_ru || item.title}</h2>
                 <p className="mt-2 rounded-lg bg-slate-50 p-3 font-mono text-sm">{item.pattern}</p>

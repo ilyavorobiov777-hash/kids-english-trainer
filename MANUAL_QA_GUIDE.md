@@ -286,6 +286,7 @@ Wrong answer flow:
    - `Почти! Давай разберем.`
    - the child's answer;
    - the correct answer;
+   - Russian translation of the correct answer, or the softer fallback `Перевод пока не добавлен.`;
    - a short explanation;
    - the `Продолжить` button.
 5. Click `Продолжить`.
@@ -312,6 +313,24 @@ Critical errors:
 - focused grammar practice mixes another grammar topic;
 - a possessive fill gap appears without context, for example bare `These are ___ toys.`;
 - several answer options are grammatically correct but the app accepts only one.
+
+Curated topic blocks:
+
+1. Open `/child/words/topics`.
+2. Confirm these cards are visible in `Быстрые учебные блоки`:
+   - `Вопросительные слова`
+   - `Местоимения`
+   - `Дни недели и время`
+   - `This / that / these / those`
+   - `-ing actions`
+3. Open each block with `Учить`.
+4. Confirm the topic training starts and is not empty.
+
+Grammar duplicate check:
+
+1. Open `/grammar`.
+2. Confirm `Personal pronouns` appears once.
+3. Confirm `Possessive words` appears once.
 
 ## 8. Pages To Check
 

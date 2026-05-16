@@ -1,7 +1,7 @@
 import type { PracticeExercise } from "@/lib/practice/exercises";
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[?.!,]/g, "").replace(/\s+/g, " ").trim();
+  return value.toLowerCase().replace(/[?.!,']/g, "").replace(/\s+/g, " ").trim();
 }
 
 const answerTranslations: Record<string, string> = {
@@ -63,7 +63,41 @@ const answerTranslations: Record<string, string> = {
   "in": "in: утром, днем или вечером",
   "at": "at: ночью или в точное время",
   "last": "last: прошлый",
-  "next": "next: следующий"
+  "next": "next: следующий",
+  "have you got a dog": "У тебя есть собака?",
+  "have you got a pencil": "У тебя есть карандаш?",
+  "have you got a book": "У тебя есть книга?",
+  "do you like apples": "Тебе нравятся яблоки?",
+  "do you like bananas": "Тебе нравятся бананы?",
+  "would you like some juice": "Ты хочешь сока?",
+  "would you like some tea": "Ты хочешь чаю?",
+  "can you swim": "Ты умеешь плавать?",
+  "can you jump": "Ты умеешь прыгать?",
+  "what is this": "Что это?",
+  "what is that": "Что это там?",
+  "what are these": "Что это?",
+  "what are those": "Что это там?",
+  "are these your books": "Это твои книги?",
+  "are those your pencils": "Вон те твои карандаши?",
+  "are those their books": "Вон те их книги?",
+  "whose book is this": "Чья это книга?",
+  "whose pencils are these": "Чьи это карандаши?",
+  "what are you doing": "Что ты делаешь?",
+  "are you running": "Ты бежишь?",
+  "are you reading": "Ты читаешь?",
+  "is she sleeping": "Она спит?",
+  "is he playing": "Он играет?",
+  "are they jumping": "Они прыгают?",
+  "what do you do on sunday": "Что ты делаешь в воскресенье?",
+  "what time do you get up": "Во сколько ты встаешь?",
+  "these are my pencils": "Это мои карандаши.",
+  "those are my books": "Вон те мои книги.",
+  "anna has a bag this is her bag": "У Анны есть сумка. Это ее сумка.",
+  "tom has a dog this is his dog": "У Тома есть собака. Это его собака.",
+  "they have toys these are their toys": "У них есть игрушки. Это их игрушки.",
+  "i have a book this is my book": "У меня есть книга. Это моя книга.",
+  "you have a pencil this is your pencil": "У тебя есть карандаш. Это твой карандаш.",
+  "we have a classroom this is our classroom": "У нас есть класс. Это наш класс."
 };
 
 function looksRussian(value: string) {
@@ -71,16 +105,29 @@ function looksRussian(value: string) {
 }
 
 export function correctAnswerTranslation(
-  exercise: Pick<PracticeExercise, "correctAnswer" | "correctAnswerRu" | "card">
+  exercise: Pick<PracticeExercise, "correctAnswer"> & Partial<Pick<PracticeExercise, "type" | "prompt" | "context" | "correctAnswerRu" | "translationRu" | "card">>
 ) {
   if (exercise.correctAnswerRu?.trim()) return exercise.correctAnswerRu;
+  if (exercise.translationRu?.trim()) return exercise.translationRu;
   if (looksRussian(exercise.correctAnswer)) return exercise.correctAnswer;
-  if (exercise.card?.russian?.trim()) return exercise.card.russian;
+  if (exercise.card && normalize(exercise.correctAnswer) === normalize(exercise.card.english)) return exercise.card.russian;
+  if (exercise.card?.example_en && normalize(exercise.correctAnswer) === normalize(exercise.card.example_en)) {
+    return exercise.card.example_ru || exercise.card.russian;
+  }
+
+  if (exercise.type === "fill_the_gap" && exercise.prompt?.includes("___")) {
+    const completed = exercise.prompt.replace("___", exercise.correctAnswer);
+    const full = exercise.context ? `${exercise.context} ${completed}` : completed;
+    const fullKnown = answerTranslations[normalize(full)];
+    if (fullKnown) return fullKnown;
+    const completedKnown = answerTranslations[normalize(completed)];
+    if (completedKnown) return completedKnown;
+  }
 
   const known = answerTranslations[normalize(exercise.correctAnswer)];
   if (known) return known;
 
-  return "Перевод недоступен.";
+  return "Перевод пока не добавлен.";
 }
 
 export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt" | "correctAnswer" | "explanationRu">) {
@@ -115,6 +162,16 @@ export function explainAnswer(exercise: Pick<PracticeExercise, "type" | "prompt"
 
   if (exercise.type === "question_form") {
     const correct = normalize(exercise.correctAnswer);
+    if (correct.startsWith("whose")) {
+      if (correct.includes("pencils") || correct.includes("books") || correct.includes("toys")) {
+        return "Whose значит 'чей/чья/чьи'. Если предметов несколько, нужен are: Whose pencils are these?";
+      }
+      return "Whose значит 'чей/чья/чьи'. В вопросе Whose book is this? мы спрашиваем, кому принадлежит предмет.";
+    }
+    if (correct.startsWith("who")) return "Who значит 'кто'. Его используем, когда спрашиваем о человеке: Who is this?";
+    if (correct.startsWith("where")) return "Where значит 'где/куда'. Его используем, когда спрашиваем о месте.";
+    if (correct.startsWith("when")) return "When значит 'когда'. Его используем, когда спрашиваем о времени или дне.";
+    if (correct.startsWith("how many")) return "How many значит 'сколько'. После него обычно идут предметы во множественном числе.";
     if (correct.startsWith("what are these")) return "These - это несколько предметов рядом, поэтому вопрос: What are these?";
     if (correct.startsWith("what are those")) return "Those - это несколько предметов далеко, поэтому вопрос: What are those?";
     if (correct.startsWith("are these") || correct.startsWith("are those")) return "С these/those используем are, не is.";

@@ -389,6 +389,16 @@ ${Object.entries(pronounsByTopic).sort(([a], [b]) => a.localeCompare(b)).map(([t
 
 ${pronounTexts.map((text) => `- ${text.title_en} / ${text.title_ru}: ${text.topic}, difficulty ${text.difficulty}, questions ${text.questions}, grammar focus ${text.grammar_focus.join(", ")}`).join("\n")}
 
+## Curated Word Topic Blocks
+
+These are UI-level training blocks built from existing active cards and tags. They do not create duplicate database content.
+
+- question_words: what, where, who, whose, when, how many, how old, what time
+- pronouns_mixed: personal pronouns and possessive adjectives
+- days_time_prepositions: on Monday, in the morning, at night, last weekend, next week
+- demonstratives: this / that / these / those
+- ing_actions: running, sleeping, playing, reading and other -ing actions
+
 ## Starter Texts
 
 - total texts: ${starterTexts.length}

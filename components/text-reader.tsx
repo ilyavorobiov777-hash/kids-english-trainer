@@ -430,7 +430,7 @@ export function TextReader({ textId }: { textId: string }) {
                         <div className="mt-3 grid gap-2 text-sm text-slate-700">
                           <p><b>Твой ответ:</b> {lastAnswer}</p>
                           <p><b>Правильно:</b> {lastCorrectAnswer}</p>
-                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод недоступен."}</p>
+                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод пока не добавлен."}</p>
                           <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
                           <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
                             Продолжить
@@ -476,7 +476,7 @@ export function TextReader({ textId }: { textId: string }) {
                         <div className="mt-3 grid gap-2 text-sm text-slate-700">
                           <p><b>Твой ответ:</b> {lastAnswer}</p>
                           <p><b>Правильно:</b> {lastCorrectAnswer}</p>
-                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод недоступен."}</p>
+                          <p><b>Перевод:</b> {lastCorrectTranslation || "Перевод пока не добавлен."}</p>
                           <p><b>Почему:</b> {lastExplanation || "Посмотри на правильный ответ и попробуй запомнить."}</p>
                           <Button className="mt-2 bg-berry" type="button" onClick={continueAfterFeedback}>
                             Продолжить

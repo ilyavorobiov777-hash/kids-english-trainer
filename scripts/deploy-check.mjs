@@ -105,6 +105,7 @@ for (const requiredFile of [
   "supabase/migrations/20260516103000_pronouns_content.sql",
   "supabase/migrations/20260516113000_fix_pronouns_ambiguity.sql",
   "scripts/check-ambiguous-exercises.mjs",
+  "lib/words/curated-topics.ts",
   "supabase/migrations/20260509210000_learning_texts.sql"
 ]) {
   assertFile(requiredFile);

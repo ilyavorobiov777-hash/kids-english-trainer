@@ -106,6 +106,17 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 - [ ] Focused grammar practice does not mix unrelated grammar topics.
 - [ ] `/child/texts` includes `My family` and `Our classroom` after adding the pack.
 
+## Curated Topic Blocks And Feedback Translation
+
+- [ ] Wrong answers show `Перевод`, and known grammar tasks do not show `Перевод недоступен`.
+- [ ] `/grammar` does not show duplicate `Personal pronouns` or duplicate `Possessive words`.
+- [ ] `/child/words/topics` shows `Вопросительные слова`.
+- [ ] `/child/words/topics` shows `Местоимения`.
+- [ ] `/child/words/topics` shows `Дни недели и время`.
+- [ ] `/child/words/topics` shows `This / that / these / those`.
+- [ ] `/child/words/topics` shows `-ing actions`.
+- [ ] Each curated block opens a non-empty `/child/words/topic/...` training flow.
+
 ## Critical Failures
 
 Stop and fix if:
@@ -118,6 +129,7 @@ Stop and fix if:
 - -ing + time seed duplicates cards/texts;
 - pronouns seed duplicates cards/texts;
 - wrong answer auto-advances before the child can read the explanation;
+- known grammar wrong-answer feedback shows `Перевод недоступен`;
 - demonstratives practice offers `these is` or `those is` as a correct answer;
 - -ing practice accepts `I running`, `She are sleeping`, or `They is playing` as correct;
 - time practice accepts `in Sunday`, `in night`, or `on seven o'clock` as correct;

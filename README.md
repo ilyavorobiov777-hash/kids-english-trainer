@@ -248,7 +248,7 @@ The child practice flow can build a short mixed session from cards, review sched
 
 If the family has little content, the builder uses what exists and still opens without crashing.
 
-After a session, the child sees a summary with completed tasks, correct answers, mistakes, stars, and a detailed mistake review. Mistakes include the exercise type, prompt, child answer, correct answer, and a short Russian explanation. The child can repeat all mistakes or repeat a single missed task.
+After a session, the child sees a summary with completed tasks, correct answers, mistakes, stars, and a detailed mistake review. During practice, a wrong answer shows the child answer, correct answer, Russian translation where available, and a short Russian explanation before `Продолжить`. The child can repeat all mistakes or repeat a single missed task.
 
 ## How The Child Learns Words
 
@@ -263,6 +263,16 @@ Child vocabulary learning is available from `/child/dashboard` and `/child/words
 - `Слова по темам` opens `/child/words/topics`, where each topic starts a short topic session.
 
 The new words mode uses a short learning cycle:
+
+Curated topic blocks on `/child/words/topics`:
+
+- `Вопросительные слова` - what, where, who, whose, when, how many, what time.
+- `Местоимения` - I/you/he/she/we/they and my/your/his/her/our/their.
+- `Дни недели и время` - on Monday, in the morning, at night, last weekend, next week.
+- `This / that / these / those` - demonstratives as vocabulary-style recall.
+- `-ing actions` - running, sleeping, playing, reading and other current actions.
+
+These blocks do not duplicate database content. They are stable UI training groups that select from existing active cards and tags.
 
 1. Presentation: English, Russian, Listen, Listen slowly, example sentence.
 2. Recognition: English -> Russian.
@@ -416,6 +426,8 @@ Possessive fill gaps use context so the correct answer is unambiguous:
 - `They have toys. These are ___ toys.` -> `their`
 
 Avoid bare prompts like `These are ___ toys.` when several possessive words are grammatically possible. `npm run content:check` guards these known ambiguous patterns.
+
+The `/grammar` page de-duplicates rich hardcoded grammar blocks from database `grammar_patterns`, so `Personal pronouns` and `Possessive words` should appear once.
 
 Focused practice URLs:
 

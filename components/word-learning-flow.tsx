@@ -8,6 +8,7 @@ import { correctAnswerTranslation, explainAnswer } from "@/lib/practice/explanat
 import { isCorrectAnswer, nextReviewState, type PracticeExercise } from "@/lib/practice/exercises";
 import { speakEnglish } from "@/lib/speech";
 import { shuffle } from "@/lib/supabase/helpers";
+import { cardsForCuratedTopic, findCuratedTopic } from "@/lib/words/curated-topics";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -147,6 +148,11 @@ function selectCards(params: {
   topicId?: string;
 }) {
   const { mode, cards, attempts, schedules, topicId } = params;
+  const curatedTopic = findCuratedTopic(topicId);
+  if (mode === "topic" && curatedTopic) {
+    return uniqueCards(cardsForCuratedTopic(cards, curatedTopic)).slice(0, 8);
+  }
+
   const wordCards = cards.filter((card) => card.status === "active" && (card.type === "word" || card.type === "phrase"));
   const wordOnly = wordCards.filter((card) => card.type === "word");
   const stats = attemptsByCard(attempts);
@@ -193,6 +199,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
+  const [curatedTopicTitle, setCuratedTopicTitle] = useState<string | null>(null);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -202,11 +209,12 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   useEffect(() => {
     async function load() {
       if (!family || !childId) return;
+      const curatedTopic = findCuratedTopic(topicId);
       const [cardsRes, attemptsRes, schedulesRes, topicRes] = await Promise.all([
         api.from("cards").select("*").eq("family_id", family.familyId).eq("status", "active").limit(500),
         api.from("practice_attempts").select("*").eq("family_id", family.familyId).eq("child_id", childId).order("created_at", { ascending: false }).limit(1000),
         api.from("review_schedule").select("*").eq("family_id", family.familyId).eq("child_id", childId),
-        topicId ? api.from("topics").select("*").eq("family_id", family.familyId).eq("id", topicId).maybeSingle() : Promise.resolve({ data: null })
+        topicId && !curatedTopic ? api.from("topics").select("*").eq("family_id", family.familyId).eq("id", topicId).maybeSingle() : Promise.resolve({ data: null })
       ]);
 
       const loadedCards = (cardsRes.data ?? []) as Card[];
@@ -220,6 +228,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       setSchedules(loadedSchedules);
       setTasks(buildLearningTasks(pickedCards, loadedCards, includePresentation));
       setTopic((topicRes.data ?? null) as Topic | null);
+      setCuratedTopicTitle(curatedTopic?.title ?? null);
 
       if (pickedCards.length) {
         const { data: newSession } = await api
@@ -360,7 +369,7 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       ) : (
         <>
           <PageHeader
-            title={topic ? `${copy.title}: ${topic.title}` : copy.title}
+            title={topic ? `${copy.title}: ${topic.title}` : curatedTopicTitle ? `${copy.title}: ${curatedTopicTitle}` : copy.title}
             subtitle={childName ? `${childName}, ${copy.subtitle}` : copy.subtitle}
           />
           {!tasks.length ? (

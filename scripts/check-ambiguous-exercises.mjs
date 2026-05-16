@@ -11,6 +11,9 @@ function fail(message) {
 }
 
 const runtime = read("lib/practice/exercises.ts");
+const explanations = read("lib/practice/explanations.ts");
+const grammarPage = read("app/grammar/page.tsx");
+const curatedTopics = read("lib/words/curated-topics.ts");
 const pronounData = read("scripts/pronouns-content-data.mjs");
 const latestPronounsMigration = read("supabase/migrations/20260516113000_fix_pronouns_ambiguity.sql");
 
@@ -64,10 +67,44 @@ if (runtime.includes('prompt: "Whose dog is this?"')) {
   fail('Runtime generator contains ambiguous "Whose dog is this?" prompt.');
 }
 
+if (explanations.includes("Перевод недоступен")) {
+  fail('Wrong-answer fallback must use the softer "Перевод пока не добавлен.", not "Перевод недоступен".');
+}
+
+for (const knownTranslation of [
+  "have you got a dog",
+  "whose pencils are these",
+  "what are you doing",
+  "anna has a bag this is her bag",
+  "tom has a dog this is his dog",
+  "they have toys these are their toys",
+  "they are happy"
+]) {
+  if (!explanations.includes(`"${knownTranslation}"`)) {
+    fail(`Missing known grammar answer translation: ${knownTranslation}`);
+  }
+}
+
+for (const curatedKey of [
+  "question_words",
+  "pronouns_mixed",
+  "days_time_prepositions",
+  "demonstratives",
+  "ing_actions"
+]) {
+  if (!curatedTopics.includes(`key: "${curatedKey}"`)) {
+    fail(`Missing curated topic block: ${curatedKey}`);
+  }
+}
+
+if (!grammarPage.includes("displayedItems") || !grammarPage.includes("isHardcodedGrammarDuplicate")) {
+  fail("/grammar must de-duplicate hardcoded grammar blocks from DB grammar_patterns.");
+}
+
 if (failures.length) {
   console.error("content:check failed");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
 
-console.log("content:check: ambiguous possessive fill gaps are context-protected.");
+console.log("content:check: ambiguity, known translations, curated topic blocks, and grammar de-dupe guards look good.");

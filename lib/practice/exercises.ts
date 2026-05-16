@@ -12,6 +12,7 @@ export type PracticeExercise = {
   options: string[];
   correctAnswer: string;
   correctAnswerRu?: string;
+  translationRu?: string;
   listenText?: string;
   words?: string[];
   explanationRu?: string;

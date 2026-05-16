@@ -200,6 +200,16 @@ Generated from `scripts/learning-content-data.mjs`.
 - My family / Моя семья: family, difficulty 1, questions 3, grammar focus personal_pronouns, possessive_adjectives, to be
 - Our classroom / Наш класс: classroom objects, difficulty 1, questions 3, grammar focus possessive_adjectives, demonstratives_this_that_these_those
 
+## Curated Word Topic Blocks
+
+These are UI-level training blocks built from existing active cards and tags. They do not create duplicate database content.
+
+- question_words: what, where, who, whose, when, how many, how old, what time
+- pronouns_mixed: personal pronouns and possessive adjectives
+- days_time_prepositions: on Monday, in the morning, at night, last weekend, next week
+- demonstratives: this / that / these / those
+- ing_actions: running, sleeping, playing, reading and other -ing actions
+
 ## Starter Texts
 
 - total texts: 15
