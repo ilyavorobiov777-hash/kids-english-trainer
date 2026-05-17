@@ -219,6 +219,7 @@ Check texts:
    - `Повторить слова`
    - `Повторить ошибки`
    - `Слова по темам`
+   - `Местоимения`
 3. Click `Учить новые слова`.
 4. Confirm the child sees 5-7 words, not the full card list.
 5. For a word, check the cycle:
@@ -239,12 +240,37 @@ Check texts:
 12. Open `/child/words/topics`.
 13. Pick a topic and confirm it starts a short topic session.
 
+## 6E. Check Pronouns Trainer
+
+1. Open `/child/dashboard`.
+2. Click `Местоимения`.
+3. Confirm `/child/pronouns` opens.
+4. Start each mode:
+   - `Быстрый микс`
+   - `Английский -> русский`
+   - `Русский -> английский`
+   - `Пары I -> my`
+5. Confirm the child types answers manually, not by choosing buttons.
+6. Give a correct answer and confirm the next item appears immediately.
+7. Give a wrong answer and confirm the page shows:
+   - `Твой ответ`
+   - `Правильно`
+   - `Перевод`
+   - `Почему`
+   - `Продолжить`
+8. Click `Продолжить` and confirm the next item appears.
+9. Finish the session and confirm the summary shows total tasks, correct answers, mistakes, stars, and `Повторить ошибки` when there were mistakes.
+10. Click `Повторить ошибки` and confirm only missed pronoun tasks are repeated in a shuffled order.
+
 Critical errors:
 
 - child sees all 467 cards as the learning screen;
 - word-learning attempts are not saved;
 - `review_schedule` is not updated after word exercises;
 - topic mode shows empty/broken exercises when the topic has cards.
+- pronouns trainer does not save attempts;
+- correct pronouns answer waits or freezes instead of advancing immediately;
+- wrong pronouns answer advances without explanation;
 
 Critical errors:
 

@@ -79,17 +79,25 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 34. [ ] `/child/words/review` works.
 35. [ ] `/child/words/mistakes` works.
 36. [ ] `/child/words/topics` works.
-37. [ ] `/child/texts` opens.
-38. [ ] A text opens.
-39. [ ] Translation is hidden by default.
-40. [ ] `Показать перевод` works.
-41. [ ] Text comprehension questions work.
-42. [ ] `Повторить слова из текста` works.
-43. [ ] `/parent/dashboard` shows updated statistics.
-44. [ ] `/parent/progress` shows recent mistakes and text statistics.
-45. [ ] Android tablet works.
-46. [ ] iPhone Safari works.
-47. [ ] Windows Yandex Browser works.
+37. [ ] `/child/pronouns` opens from the child dashboard.
+38. [ ] Pronouns mode `Быстрый микс` uses typed answers.
+39. [ ] Pronouns mode `Английский -> русский` uses typed answers.
+40. [ ] Pronouns mode `Русский -> английский` uses typed answers.
+41. [ ] Pronouns mode `Пары I -> my` uses typed answers.
+42. [ ] Correct pronouns answers advance immediately.
+43. [ ] Wrong pronouns answers show answer review and wait for `Продолжить`.
+44. [ ] Pronouns summary shows mistakes and `Повторить ошибки`.
+45. [ ] `/child/texts` opens.
+46. [ ] A text opens.
+47. [ ] Translation is hidden by default.
+48. [ ] `Показать перевод` works.
+49. [ ] Text comprehension questions work.
+50. [ ] `Повторить слова из текста` works.
+51. [ ] `/parent/dashboard` shows updated statistics.
+52. [ ] `/parent/progress` shows recent mistakes and text statistics.
+53. [ ] Android tablet works.
+54. [ ] iPhone Safari works.
+55. [ ] Windows Yandex Browser works.
 
 ## Pronouns Production Checks
 

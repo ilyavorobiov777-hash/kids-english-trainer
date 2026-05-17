@@ -261,6 +261,16 @@ Child vocabulary learning is available from `/child/dashboard` and `/child/words
 - `Повторить слова` opens `/child/words/review` and uses due cards from `review_schedule`.
 - `Повторить ошибки` opens `/child/words/mistakes` and trains recent incorrect word attempts.
 - `Слова по темам` opens `/child/words/topics`, where each topic starts a short topic session.
+- `Местоимения` opens `/child/pronouns`, a fast typing trainer for I/you/he/she/it/we/they and my/your/his/her/its/our/their.
+
+The pronouns trainer has four short modes:
+
+- `Быстрый микс` mixes personal and possessive pronouns.
+- `Английский -> русский` asks the child to type the Russian meaning.
+- `Русский -> английский` asks the child to type the English pronoun.
+- `Пары I -> my` trains personal-to-possessive pairs.
+
+Correct answers advance immediately. Wrong answers show the child answer, correct answer, translation, a short explanation, and wait for `Продолжить`. Mistakes can be repeated from the summary.
 
 The new words mode uses a short learning cycle:
 

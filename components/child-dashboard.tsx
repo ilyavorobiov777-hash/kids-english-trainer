@@ -4,7 +4,7 @@ import { AuthRequired, NeedLogin } from "@/components/auth-required";
 import { PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import type { PracticeAttempt } from "@/lib/database.types";
-import { BookOpen, CalendarCheck, Headphones, RotateCcw, Sparkles, Tags } from "lucide-react";
+import { BookOpen, CalendarCheck, Headphones, RotateCcw, Sparkles, Tags, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -14,6 +14,7 @@ const actions = [
   { href: "/child/words/review", title: "Повторить слова", text: "То, что пора повторить сегодня", icon: RotateCcw, className: "bg-skysoft text-ink" },
   { href: "/child/words/mistakes", title: "Повторить ошибки", text: "Слова, где были промахи", icon: BookOpen, className: "bg-peach text-ink" },
   { href: "/child/words/topics", title: "Слова по темам", text: "Animals, Food, School и другие", icon: Tags, className: "bg-white text-ink" },
+  { href: "/child/pronouns", title: "Местоимения", text: "I, you, he, she и my, your, his, her", icon: UserRound, className: "bg-white text-ink" },
   { href: "/child/texts", title: "Тексты", text: "Читать, слушать и отвечать на вопросы", icon: Headphones, className: "bg-white text-ink" }
 ];
 
