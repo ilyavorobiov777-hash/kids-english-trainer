@@ -81,16 +81,13 @@ export function TextReader({ textId }: { textId: string }) {
   const [lastCorrectTranslation, setLastCorrectTranslation] = useState<string | null>(null);
   const [lastExplanation, setLastExplanation] = useState<string | null>(null);
   const [pendingAdvance, setPendingAdvance] = useState<"question" | "vocab" | null>(null);
-  const autoAdvanceTimerRef = useRef<number | null>(null);
+  const [answering, setAnswering] = useState(false);
+  const answeringRef = useRef(false);
 
-  const clearAutoAdvanceTimer = useCallback(() => {
-    if (autoAdvanceTimerRef.current !== null) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
+  useEffect(() => {
+    answeringRef.current = false;
+    setAnswering(false);
+  }, [questionIndex, vocabIndex, showQuestions, showVocabulary]);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -150,11 +147,24 @@ export function TextReader({ textId }: { textId: string }) {
     [session, api]
   );
 
+  function goToNextQuestion() {
+    setFeedback(null);
+    setFeedbackCorrect(null);
+    setLastAnswer(null);
+    setLastCorrectAnswer(null);
+    setLastCorrectTranslation(null);
+    setLastExplanation(null);
+    setSelectedWords([]);
+    setUsedWordIndexes([]);
+    setQuestionIndex((value) => value + 1);
+    setStartedAt(Date.now());
+  }
+
   async function saveQuestionAnswer(answer: string) {
-    if (!family || !childId || !text || !currentQuestion || feedback) return;
-    clearAutoAdvanceTimer();
-    const activeSession = await ensureSession();
-    if (!activeSession) return;
+    if (!family || !childId || !text || !currentQuestion || feedback || answeringRef.current) return;
+    answeringRef.current = true;
+    setAnswering(true);
+    const activeSessionPromise = ensureSession();
     const correct = isCorrectAnswer(answer, currentQuestion.correctAnswer);
     const nextAnswers = { total: answers.total + 1, correct: answers.correct + (correct ? 1 : 0) };
     setAnswers(nextAnswers);
@@ -165,6 +175,10 @@ export function TextReader({ textId }: { textId: string }) {
     setLastCorrectTranslation(correctAnswerTranslation({ correctAnswer: currentQuestion.correctAnswer }));
     setLastExplanation(questionExplanation(currentQuestion));
     setPendingAdvance(correct ? null : "question");
+
+    if (correct) {
+      goToNextQuestion();
+    }
 
     if (!correct) {
       setMistakes((items) => [
@@ -177,6 +191,9 @@ export function TextReader({ textId }: { textId: string }) {
         }
       ]);
     }
+
+    const activeSession = await activeSessionPromise;
+    if (!activeSession) return;
 
     await api.from("practice_attempts").insert({
       family_id: family.familyId,
@@ -197,28 +214,24 @@ export function TextReader({ textId }: { textId: string }) {
 
     await updateSession(nextAnswers.total + vocabStats.total, nextAnswers.correct + vocabStats.correct, false, activeSession);
 
-    if (correct) {
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        autoAdvanceTimerRef.current = null;
-        setFeedback(null);
-        setFeedbackCorrect(null);
-        setLastAnswer(null);
-        setLastCorrectAnswer(null);
-        setLastCorrectTranslation(null);
-        setLastExplanation(null);
-        setSelectedWords([]);
-        setUsedWordIndexes([]);
-        setQuestionIndex((value) => value + 1);
-        setStartedAt(Date.now());
-      }, 1000);
-    }
+  }
+
+  function goToNextVocab() {
+    setFeedback(null);
+    setFeedbackCorrect(null);
+    setLastAnswer(null);
+    setLastCorrectAnswer(null);
+    setLastCorrectTranslation(null);
+    setLastExplanation(null);
+    setVocabIndex((value) => value + 1);
+    setStartedAt(Date.now());
   }
 
   async function saveVocabularyAnswer(task: VocabTask, answer: string) {
-    if (!family || !childId || !text || feedback) return;
-    clearAutoAdvanceTimer();
-    const activeSession = await ensureSession();
-    if (!activeSession) return;
+    if (!family || !childId || !text || feedback || answeringRef.current) return;
+    answeringRef.current = true;
+    setAnswering(true);
+    const activeSessionPromise = ensureSession();
     const correct = isCorrectAnswer(answer, task.word.russian);
     const nextStats = { total: vocabStats.total + 1, correct: vocabStats.correct + (correct ? 1 : 0) };
     setVocabStats(nextStats);
@@ -229,6 +242,10 @@ export function TextReader({ textId }: { textId: string }) {
     setLastCorrectTranslation(task.word.russian);
     setLastExplanation("Запомни слово из текста и его перевод.");
     setPendingAdvance(correct ? null : "vocab");
+
+    if (correct) {
+      goToNextVocab();
+    }
 
     if (!correct) {
       setMistakes((items) => [
@@ -241,6 +258,9 @@ export function TextReader({ textId }: { textId: string }) {
         }
       ]);
     }
+
+    const activeSession = await activeSessionPromise;
+    if (!activeSession) return;
 
     await api.from("practice_attempts").insert({
       family_id: family.familyId,
@@ -273,24 +293,10 @@ export function TextReader({ textId }: { textId: string }) {
 
     await updateSession(answers.total + nextStats.total, answers.correct + nextStats.correct, false, activeSession);
 
-    if (correct) {
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        autoAdvanceTimerRef.current = null;
-        setFeedback(null);
-        setFeedbackCorrect(null);
-        setLastAnswer(null);
-        setLastCorrectAnswer(null);
-        setLastCorrectTranslation(null);
-        setLastExplanation(null);
-        setVocabIndex((value) => value + 1);
-        setStartedAt(Date.now());
-      }, 1000);
-    }
   }
 
   function continueAfterFeedback() {
     if (!feedback || feedbackCorrect !== false) return;
-    clearAutoAdvanceTimer();
     setFeedback(null);
     setFeedbackCorrect(null);
     setLastAnswer(null);
@@ -314,7 +320,7 @@ export function TextReader({ textId }: { textId: string }) {
   }
 
   function addWord(word: string, wordIndex: number) {
-    if (usedWordIndexes.includes(wordIndex)) return;
+    if (usedWordIndexes.includes(wordIndex) || answering || Boolean(feedback)) return;
     setSelectedWords([...selectedWords, word]);
     setUsedWordIndexes([...usedWordIndexes, wordIndex]);
   }
@@ -415,7 +421,7 @@ export function TextReader({ textId }: { textId: string }) {
                         {currentQuestion.options.map((word, wordIndex) => (
                           <button
                             className="rounded-lg border border-slate-200 bg-white px-4 py-3 font-bold disabled:opacity-40"
-                            disabled={usedWordIndexes.includes(wordIndex)}
+                            disabled={usedWordIndexes.includes(wordIndex) || answering || Boolean(feedback)}
                             key={`${word}-${wordIndex}`}
                             onClick={() => addWord(word, wordIndex)}
                             type="button"
@@ -432,7 +438,7 @@ export function TextReader({ textId }: { textId: string }) {
                   ) : (
                     <div className="mt-5 grid gap-3">
                       {currentQuestion.options.map((option) => (
-                        <button className="rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry" key={option} type="button" onClick={() => saveQuestionAnswer(option)}>
+                        <button className="rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry disabled:opacity-60" disabled={answering || Boolean(feedback)} key={option} type="button" onClick={() => saveQuestionAnswer(option)}>
                           {option}
                         </button>
                       ))}
@@ -479,7 +485,7 @@ export function TextReader({ textId }: { textId: string }) {
                   </div>
                   <div className="mt-5 grid gap-3">
                     {currentVocab.options.map((option) => (
-                      <button className="rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry" key={option} type="button" onClick={() => saveVocabularyAnswer(currentVocab, option)}>
+                      <button className="rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry disabled:opacity-60" disabled={answering || Boolean(feedback)} key={option} type="button" onClick={() => saveVocabularyAnswer(currentVocab, option)}>
                         {option}
                       </button>
                     ))}

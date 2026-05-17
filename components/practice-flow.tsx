@@ -41,16 +41,13 @@ export function PracticeFlow() {
   const [usedWordIndexes, setUsedWordIndexes] = useState<number[]>([]);
   const [completed, setCompleted] = useState(false);
   const [mistakes, setMistakes] = useState<MistakeReview[]>([]);
-  const autoAdvanceTimerRef = useRef<number | null>(null);
+  const [answering, setAnswering] = useState(false);
+  const answeringRef = useRef(false);
 
-  const clearAutoAdvanceTimer = useCallback(() => {
-    if (autoAdvanceTimerRef.current !== null) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
+  useEffect(() => {
+    answeringRef.current = false;
+    setAnswering(false);
+  }, [index]);
 
   useEffect(() => {
     const queryChildId = searchParams.get("childId");
@@ -67,7 +64,6 @@ export function PracticeFlow() {
   const beginSession = useCallback(
     async (nextExercises: PracticeExercise[], nextChildId: string, keepMistakes = false) => {
       if (!family) return;
-      clearAutoAdvanceTimer();
       const { data: newSession } = await api
         .from("practice_sessions")
         .insert({ family_id: family.familyId, child_id: nextChildId })
@@ -88,7 +84,7 @@ export function PracticeFlow() {
       if (!keepMistakes) setMistakes([]);
       setStartedAt(Date.now());
     },
-    [family, api, clearAutoAdvanceTimer]
+    [family, api]
   );
 
   useEffect(() => {
@@ -175,17 +171,35 @@ export function PracticeFlow() {
     setSpeechMessage(result.message ?? null);
   }
 
+  function goToNextExercise() {
+    setFeedback(null);
+    setLastCorrect(null);
+    setLastAnswer(null);
+    setSpeechMessage(null);
+    setSelectedWords([]);
+    setUsedWordIndexes([]);
+    setIndex((value) => value + 1);
+    setStartedAt(Date.now());
+  }
+
   async function saveAnswer(answer: string) {
-    if (!family || !childId || !current || !session || feedback) return;
-    clearAutoAdvanceTimer();
+    if (!family || !childId || !current || !session || feedback || answeringRef.current) return;
+    answeringRef.current = true;
+    setAnswering(true);
     const isCorrect = isCorrectAnswer(answer, current.correctAnswer);
     const responseTime = Date.now() - startedAt;
     const rating = isCorrect ? 5 : 2;
     const nextStats = { total: stats.total + 1, correct: stats.correct + (isCorrect ? 1 : 0) };
+    const answeredExercise = current;
+    const activeSession = session;
     setStats(nextStats);
     setLastCorrect(isCorrect);
     setLastAnswer(answer);
     setFeedback(isCorrect ? positiveFeedback[nextStats.correct % positiveFeedback.length] : "Почти! Давай разберем.");
+
+    if (isCorrect) {
+      goToNextExercise();
+    }
 
     if (!isCorrect) {
       setMistakes((currentMistakes) => [
@@ -240,24 +254,10 @@ export function PracticeFlow() {
       );
     }
 
-    if (isCorrect) {
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        autoAdvanceTimerRef.current = null;
-        setFeedback(null);
-        setLastCorrect(null);
-        setLastAnswer(null);
-        setSpeechMessage(null);
-        setSelectedWords([]);
-        setUsedWordIndexes([]);
-        setIndex((value) => value + 1);
-        setStartedAt(Date.now());
-      }, 1000);
-    }
   }
 
   function continueAfterFeedback() {
     if (!feedback) return;
-    clearAutoAdvanceTimer();
     setFeedback(null);
     setLastCorrect(null);
     setLastAnswer(null);
@@ -269,7 +269,7 @@ export function PracticeFlow() {
   }
 
   function addWord(word: string, wordIndex: number) {
-    if (usedWordIndexes.includes(wordIndex) || feedback) return;
+    if (usedWordIndexes.includes(wordIndex) || feedback || answering) return;
     setSelectedWords([...selectedWords, word]);
     setUsedWordIndexes([...usedWordIndexes, wordIndex]);
   }
@@ -444,7 +444,7 @@ export function PracticeFlow() {
                       <button
                         key={`${word}-${wordIndex}`}
                         className="focus-ring rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg font-bold disabled:opacity-40"
-                        disabled={usedWordIndexes.includes(wordIndex)}
+                        disabled={usedWordIndexes.includes(wordIndex) || answering || Boolean(feedback)}
                         onClick={() => addWord(word, wordIndex)}
                         type="button"
                       >
@@ -453,7 +453,7 @@ export function PracticeFlow() {
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <Button type="button" onClick={() => saveAnswer(selectedWords.join(" "))} disabled={!sentenceReady}>
+                    <Button type="button" onClick={() => saveAnswer(selectedWords.join(" "))} disabled={!sentenceReady || answering || Boolean(feedback)}>
                       Проверить
                     </Button>
                     <Button type="button" className="bg-slate-600" onClick={resetSentence}>Reset</Button>
@@ -465,6 +465,7 @@ export function PracticeFlow() {
                     <button
                       key={option}
                       className="focus-ring rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry"
+                      disabled={answering || Boolean(feedback)}
                       onClick={() => saveAnswer(option)}
                       type="button"
                     >

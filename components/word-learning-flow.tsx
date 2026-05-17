@@ -200,16 +200,13 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [curatedTopicTitle, setCuratedTopicTitle] = useState<string | null>(null);
-  const autoAdvanceTimerRef = useRef<number | null>(null);
+  const [answering, setAnswering] = useState(false);
+  const answeringRef = useRef(false);
 
-  const clearAutoAdvanceTimer = useCallback(() => {
-    if (autoAdvanceTimerRef.current !== null) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
+  useEffect(() => {
+    answeringRef.current = false;
+    setAnswering(false);
+  }, [index]);
 
   useEffect(() => {
     setChildId(window.localStorage.getItem("selected_child_id"));
@@ -277,22 +274,37 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     if (finished) void finishSession();
   }, [finishSession, finished]);
 
+  function goToNextTask() {
+    setFeedback(null);
+    setLastCorrect(null);
+    setLastAnswer(null);
+    setIndex((value) => value + 1);
+    setStartedAt(Date.now());
+  }
+
   async function saveAnswer(answer: string) {
-    if (!family || !childId || !session || !current?.exercise || feedback) return;
-    clearAutoAdvanceTimer();
+    if (!family || !childId || !session || !current?.exercise || feedback || answeringRef.current) return;
+    answeringRef.current = true;
+    setAnswering(true);
     const exercise = current.exercise;
     const correct = isCorrectAnswer(answer, exercise.correctAnswer);
     const nextStats = { total: stats.total + 1, correct: stats.correct + (correct ? 1 : 0) };
+    const answeredTask = current;
+    const activeSession = session;
     setStats(nextStats);
     setLastCorrect(correct);
     setLastAnswer(answer);
     setFeedback(correct ? "Отлично!" : "Почти! Давай разберем.");
 
+    if (correct) {
+      goToNextTask();
+    }
+
     if (!correct) {
       setMistakes((items) => [
         ...items,
         {
-          task: current,
+          task: answeredTask,
           answer,
           correctAnswer: exercise.correctAnswer,
           explanationRu: explainAnswer(exercise)
@@ -303,8 +315,8 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
     await api.from("practice_attempts").insert({
       family_id: family.familyId,
       child_id: childId,
-      session_id: session.id,
-      card_id: current.card.id,
+      session_id: activeSession.id,
+      card_id: answeredTask.card.id,
       grammar_pattern_id: null,
       exercise_type: exercise.type,
       answer,
@@ -314,37 +326,22 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       rating: correct ? 5 : 2
     });
 
-    const existing = schedules.find((item) => item.card_id === current.card.id);
+    const existing = schedules.find((item) => item.card_id === answeredTask.card.id);
     await api.from("review_schedule").upsert(
       {
         family_id: family.familyId,
         child_id: childId,
-        card_id: current.card.id,
+        card_id: answeredTask.card.id,
         ...nextReviewState(existing, correct, correct ? 5 : 2)
       },
       { onConflict: "child_id,card_id" }
     );
 
-    if (correct) {
-      autoAdvanceTimerRef.current = window.setTimeout(() => {
-        autoAdvanceTimerRef.current = null;
-        setFeedback(null);
-        setLastCorrect(null);
-        setLastAnswer(null);
-        setIndex((value) => value + 1);
-        setStartedAt(Date.now());
-      }, 1000);
-    }
   }
 
   function continueAfterFeedback() {
     if (!feedback) return;
-    clearAutoAdvanceTimer();
-    setFeedback(null);
-    setLastCorrect(null);
-    setLastAnswer(null);
-    setIndex((value) => value + 1);
-    setStartedAt(Date.now());
+    goToNextTask();
   }
 
   function nextPresentation() {
@@ -462,7 +459,13 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
                   ) : null}
                   <div className="mt-5 grid gap-3">
                     {current.exercise.options.map((option) => (
-                      <button className="focus-ring rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry" key={option} type="button" onClick={() => saveAnswer(option)}>
+                      <button
+                        className="focus-ring rounded-lg border-2 border-slate-200 bg-white p-4 text-left text-xl font-bold hover:border-berry disabled:opacity-60"
+                        disabled={answering || Boolean(feedback)}
+                        key={option}
+                        type="button"
+                        onClick={() => saveAnswer(option)}
+                      >
                         {option}
                       </button>
                     ))}

@@ -292,14 +292,14 @@ Wrong answer flow:
 5. Click `Продолжить`.
 6. Confirm the next exercise opens, or the summary opens if it was the last exercise.
 
-Correct answer timing:
+Correct answer transition:
 
 1. Open `/child/practice`, a focused grammar practice, or a word topic session.
 2. Choose a correct answer.
-3. Confirm the positive feedback appears briefly.
-4. Confirm the next exercise opens after about 1 second.
+3. Confirm the next exercise opens immediately, without a blocking feedback screen.
+4. Confirm there is no 5-10 second delay after a correct answer.
 5. Confirm no `Продолжить` button is required for a correct answer.
-6. On the last exercise, confirm the summary opens after about 1 second.
+6. On the last exercise, confirm the summary opens immediately after a correct answer.
 
 Focused grammar practice:
 

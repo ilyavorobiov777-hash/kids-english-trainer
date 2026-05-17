@@ -109,7 +109,7 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 ## Curated Topic Blocks And Feedback Translation
 
 - [ ] Wrong answers show `Перевод`, and known grammar tasks do not show `Перевод недоступен`.
-- [ ] Correct answers show brief positive feedback and auto-advance after about 1 second.
+- [ ] Correct answers advance immediately without a 5-10 second delay.
 - [ ] Wrong answers still wait for the `Продолжить` button and do not auto-advance.
 - [ ] `/grammar` does not show duplicate `Personal pronouns` or duplicate `Possessive words`.
 - [ ] `/child/words/topics` shows `Вопросительные слова`.
