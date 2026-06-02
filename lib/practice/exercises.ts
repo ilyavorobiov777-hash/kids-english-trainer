@@ -402,153 +402,228 @@ const possessiveGapExamples = [
 const shortAnswerExamples = [
   {
     key: "have got",
+    context: "I have got a dog.",
     prompt: "Have you got a dog?",
     answer: "Yes, I have.",
-    options: ["Yes, I have.", "No, I haven't.", "Yes, I do.", "No, thank you."]
+    answerRu: "Да.",
+    options: ["Yes, I have.", "No, I haven't.", "Yes, I do.", "No, thank you."],
+    explanationRu: "В ситуации сказано: I have got a dog. Поэтому на Have you got...? отвечаем Yes, I have."
   },
   {
     key: "have got",
+    context: "I haven't got a pencil.",
     prompt: "Have you got a pencil?",
     answer: "No, I haven't.",
-    options: ["No, I haven't.", "Yes, I have.", "No, I can't.", "No, I don't."]
+    answerRu: "Нет.",
+    options: ["No, I haven't.", "Yes, I have.", "No, I can't.", "No, I don't."],
+    explanationRu: "В ситуации сказано: I haven't got a pencil. Поэтому ответ No, I haven't."
   },
   {
     key: "can",
+    context: "I can swim.",
     prompt: "Can you swim?",
     answer: "Yes, I can.",
-    options: ["Yes, I can.", "No, I can't.", "Yes, I do.", "Yes, please."]
+    answerRu: "Да.",
+    options: ["Yes, I can.", "No, I can't.", "Yes, I do.", "Yes, please."],
+    explanationRu: "В ситуации сказано: I can swim. На Can you...? отвечаем Yes, I can."
   },
   {
     key: "can",
+    context: "I can't jump.",
     prompt: "Can you jump?",
     answer: "No, I can't.",
-    options: ["No, I can't.", "Yes, I can.", "No, I don't.", "No, I haven't."]
+    answerRu: "Нет.",
+    options: ["No, I can't.", "Yes, I can.", "No, I don't.", "No, I haven't."],
+    explanationRu: "В ситуации сказано: I can't jump. Поэтому ответ No, I can't."
   },
   {
     key: "like",
+    context: "I like bananas.",
     prompt: "Do you like bananas?",
     answer: "Yes, I do.",
-    options: ["Yes, I do.", "No, I don't.", "Yes, I can.", "Yes, please."]
+    answerRu: "Да.",
+    options: ["Yes, I do.", "No, I don't.", "Yes, I can.", "Yes, please."],
+    explanationRu: "В ситуации сказано: I like bananas. На Do you like...? отвечаем Yes, I do."
   },
   {
     key: "like",
+    context: "I don't like apples.",
     prompt: "Do you like apples?",
     answer: "No, I don't.",
-    options: ["No, I don't.", "Yes, I do.", "No, I can't.", "No, thank you."]
+    answerRu: "Нет.",
+    options: ["No, I don't.", "Yes, I do.", "No, I can't.", "No, thank you."],
+    explanationRu: "В ситуации сказано: I don't like apples. Поэтому ответ No, I don't."
   },
   {
     key: "would like",
+    context: "I would like an apple.",
     prompt: "Would you like an apple?",
     answer: "Yes, please.",
-    options: ["Yes, please.", "No, thank you.", "Yes, I can.", "No, I don't."]
+    answerRu: "Да, пожалуйста.",
+    options: ["Yes, please.", "No, thank you.", "Yes, I can.", "No, I don't."],
+    explanationRu: "В ситуации сказано: I would like an apple. Вежливый ответ: Yes, please."
   },
   {
     key: "would like",
+    context: "I would not like juice.",
     prompt: "Would you like some juice?",
     answer: "No, thank you.",
-    options: ["No, thank you.", "Yes, please.", "No, I don't.", "No, I haven't."]
+    answerRu: "Нет, спасибо.",
+    options: ["No, thank you.", "Yes, please.", "No, I don't.", "No, I haven't."],
+    explanationRu: "В ситуации сказано: I would not like juice. Вежливый ответ: No, thank you."
   },
   {
     key: "demonstratives_this_that_these_those",
+    context: "These are my books.",
     prompt: "Are these your books?",
     answer: "Yes, they are.",
-    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I do."]
+    answerRu: "Да.",
+    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I do."],
+    explanationRu: "В ситуации сказано: These are my books. Books - несколько предметов, поэтому Yes, they are."
   },
   {
     key: "demonstratives_this_that_these_those",
+    context: "Those aren't my pencils.",
     prompt: "Are those your pencils?",
     answer: "No, they aren't.",
-    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I don't."]
+    answerRu: "Нет.",
+    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I don't."],
+    explanationRu: "В ситуации сказано: Those aren't my pencils. Pencils - несколько предметов, поэтому No, they aren't."
   },
   {
     key: "demonstratives_this_that_these_those",
+    context: "These are my books.",
     prompt: "Whose books are these?",
     answer: "These are my books.",
-    options: ["These are my books.", "This is my book.", "Those is my books.", "Yes, they are."]
+    answerRu: "Это мои книги.",
+    options: ["These are my books.", "This is my book.", "Those is my books.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: These are my books. Whose значит чьи, поэтому отвечаем These are my books."
   },
   {
     key: "demonstratives_this_that_these_those",
+    context: "Those are her pencils.",
     prompt: "Whose pencils are those?",
     answer: "Those are her pencils.",
-    options: ["Those are her pencils.", "That is her pencil.", "These is her pencils.", "No, they aren't."]
+    answerRu: "Вон те ее карандаши.",
+    options: ["Those are her pencils.", "That is her pencil.", "These is her pencils.", "No, they aren't."],
+    explanationRu: "В ситуации сказано: Those are her pencils. Pencils - множественное число, поэтому Those are..."
   },
   {
     key: "personal_pronouns",
+    context: "I am happy.",
     prompt: "Are you happy?",
     answer: "Yes, I am.",
-    options: ["Yes, I am.", "No, I am not.", "Yes, he is.", "Yes, they are."]
+    answerRu: "Да.",
+    options: ["Yes, I am.", "No, I am not.", "Yes, he is.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: I am happy. На Are you...? отвечаем Yes, I am."
   },
   {
     key: "personal_pronouns",
+    context: "He is my brother.",
     prompt: "Is he your brother?",
     answer: "Yes, he is.",
-    options: ["Yes, he is.", "No, he isn't.", "Yes, she is.", "Yes, they are."]
+    answerRu: "Да.",
+    options: ["Yes, he is.", "No, he isn't.", "Yes, she is.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: He is my brother. На Is he...? отвечаем Yes, he is."
   },
   {
     key: "personal_pronouns",
+    context: "She isn't my sister.",
     prompt: "Is she your sister?",
     answer: "No, she isn't.",
-    options: ["No, she isn't.", "Yes, she is.", "No, he isn't.", "No, they aren't."]
+    answerRu: "Нет.",
+    options: ["No, she isn't.", "Yes, she is.", "No, he isn't.", "No, they aren't."],
+    explanationRu: "В ситуации сказано: She isn't my sister. На Is she...? отвечаем No, she isn't."
   },
   {
     key: "personal_pronouns",
+    context: "It is a dog.",
     prompt: "Is it a dog?",
     answer: "Yes, it is.",
-    options: ["Yes, it is.", "No, it isn't.", "Yes, he is.", "Yes, they are."]
+    answerRu: "Да.",
+    options: ["Yes, it is.", "No, it isn't.", "Yes, he is.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: It is a dog. На Is it...? отвечаем Yes, it is."
   },
   {
     key: "personal_pronouns",
+    context: "They are pupils.",
     prompt: "Are they pupils?",
     answer: "Yes, they are.",
-    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I am."]
+    answerRu: "Да.",
+    options: ["Yes, they are.", "No, they aren't.", "Yes, it is.", "Yes, I am."],
+    explanationRu: "В ситуации сказано: They are pupils. На Are they...? отвечаем Yes, they are."
   },
   {
     key: "possessive_adjectives",
+    context: "This is my book.",
     prompt: "Is this your book?",
     answer: "Yes, it is.",
-    options: ["Yes, it is.", "No, it isn't.", "Yes, they are.", "Yes, I am."]
+    answerRu: "Да.",
+    options: ["Yes, it is.", "No, it isn't.", "Yes, they are.", "Yes, I am."],
+    explanationRu: "В ситуации сказано: This is my book. Book - один предмет, поэтому Yes, it is."
   },
   {
     key: "possessive_adjectives",
+    context: "These aren't my toys.",
     prompt: "Are these your toys?",
     answer: "No, they aren't.",
-    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I am not."]
+    answerRu: "Нет.",
+    options: ["No, they aren't.", "Yes, they are.", "No, it isn't.", "No, I am not."],
+    explanationRu: "В ситуации сказано: These aren't my toys. Toys - несколько предметов, поэтому No, they aren't."
   },
   {
     key: "possessive_adjectives",
+    context: "I have a book.",
     prompt: "Whose book is this?",
     answer: "It is my book.",
-    options: ["It is my book.", "They are her pencils.", "This is I book.", "Yes, they are."]
+    answerRu: "Это моя книга.",
+    options: ["It is my book.", "They are her pencils.", "This is I book.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: I have a book. Поэтому это my book."
   },
   {
     key: "possessive_adjectives",
+    context: "Anna has pencils.",
     prompt: "Whose pencils are these?",
     answer: "They are her pencils.",
-    options: ["They are her pencils.", "It is my book.", "These is her pencils.", "No, it isn't."]
+    answerRu: "Это ее карандаши.",
+    options: ["They are her pencils.", "It is my book.", "These is her pencils.", "No, it isn't."],
+    explanationRu: "В ситуации сказано: Anna has pencils. Anna - девочка, поэтому her pencils."
   },
   {
     key: "present_continuous_ing",
+    context: "I am running.",
     prompt: "Are you running?",
     answer: "Yes, I am.",
-    options: ["Yes, I am.", "No, I am not.", "Yes, I do.", "Yes, they are."]
+    answerRu: "Да.",
+    options: ["Yes, I am.", "No, I am not.", "Yes, I do.", "Yes, they are."],
+    explanationRu: "В ситуации сказано: I am running. На Are you...? отвечаем Yes, I am."
   },
   {
     key: "present_continuous_ing",
+    context: "She isn't sleeping.",
     prompt: "Is she sleeping?",
     answer: "No, she isn't.",
-    options: ["No, she isn't.", "Yes, she is.", "No, she doesn't.", "No, they aren't."]
+    answerRu: "Нет.",
+    options: ["No, she isn't.", "Yes, she is.", "No, she doesn't.", "No, they aren't."],
+    explanationRu: "В ситуации сказано: She isn't sleeping. На Is she...? отвечаем No, she isn't."
   },
   {
     key: "present_continuous_ing",
+    context: "He is playing.",
     prompt: "Is he playing?",
     answer: "Yes, he is.",
-    options: ["Yes, he is.", "No, he isn't.", "Yes, he does.", "Yes, I am."]
+    answerRu: "Да.",
+    options: ["Yes, he is.", "No, he isn't.", "Yes, he does.", "Yes, I am."],
+    explanationRu: "В ситуации сказано: He is playing. На Is he...? отвечаем Yes, he is."
   },
   {
     key: "present_continuous_ing",
+    context: "They aren't jumping.",
     prompt: "Are they jumping?",
     answer: "No, they aren't.",
-    options: ["No, they aren't.", "Yes, they are.", "No, they don't.", "No, it isn't."]
+    answerRu: "Нет.",
+    options: ["No, they aren't.", "Yes, they are.", "No, they don't.", "No, it isn't."],
+    explanationRu: "В ситуации сказано: They aren't jumping. На Are they...? отвечаем No, they aren't."
   }
 ];
 
@@ -773,12 +848,14 @@ function buildDemonstrativesPractice(cards: Card[], grammarPatterns: GrammarPatt
       id: `demonstratives_short:${index}:${item.prompt}`,
       type: "short_answer" as ExerciseType,
       grammarPattern,
+      context: item.context,
       prompt: item.prompt,
       promptRu: "Выбери короткий ответ",
       options: shuffle(item.options),
       correctAnswer: item.answer,
+      correctAnswerRu: item.answerRu,
       listenText: item.prompt,
-      explanationRu: "В вопросах Are these...? и Are those...? короткий ответ: Yes, they are / No, they aren't."
+      explanationRu: item.explanationRu
     }));
 
   const dialogueExercises = miniDialogueExamples
@@ -840,12 +917,14 @@ function buildIngPractice(cards: Card[], grammarPatterns: GrammarPattern[]) {
       id: `ing_short:${index}:${item.prompt}`,
       type: "short_answer" as ExerciseType,
       grammarPattern,
+      context: item.context,
       prompt: item.prompt,
       promptRu: "Выбери короткий ответ",
       options: shuffle(item.options),
       correctAnswer: item.answer,
+      correctAnswerRu: item.answerRu,
       listenText: item.prompt,
-      explanationRu: "Короткий ответ повторяет am / is / are: Yes, I am. No, she isn't. Yes, they are."
+      explanationRu: item.explanationRu
     }));
 
   return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises, ...shortAnswerExercises]), 12);
@@ -938,14 +1017,14 @@ function buildPronounsPractice(cards: Card[], grammarPatterns: GrammarPattern[],
       id: `${personalMode ? "personal" : "possessive"}_short:${index}:${item.prompt}`,
       type: "short_answer" as ExerciseType,
       grammarPattern,
+      context: item.context,
       prompt: item.prompt,
       promptRu: "Выбери короткий ответ",
       options: shuffle(item.options),
       correctAnswer: item.answer,
+      correctAnswerRu: item.answerRu,
       listenText: item.prompt,
-      explanationRu: personalMode
-        ? "Короткий ответ повторяет am/is/are из вопроса: Yes, he is. No, they aren't."
-        : "Если вопрос про один предмет, отвечаем Yes, it is / No, it isn't. Если предметов несколько: Yes, they are / No, they aren't."
+      explanationRu: item.explanationRu
     }));
 
   return dedupeValidExercises(shuffle([...cardExercises, ...gapExercises, ...questionExercises, ...shortAnswerExercises]), 12);
@@ -981,11 +1060,14 @@ function buildGenericGrammarPractice(cards: Card[], grammarPatterns: GrammarPatt
       id: `generic_short:${index}:${item.prompt}`,
       type: "short_answer" as ExerciseType,
       grammarPattern,
+      context: item.context,
       prompt: item.prompt,
       promptRu: "Выбери короткий ответ",
       options: shuffle(item.options),
       correctAnswer: item.answer,
-      listenText: item.prompt
+      correctAnswerRu: item.answerRu,
+      listenText: item.prompt,
+      explanationRu: item.explanationRu
     }));
 
   return dedupeValidExercises(shuffle([...questionExercises, ...shortAnswerExercises, ...cardExercises]), 12);
@@ -996,6 +1078,10 @@ function isValidExercise(exercise: PracticeExercise) {
 
   if (exercise.type === "build_sentence") {
     return (exercise.words?.length ?? 0) >= 2;
+  }
+
+  if (exercise.type === "short_answer" && !exercise.context?.trim()) {
+    return false;
   }
 
   return exercise.options.length >= 2 && exercise.options.some((option) => normalize(option) === normalize(exercise.correctAnswer));

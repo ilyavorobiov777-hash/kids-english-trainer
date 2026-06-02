@@ -110,6 +110,7 @@ For the new proxy architecture, also run [PROXY_SMOKE_TEST.md](PROXY_SMOKE_TEST.
 - [ ] Pronouns practice checks `I am`, `He is`, `She is`, `We are`, `They are`.
 - [ ] Possessive practice checks `my book`, `your pencil`, `his dog`, `her bag`, `our classroom`, `their toys`.
 - [ ] Possessive fill gaps include context, for example `Anna has a bag. This is ___ bag.` -> `her`.
+- [ ] Short-answer yes/no questions include context, for example `She isn't sleeping. Is she sleeping?` -> `No, she isn't.`
 - [ ] Wrong answers do not auto-advance; they show the explanation and wait for `Продолжить`.
 - [ ] Focused grammar practice does not mix unrelated grammar topics.
 - [ ] `/child/texts` includes `My family` and `Our classroom` after adding the pack.
@@ -147,6 +148,7 @@ Stop and fix if:
 - time practice accepts `in Sunday`, `in night`, or `on seven o'clock` as correct;
 - pronouns practice accepts `I book`, `he are`, `she are`, or `they is` as correct;
 - possessive practice shows bare ambiguous prompts such as `These are ___ toys.` without context;
+- short-answer practice shows bare yes/no prompts such as `Is she sleeping?` or `Are they jumping?` without context;
 - child practice starts with an empty exercise;
 - exercise options do not contain the correct answer;
 - practice attempts are not saved;

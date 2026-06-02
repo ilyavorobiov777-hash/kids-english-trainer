@@ -437,6 +437,12 @@ Possessive fill gaps use context so the correct answer is unambiguous:
 
 Avoid bare prompts like `These are ___ toys.` when several possessive words are grammatically possible. `npm run content:check` guards these known ambiguous patterns.
 
+Short-answer yes/no tasks also require context. The app should not ask a bare question like `Is she sleeping?` and mark one answer as correct without a situation. It should show an unambiguous setup first:
+
+- `She isn't sleeping. Is she sleeping?` -> `No, she isn't.`
+- `They are pupils. Are they pupils?` -> `Yes, they are.`
+- `I can swim. Can you swim?` -> `Yes, I can.`
+
 The `/grammar` page de-duplicates rich hardcoded grammar blocks from database `grammar_patterns`, so `Personal pronouns` and `Possessive words` should appear once.
 
 Focused practice URLs:

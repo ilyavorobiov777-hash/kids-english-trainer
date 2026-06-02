@@ -342,11 +342,18 @@ Possessive fill gaps must include context:
 - `Tom has a dog. This is ___ dog.` Correct: `his`.
 - `They have toys. These are ___ toys.` Correct: `their`.
 
+Yes/no short answers must also include context:
+
+- `She isn't sleeping. Is she sleeping?` Correct: `No, she isn't.`
+- `They are pupils. Are they pupils?` Correct: `Yes, they are.`
+- `I can swim. Can you swim?` Correct: `Yes, I can.`
+
 Critical errors:
 
 - wrong answer auto-advances before the explanation can be read;
 - focused grammar practice mixes another grammar topic;
 - a possessive fill gap appears without context, for example bare `These are ___ toys.`;
+- a short-answer yes/no question appears without context, for example bare `Is she sleeping?`;
 - several answer options are grammatically correct but the app accepts only one.
 
 Curated topic blocks:

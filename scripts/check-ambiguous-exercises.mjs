@@ -67,6 +67,42 @@ if (runtime.includes('prompt: "Whose dog is this?"')) {
   fail('Runtime generator contains ambiguous "Whose dog is this?" prompt.');
 }
 
+const shortAnswerBlock = runtime.match(/const shortAnswerExamples = \[([\s\S]*?)\];/);
+if (!shortAnswerBlock) {
+  fail("Could not find shortAnswerExamples in runtime practice generator.");
+} else {
+  const objects = shortAnswerBlock[1].split(/\n\s*},/).filter((item) => item.includes("prompt:"));
+  for (const object of objects) {
+    const compact = object.trim().split("\n").join(" ");
+    if (!object.includes("context:")) {
+      fail(`Runtime short_answer is missing context: ${compact}`);
+    }
+    if (!object.includes("answerRu:")) {
+      fail(`Runtime short_answer is missing answerRu: ${compact}`);
+    }
+    if (!object.includes("explanationRu:")) {
+      fail(`Runtime short_answer is missing explanationRu: ${compact}`);
+    }
+  }
+}
+
+for (const bareQuestion of [
+  'prompt: "Is she sleeping?"',
+  'prompt: "Are they jumping?"',
+  'prompt: "Is he playing?"',
+  'prompt: "Can you swim?"',
+  'prompt: "Do you like apples?"',
+  'prompt: "Have you got a dog?"'
+]) {
+  const index = runtime.indexOf(bareQuestion);
+  if (index !== -1) {
+    const before = runtime.slice(Math.max(0, index - 220), index);
+    if (!before.includes("context:")) {
+      fail(`Ambiguous yes/no question has no nearby context: ${bareQuestion}`);
+    }
+  }
+}
+
 if (explanations.includes("Перевод недоступен")) {
   fail('Wrong-answer fallback must use the softer "Перевод пока не добавлен.", not "Перевод недоступен".');
 }
