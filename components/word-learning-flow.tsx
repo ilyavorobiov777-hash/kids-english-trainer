@@ -1,6 +1,9 @@
 "use client";
 
 import { AuthRequired, NeedLogin } from "@/components/auth-required";
+import { CatMascot, type CatMood } from "@/components/cat-mascot";
+import { Confetti } from "@/components/confetti";
+import { StarsRow } from "@/components/stars-row";
 import { Button, PageHeader, Panel } from "@/components/ui";
 import { useFamily } from "@/hooks/use-family";
 import type { Card, PracticeAttempt, PracticeSession, ReviewSchedule, Topic } from "@/lib/database.types";
@@ -59,10 +62,32 @@ function uniqueCards(cards: Card[]) {
   return Array.from(new Map(cards.map((card) => [card.id, card])).values());
 }
 
+/**
+ * Reject obviously-broken or misleading distractor strings.
+ *  - Pattern instructions like "___ are happy. Correct: They" come from
+ *    grammar_pattern seed rows and should NEVER appear in word options.
+ *  - When the correct answer is a single short word, multi-word sentences
+ *    are easy-to-guess decoys -> drop them.
+ *  - When the correct answer is a sentence, single bare words are silly
+ *    decoys -> drop them.
+ */
+function isPlausibleDistractor(item: string, correct: string): boolean {
+  if (!item) return false;
+  if (/___|Correct:/i.test(item)) return false;
+  if (item.includes("/")) return false;
+  const correctWords = correct.trim().split(/\s+/).length;
+  const itemWords = item.trim().split(/\s+/).length;
+  if (correctWords <= 2 && itemWords > 4) return false;
+  if (correctWords >= 4 && itemWords <= 1) return false;
+  return true;
+}
+
 function options(correct: string, candidates: string[], fallback: string[]) {
   const used = new Set<string>([normalize(correct)]);
-  const distractors = shuffle([...candidates, ...fallback])
-    .map((item) => item.trim())
+  const pool = [...candidates, ...fallback]
+    .map((item) => (item ?? "").trim())
+    .filter((item) => isPlausibleDistractor(item, correct));
+  const distractors = shuffle(pool)
     .filter((item) => {
       const key = normalize(item);
       if (!item || used.has(key)) return false;
@@ -70,6 +95,16 @@ function options(correct: string, candidates: string[], fallback: string[]) {
       return true;
     })
     .slice(0, 3);
+  if (distractors.length < 3) {
+    for (const fb of fallback) {
+      const key = normalize(fb);
+      if (!used.has(key) && isPlausibleDistractor(fb, correct)) {
+        distractors.push(fb);
+        used.add(key);
+        if (distractors.length >= 3) break;
+      }
+    }
+  }
   return shuffle([correct, ...distractors]);
 }
 
@@ -230,10 +265,16 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
       const pickedCards = selectCards({ mode, cards: loadedCards, attempts: loadedAttempts, schedules: loadedSchedules, topicId });
       const includePresentation = mode === "new" || mode === "topic";
 
+      const distractorPool = loadedCards.filter(
+        (c) => (c.type === "word" || c.type === "phrase")
+          && !/___|Correct:/i.test(c.english ?? "")
+          && !/___|Correct:/i.test(c.russian ?? "")
+      );
+
       setCards(loadedCards);
       setSelectedCards(pickedCards);
       setSchedules(loadedSchedules);
-      setTasks(buildLearningTasks(pickedCards, loadedCards, includePresentation));
+      setTasks(buildLearningTasks(pickedCards, distractorPool, includePresentation));
       setTopic((topicRes.data ?? null) as Topic | null);
       setCuratedTopicTitle(curatedTopic?.title ?? null);
 
@@ -253,6 +294,20 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
   const finished = tasks.length > 0 && index >= tasks.length;
   const copy = modeCopy[mode];
   const stars = Math.min(3, Math.floor(stats.correct / 4) + (stats.total && stats.correct === stats.total ? 1 : 0));
+  const mascotMood: CatMood = lastCorrect === true
+    ? "happy"
+    : lastCorrect === false
+      ? "sad"
+      : current?.step === "presentation"
+        ? "wave"
+        : "idle";
+  const mascotSpeech = lastCorrect === true
+    ? "Молодец!"
+    : lastCorrect === false
+      ? "Не страшно, разберёмся!"
+      : current?.step === "presentation"
+        ? "Послушай и повтори!"
+        : undefined;
 
   const finishSession = useCallback(async () => {
     if (!session) return;
@@ -392,12 +447,17 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
             </Panel>
           ) : finished ? (
             <Panel className="mx-auto max-w-3xl">
-              <h2 className="text-center text-3xl font-bold">Готово!</h2>
+              <Confetti trigger={stats.correct} />
+              <div className="flex flex-col items-center gap-3">
+                <CatMascot mood="happy" size={120} speech={childName ? `Молодец, ${childName}!` : "Молодец!"} />
+                <h2 className="text-center text-3xl font-bold">Готово!</h2>
+                <StarsRow value={stars} size={36} />
+              </div>
               <div className="mt-4 grid gap-3 text-center sm:grid-cols-4">
                 <Panel><p className="text-sm text-slate-500">Слов</p><p className="text-2xl font-bold">{selectedCards.length}</p></Panel>
                 <Panel><p className="text-sm text-slate-500">Ответов</p><p className="text-2xl font-bold">{stats.total}</p></Panel>
                 <Panel><p className="text-sm text-slate-500">Верно</p><p className="text-2xl font-bold">{stats.correct}</p></Panel>
-                <Panel><p className="text-sm text-slate-500">Звезды</p><p className="text-2xl font-bold">{"★".repeat(stars)}{"☆".repeat(Math.max(0, 3 - stars))}</p></Panel>
+                <Panel><p className="text-sm text-slate-500">Точность</p><p className="text-2xl font-bold">{stats.total ? Math.round(stats.correct / stats.total * 100) : 0}%</p></Panel>
               </div>
               <div className="mt-5 rounded-lg bg-skysoft p-4">
                 <h3 className="font-bold">Изученные слова</h3>
@@ -429,9 +489,18 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
             </Panel>
           ) : current ? (
             <Panel className="mx-auto max-w-2xl">
-              <div className="mb-4 flex items-center justify-between text-sm font-semibold text-slate-500">
-                <span>{index + 1} / {tasks.length}</span>
-                <span>{current.card.english}</span>
+              <div className="mb-3 flex items-center justify-between gap-3 text-sm font-semibold text-slate-500">
+                <span>Задание {index + 1} / {tasks.length}</span>
+                <StarsRow value={stars} />
+              </div>
+              <div className="mb-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-berry transition-all"
+                  style={{ width: `${((index + (feedback ? 1 : 0)) / tasks.length) * 100}%` }}
+                />
+              </div>
+              <div className="mb-3 flex justify-center">
+                <CatMascot mood={mascotMood} size={92} speech={mascotSpeech} />
               </div>
               {current.step === "presentation" ? (
                 <div className="text-center">
@@ -495,5 +564,5 @@ export function WordLearningFlow({ mode, topicId }: { mode: WordMode; topicId?: 
         </>
       )}
     </AuthRequired>
-  );
+    );
 }
