@@ -674,10 +674,26 @@ function uniqueValues(values: string[]) {
   return result;
 }
 
+/**
+ * Reject obviously-broken or misleading distractor strings.
+ * Same logic as in word-learning-flow but applied to mixed daily practice too,
+ * so single-word prompts like "dog" don't get sentence distractors like "This is your pencil."
+ */
+function isPlausibleDistractor(item: string, correct: string): boolean {
+  if (!item) return false;
+  if (/___|Correct:/i.test(item)) return false;
+  if (item.includes("/")) return false;
+  const correctWords = correct.trim().split(/\s+/).length;
+  const itemWords = item.trim().split(/\s+/).length;
+  if (correctWords <= 2 && itemWords > 4) return false;
+  if (correctWords >= 4 && itemWords <= 1) return false;
+  return true;
+}
+
 function pickOptions(correct: string, candidates: string[], count = 4, fallback: string[] = []) {
   const correctAnswer = correct.trim();
   const distractors = uniqueValues([...candidates, ...fallback]).filter(
-    (item) => normalize(item) !== normalize(correctAnswer)
+    (item) => normalize(item) !== normalize(correctAnswer) && isPlausibleDistractor(item, correctAnswer)
   );
   return shuffle(uniqueValues([correctAnswer, ...shuffle(distractors).slice(0, count - 1)])).slice(0, count);
 }
